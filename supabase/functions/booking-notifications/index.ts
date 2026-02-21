@@ -24,10 +24,10 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Fetch booking with package and user profile
+    // Fetch booking with package
     const { data: booking, error: bookingErr } = await supabase
       .from("bookings")
-      .select("*, packages(name), profiles!bookings_user_id_fkey(full_name, phone)")
+      .select("*, packages(name)")
       .eq("id", booking_id)
       .single();
 
@@ -39,11 +39,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Fetch profile separately (no FK relationship)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, phone")
+      .eq("user_id", booking.user_id)
+      .single();
+
     // Get user email from auth
     const { data: authUser } = await supabase.auth.admin.getUserById(booking.user_id);
     const email = authUser?.user?.email;
-    const fullName = booking.profiles?.full_name || "Valued Customer";
-    const phone = booking.profiles?.phone;
+    const fullName = profile?.full_name || "Valued Customer";
+    const phone = profile?.phone;
     const packageName = booking.packages?.name || "Umrah Package";
     const trackingId = booking.tracking_id;
 
