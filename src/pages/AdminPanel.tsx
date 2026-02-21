@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Package, Users, CreditCard, Settings, LogOut, Plus, X, AlertTriangle, FileText,
 } from "lucide-react";
 import logo from "@/assets/logo.jpg";
+import AdminDashboardCharts from "@/components/AdminDashboardCharts";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -139,45 +140,12 @@ const AdminPanel = () => {
           ))}
         </div>
 
-        {/* Dashboard */}
         {activeTab === "dashboard" && (
-          <div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {[
-                { label: "Total Revenue", value: `৳${totalRevenue.toLocaleString()}`, color: "text-primary" },
-                { label: "Total Bookings", value: bookings.length, color: "text-foreground" },
-                { label: "Total Due", value: `৳${totalDue.toLocaleString()}`, color: "text-destructive" },
-                { label: "Overdue Alerts", value: overduePayments.length, color: "text-destructive" },
-              ].map((c) => (
-                <div key={c.label} className="bg-card border border-border rounded-xl p-5">
-                  <p className="text-sm text-muted-foreground mb-1">{c.label}</p>
-                  <p className={`text-2xl font-heading font-bold ${c.color}`}>{c.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {overduePayments.length > 0 && (
-              <div className="mb-6">
-                <h3 className="font-heading text-lg font-bold mb-3 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive" /> Overdue Payment Alerts
-                </h3>
-                <div className="space-y-2">
-                  {overduePayments.slice(0, 5).map((p: any) => (
-                    <div key={p.id} className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium">Booking: {p.bookings?.tracking_id || p.booking_id.slice(0, 8)}</p>
-                        <p className="text-xs text-muted-foreground">Due: {new Date(p.due_date).toLocaleDateString()} — Installment #{p.installment_number}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-destructive">৳{Number(p.amount).toLocaleString()}</p>
-                        <button onClick={() => markPaymentCompleted(p.id)} className="text-xs text-primary hover:underline mt-1">Mark Paid</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <AdminDashboardCharts
+            bookings={bookings}
+            payments={payments}
+            onMarkPaid={markPaymentCompleted}
+          />
         )}
 
         {/* Packages */}
