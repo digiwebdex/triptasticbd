@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, FileText, Users, Package, Building2, CreditCard,
-  Calculator, BarChart3, Pencil, Settings, LogOut,
+  Calculator, BarChart3, Pencil, Settings, LogOut, AlertTriangle,
 } from "lucide-react";
 import logo from "@/assets/logo.jpg";
 import { NavLink } from "@/components/NavLink";
@@ -19,6 +19,7 @@ const menuItems = [
   { title: "Packages", url: "/admin/packages", icon: Package },
   { title: "Hotels", url: "/admin/hotels", icon: Building2 },
   { title: "Payments", url: "/admin/payments", icon: CreditCard },
+  { title: "Due Alerts", url: "/admin/due-alerts", icon: AlertTriangle },
   { title: "Accounting", url: "/admin/accounting", icon: Calculator },
   { title: "Reports", url: "/admin/reports", icon: BarChart3 },
   { title: "CMS", url: "/admin/cms", icon: Pencil },

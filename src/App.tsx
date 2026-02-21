@@ -24,6 +24,7 @@ import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
 import AdminPackagesPage from "./pages/admin/AdminPackagesPage";
 import AdminHotelsPage from "./pages/admin/AdminHotelsPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
+import AdminDueAlertsPage from "./pages/admin/AdminDueAlertsPage";
 import AdminAccountingPage from "./pages/admin/AdminAccountingPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import AdminCmsPage from "./pages/admin/AdminCmsPage";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="packages" element={<AdminPackagesPage />} />
             <Route path="hotels" element={<AdminHotelsPage />} />
             <Route path="payments" element={<AdminPaymentsPage />} />
+            <Route path="due-alerts" element={<AdminDueAlertsPage />} />
             <Route path="accounting" element={<AdminAccountingPage />} />
             <Route path="reports" element={<AdminReportsPage />} />
             <Route path="cms" element={<AdminCmsPage />} />
