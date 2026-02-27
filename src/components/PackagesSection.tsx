@@ -5,32 +5,39 @@ import medinaImage from "@/assets/medina-mosque.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const PackagesSection = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const bn = language === "bn";
 
   const packages = [
     {
-      name: "Umrah Economy",
-      price: "৳85,000",
-      duration: "10 Days",
+      name: bn ? "উমরাহ ইকোনমি" : "Umrah Economy",
+      price: "৳৮৫,০০০",
+      duration: bn ? "১০ দিন" : "10 Days",
       image: medinaImage,
       popular: false,
-      features: ["Return Air Ticket", "3-Star Hotel", "Visa Processing", "Ground Transport", "Ziyara Tour", "Meal Included"],
+      features: bn
+        ? ["রিটার্ন এয়ার টিকেট", "৩-স্টার হোটেল", "ভিসা প্রসেসিং", "গ্রাউন্ড ট্রান্সপোর্ট", "জিয়ারা ট্যুর", "খাবার অন্তর্ভুক্ত"]
+        : ["Return Air Ticket", "3-Star Hotel", "Visa Processing", "Ground Transport", "Ziyara Tour", "Meal Included"],
     },
     {
-      name: "Umrah Premium",
-      price: "৳1,50,000",
-      duration: "14 Days",
+      name: bn ? "উমরাহ প্রিমিয়াম" : "Umrah Premium",
+      price: "৳১,৫০,০০০",
+      duration: bn ? "১৪ দিন" : "14 Days",
       image: heroImage,
       popular: true,
-      features: ["Return Air Ticket", "5-Star Hotel Near Haram", "Visa Processing", "VIP Transport", "Full Ziyara", "All Meals", "Personal Guide", "Laundry Service"],
+      features: bn
+        ? ["রিটার্ন এয়ার টিকেট", "হারামের নিকটে ৫-স্টার হোটেল", "ভিসা প্রসেসিং", "ভিআইপি ট্রান্সপোর্ট", "সম্পূর্ণ জিয়ারা", "সব খাবার", "ব্যক্তিগত গাইড", "লন্ড্রি সেবা"]
+        : ["Return Air Ticket", "5-Star Hotel Near Haram", "Visa Processing", "VIP Transport", "Full Ziyara", "All Meals", "Personal Guide", "Laundry Service"],
     },
     {
-      name: "Hajj Package",
-      price: "৳6,50,000",
-      duration: "40 Days",
+      name: bn ? "হজ প্যাকেজ" : "Hajj Package",
+      price: "৳৬,৫০,০০০",
+      duration: bn ? "৪০ দিন" : "40 Days",
       image: medinaImage,
       popular: false,
-      features: ["Return Air Ticket", "Premium Accommodation", "Visa Processing", "Full Transport", "Complete Ziyara", "All Meals", "Experienced Guide", "Training Sessions"],
+      features: bn
+        ? ["রিটার্ন এয়ার টিকেট", "প্রিমিয়াম থাকার ব্যবস্থা", "ভিসা প্রসেসিং", "সম্পূর্ণ পরিবহন", "সম্পূর্ণ জিয়ারা", "সব খাবার", "অভিজ্ঞ গাইড", "প্রশিক্ষণ সেশন"]
+        : ["Return Air Ticket", "Premium Accommodation", "Visa Processing", "Full Transport", "Complete Ziyara", "All Meals", "Experienced Guide", "Training Sessions"],
     },
   ];
 
