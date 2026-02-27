@@ -51,13 +51,13 @@ const HeroSection = () => {
 
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }} className="max-w-2xl mb-10">
-            <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-snug" dir="rtl" style={{ fontFamily: "'Amiri', 'Noto Naskh Arabic', serif" }}>
+            <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-snug" dir="rtl" style={{ fontFamily: "'Amiri', 'Noto Naskh Arabic', serif" }}>
               وَأَتِمُّوا الْحَجَّ وَالْعُمْرَةَ لِلَّهِ
             </p>
-            <p className="text-lg sm:text-xl md:text-2xl text-foreground/80 mt-3 leading-relaxed font-medium">
+            <p className="text-xl sm:text-2xl md:text-3xl text-foreground/80 mt-4 leading-relaxed font-medium">
               "আর তোমরা আল্লাহর সন্তুষ্টির জন্য হজ্জ ও ওমরাহ পূর্ণ কর।"
             </p>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1.5">
+            <p className="text-base sm:text-lg text-muted-foreground mt-2">
               — (সূরা আল-বাকারা: ১৯৬)
             </p>
           </motion.div>
