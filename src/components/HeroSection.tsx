@@ -33,12 +33,12 @@ const HeroSection = () => {
     <section ref={sectionRef} id="home" className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden">
       {/* Parallax Background */}
       <motion.div className="absolute inset-0 will-change-transform" style={{ y: imgY }}>
-        <img src={heroImage} alt="The Holy Kaaba at night, illuminated by golden lights" className="w-full h-[130%] object-cover object-center brightness-[0.4]" />
+        <img src={heroImage} alt="The Holy Kaaba at night, illuminated by golden lights" className="w-full h-[130%] object-cover object-center brightness-[0.7] saturate-[1.1]" />
       </motion.div>
 
       {/* Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/40" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background)/0.5)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/35 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,hsl(var(--background)/0.3)_100%)]" />
 
       {/* Top gold accent */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-gold" />
