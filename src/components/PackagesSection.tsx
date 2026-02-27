@@ -10,34 +10,34 @@ const PackagesSection = () => {
 
   const packages = [
     {
-      name: bn ? "উমরাহ ইকোনমি" : "Umrah Economy",
-      price: "৳৮৫,০০০",
-      duration: bn ? "১০ দিন" : "10 Days",
-      image: medinaImage,
+      name: bn ? "রমজান প্যাকেজ" : "Ramadan Package",
+      price: "",
+      duration: bn ? "১৭ ফেব্রুয়ারি ২০২৬" : "17 February 2026",
+      image: heroImage,
       popular: false,
       features: bn
-        ? ["রিটার্ন এয়ার টিকেট", "৩-স্টার হোটেল", "ভিসা প্রসেসিং", "গ্রাউন্ড ট্রান্সপোর্ট", "জিয়ারা ট্যুর", "খাবার অন্তর্ভুক্ত"]
-        : ["Return Air Ticket", "3-Star Hotel", "Visa Processing", "Ground Transport", "Ziyara Tour", "Meal Included"],
+        ? ["রিটার্ন এয়ার টিকেট", "হোটেল বুকিং", "ভিসা প্রসেসিং", "গ্রাউন্ড ট্রান্সপোর্ট", "জিয়ারা ট্যুর", "খাবার অন্তর্ভুক্ত"]
+        : ["Return Air Ticket", "Hotel Booking", "Visa Processing", "Ground Transport", "Ziyara Tour", "Meals Included"],
     },
     {
-      name: bn ? "উমরাহ প্রিমিয়াম" : "Umrah Premium",
-      price: "৳১,৫০,০০০",
-      duration: bn ? "১৪ দিন" : "14 Days",
-      image: heroImage,
+      name: bn ? "এতেকাফ প্যাকেজ" : "Etekaf Package",
+      price: "",
+      duration: bn ? "৭ মার্চ ২০২৬" : "7 March 2026",
+      image: medinaImage,
       popular: true,
       features: bn
-        ? ["রিটার্ন এয়ার টিকেট", "হারামের নিকটে ৫-স্টার হোটেল", "ভিসা প্রসেসিং", "ভিআইপি ট্রান্সপোর্ট", "সম্পূর্ণ জিয়ারা", "সব খাবার", "ব্যক্তিগত গাইড", "লন্ড্রি সেবা"]
-        : ["Return Air Ticket", "5-Star Hotel Near Haram", "Visa Processing", "VIP Transport", "Full Ziyara", "All Meals", "Personal Guide", "Laundry Service"],
+        ? ["রিটার্ন এয়ার টিকেট", "হারামের নিকটে হোটেল", "ভিসা প্রসেসিং", "ভিআইপি ট্রান্সপোর্ট", "সম্পূর্ণ জিয়ারা", "সব খাবার", "ব্যক্তিগত গাইড"]
+        : ["Return Air Ticket", "Hotel Near Haram", "Visa Processing", "VIP Transport", "Full Ziyara", "All Meals", "Personal Guide"],
     },
     {
-      name: bn ? "হজ প্যাকেজ" : "Hajj Package",
-      price: "৳৬,৫০,০০০",
-      duration: bn ? "৪০ দিন" : "40 Days",
-      image: medinaImage,
+      name: bn ? "ঈদ পরবর্তী প্যাকেজ" : "Post-Eid Package",
+      price: "",
+      duration: bn ? "২৩ মার্চ ২০২৬" : "23 March 2026",
+      image: heroImage,
       popular: false,
       features: bn
-        ? ["রিটার্ন এয়ার টিকেট", "প্রিমিয়াম থাকার ব্যবস্থা", "ভিসা প্রসেসিং", "সম্পূর্ণ পরিবহন", "সম্পূর্ণ জিয়ারা", "সব খাবার", "অভিজ্ঞ গাইড", "প্রশিক্ষণ সেশন"]
-        : ["Return Air Ticket", "Premium Accommodation", "Visa Processing", "Full Transport", "Complete Ziyara", "All Meals", "Experienced Guide", "Training Sessions"],
+        ? ["রিটার্ন এয়ার টিকেট", "প্রিমিয়াম থাকার ব্যবস্থা", "ভিসা প্রসেসিং", "সম্পূর্ণ পরিবহন", "সম্পূর্ণ জিয়ারা", "সব খাবার", "অভিজ্ঞ গাইড"]
+        : ["Return Air Ticket", "Premium Accommodation", "Visa Processing", "Full Transport", "Complete Ziyara", "All Meals", "Experienced Guide"],
     },
   ];
 
@@ -68,10 +68,12 @@ const PackagesSection = () => {
               <div className="p-6 flex-1 flex flex-col">
                 <h3 className="font-heading text-xl font-bold">{pkg.name}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{pkg.duration}</p>
-                <p className="text-3xl font-heading font-bold text-primary mb-6">
-                  {pkg.price}
-                  <span className="text-sm font-body text-muted-foreground font-normal"> {t("packages.perPerson")}</span>
-                </p>
+                {pkg.price && (
+                  <p className="text-3xl font-heading font-bold text-primary mb-6">
+                    {pkg.price}
+                    <span className="text-sm font-body text-muted-foreground font-normal"> {t("packages.perPerson")}</span>
+                  </p>
+                )}
                 <ul className="space-y-2.5 mb-6 flex-1">
                   {pkg.features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-foreground/80">
