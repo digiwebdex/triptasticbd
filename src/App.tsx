@@ -30,6 +30,7 @@ import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import AdminCmsPage from "./pages/admin/AdminCmsPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage";
+import AdminChartOfAccountsPage from "./pages/admin/AdminChartOfAccountsPage";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="due-alerts" element={<AdminDueAlertsPage />} />
             <Route path="notifications" element={<AdminNotificationsPage />} />
             <Route path="accounting" element={<AdminAccountingPage />} />
+            <Route path="chart-of-accounts" element={<AdminChartOfAccountsPage />} />
             <Route path="reports" element={<AdminReportsPage />} />
             <Route path="cms" element={<AdminCmsPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
