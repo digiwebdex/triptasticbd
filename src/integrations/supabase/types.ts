@@ -259,6 +259,7 @@ export type Database = {
           note: string | null
           package_id: string | null
           title: string
+          wallet_account_id: string | null
         }
         Insert: {
           amount: number
@@ -272,6 +273,7 @@ export type Database = {
           note?: string | null
           package_id?: string | null
           title: string
+          wallet_account_id?: string | null
         }
         Update: {
           amount?: number
@@ -285,6 +287,7 @@ export type Database = {
           note?: string | null
           package_id?: string | null
           title?: string
+          wallet_account_id?: string | null
         }
         Relationships: [
           {
@@ -314,6 +317,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_package_profit"
             referencedColumns: ["package_id"]
+          },
+          {
+            foreignKeyName: "expenses_wallet_account_id_fkey"
+            columns: ["wallet_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -683,6 +693,7 @@ export type Database = {
           status: string
           transaction_id: string | null
           user_id: string
+          wallet_account_id: string | null
         }
         Insert: {
           amount: number
@@ -698,6 +709,7 @@ export type Database = {
           status?: string
           transaction_id?: string | null
           user_id: string
+          wallet_account_id?: string | null
         }
         Update: {
           amount?: number
@@ -713,6 +725,7 @@ export type Database = {
           status?: string
           transaction_id?: string | null
           user_id?: string
+          wallet_account_id?: string | null
         }
         Relationships: [
           {
@@ -728,6 +741,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_booking_profit"
             referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "payments_wallet_account_id_fkey"
+            columns: ["wallet_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
           },
         ]
       }
