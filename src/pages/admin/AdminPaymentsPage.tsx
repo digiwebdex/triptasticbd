@@ -1,25 +1,33 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Download, Edit2, Trash2, Save, X, Plus } from "lucide-react";
+import { Download, Edit2, Trash2, Save, X, Plus, Wallet } from "lucide-react";
 import { generateReceipt, CompanyInfo, InvoicePayment } from "@/lib/invoiceGenerator";
 import { useIsViewer } from "@/components/admin/AdminLayout";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
+const fmt = (n: number) => `৳${Number(n || 0).toLocaleString()}`;
 
 export default function AdminPaymentsPage() {
   const isViewer = useIsViewer();
   const [payments, setPayments] = useState<any[]>([]);
+  const [walletAccounts, setWalletAccounts] = useState<any[]>([]);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [addForm, setAddForm] = useState({ booking_id: "", amount: "", due_date: "", payment_method: "manual", notes: "" });
+  const [addForm, setAddForm] = useState({ booking_id: "", amount: "", due_date: "", payment_method: "manual", notes: "", wallet_account_id: "" });
   const [bookingsList, setBookingsList] = useState<any[]>([]);
 
-  const fetchPayments = () => supabase.from("payments").select("*, bookings(tracking_id, total_amount, paid_amount, due_amount, num_travelers, created_at, status, package_id, user_id, packages(name, type, duration_days))").order("created_at", { ascending: false }).then(({ data }) => setPayments(data || []));
-  
+  const fetchPayments = async () => {
+    const [payRes, walletRes] = await Promise.all([
+      supabase.from("payments").select("*, bookings(tracking_id, total_amount, paid_amount, due_amount, num_travelers, created_at, status, package_id, user_id, packages(name, type, duration_days))").order("created_at", { ascending: false }),
+      supabase.from("accounts" as any).select("*").eq("type", "asset"),
+    ]);
+    setPayments(payRes.data || []);
+    setWalletAccounts((walletRes.data as any[]) || []);
+  };
   useEffect(() => { fetchPayments(); }, []);
 
   const loadBookings = async () => {
@@ -27,8 +35,10 @@ export default function AdminPaymentsPage() {
     setBookingsList(data || []);
   };
 
-  const markPaid = async (id: string) => {
-    const { error } = await supabase.from("payments").update({ status: "completed", paid_at: new Date().toISOString() }).eq("id", id);
+  const markPaid = async (id: string, walletId?: string) => {
+    const update: any = { status: "completed", paid_at: new Date().toISOString() };
+    if (walletId) update.wallet_account_id = walletId;
+    const { error } = await supabase.from("payments").update(update).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Payment marked as completed");
     fetchPayments();
@@ -76,11 +86,12 @@ export default function AdminPaymentsPage() {
       payment_method: addForm.payment_method,
       notes: addForm.notes || null,
       status: "pending",
-    });
+      wallet_account_id: addForm.wallet_account_id || null,
+    } as any);
     if (error) { toast.error(error.message); return; }
     toast.success("Payment added");
     setShowAdd(false);
-    setAddForm({ booking_id: "", amount: "", due_date: "", payment_method: "manual", notes: "" });
+    setAddForm({ booking_id: "", amount: "", due_date: "", payment_method: "manual", notes: "", wallet_account_id: "" });
     fetchPayments();
   };
 
@@ -99,8 +110,27 @@ export default function AdminPaymentsPage() {
     setGeneratingId(null);
   };
 
+  // Mark paid state
+  const [markPaidId, setMarkPaidId] = useState<string | null>(null);
+  const [markPaidWallet, setMarkPaidWallet] = useState("");
+
   return (
     <div>
+      {/* Wallet Balance Cards */}
+      {walletAccounts.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          {walletAccounts.map((w) => (
+            <div key={w.id} className="bg-card border border-border rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Wallet className="h-3.5 w-3.5 text-primary" />
+                <p className="text-xs text-muted-foreground">{w.name}</p>
+              </div>
+              <p className="text-lg font-heading font-bold text-primary">{fmt(w.balance)}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-heading text-xl font-bold">All Payments</h2>
         {!isViewer && (
@@ -122,7 +152,11 @@ export default function AdminPaymentsPage() {
           <select className={inputClass} value={addForm.payment_method} onChange={(e) => setAddForm({ ...addForm, payment_method: e.target.value })}>
             {["manual", "bkash", "nagad", "bank", "cash"].map((m) => <option key={m} value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>)}
           </select>
-          <input className={inputClass + " sm:col-span-2"} placeholder="Notes (optional)" value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })} />
+          <select className={inputClass} value={addForm.wallet_account_id} onChange={(e) => setAddForm({ ...addForm, wallet_account_id: e.target.value })}>
+            <option value="">Select Wallet (optional)</option>
+            {walletAccounts.map((w) => <option key={w.id} value={w.id}>{w.name} — {fmt(w.balance)}</option>)}
+          </select>
+          <input className={inputClass} placeholder="Notes (optional)" value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })} />
           <button type="submit" className="bg-gradient-gold text-primary-foreground font-semibold py-2.5 rounded-md text-sm sm:col-span-2">Add Payment</button>
         </form>
       )}
@@ -179,8 +213,20 @@ export default function AdminPaymentsPage() {
                       </span>
                     </td>
                     <td className="py-3">
-                      <div className="flex items-center gap-2">
-                        {p.status === "pending" && <button onClick={() => markPaid(p.id)} className="text-xs text-primary hover:underline">Mark Paid</button>}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {p.status === "pending" && markPaidId !== p.id && (
+                          <button onClick={() => { setMarkPaidId(p.id); setMarkPaidWallet(""); }} className="text-xs text-primary hover:underline">Mark Paid</button>
+                        )}
+                        {p.status === "pending" && markPaidId === p.id && (
+                          <div className="flex items-center gap-1.5">
+                            <select className={inputClass + " w-28 !py-1 text-xs"} value={markPaidWallet} onChange={(e) => setMarkPaidWallet(e.target.value)}>
+                              <option value="">Wallet</option>
+                              {walletAccounts.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+                            </select>
+                            <button onClick={() => { markPaid(p.id, markPaidWallet || undefined); setMarkPaidId(null); }} className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">✓</button>
+                            <button onClick={() => setMarkPaidId(null)} className="text-xs text-muted-foreground">✕</button>
+                          </div>
+                        )}
                         {p.status === "completed" && (
                           <button onClick={() => handleReceipt(p)} disabled={generatingId === p.id} className="inline-flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50">
                             <Download className="h-3 w-3" /> {generatingId === p.id ? "..." : "Receipt"}

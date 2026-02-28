@@ -26,7 +26,7 @@ const ASSIGN_TO = [
 
 const EMPTY_FORM = {
   title: "", amount: "", expense_type: "visa", category: "general",
-  note: "", date: "", booking_id: "", customer_id: "", package_id: "",
+  note: "", date: "", booking_id: "", customer_id: "", package_id: "", wallet_account_id: "",
 };
 
 const TABS = [
@@ -50,6 +50,7 @@ export default function AdminAccountingPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [packages, setPackages] = useState<any[]>([]);
+  const [walletAccounts, setWalletAccounts] = useState<any[]>([]);
   const [revenue, setRevenue] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const [filterAssign, setFilterAssign] = useState("all");
@@ -60,18 +61,20 @@ export default function AdminAccountingPage() {
   const [customerProfit, setCustomerProfit] = useState<any[]>([]);
 
   const fetchData = async () => {
-    const [expRes, payRes, bkRes, custRes, pkgRes] = await Promise.all([
+    const [expRes, payRes, bkRes, custRes, pkgRes, walletRes] = await Promise.all([
       supabase.from("expenses").select("*").order("date", { ascending: false }),
       supabase.from("payments").select("amount").eq("status", "completed"),
       supabase.from("bookings").select("id, tracking_id, guest_name, user_id, profiles(full_name)").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, user_id, full_name, phone").order("full_name"),
       supabase.from("packages").select("id, name, type").eq("is_active", true).order("name"),
+      supabase.from("accounts" as any).select("*").eq("type", "asset"),
     ]);
     setExpenses(expRes.data || []);
     setRevenue((payRes.data || []).reduce((s: number, p: any) => s + Number(p.amount), 0));
     setBookings(bkRes.data || []);
     setCustomers(custRes.data || []);
     setPackages(pkgRes.data || []);
+    setWalletAccounts((walletRes.data as any[]) || []);
   };
 
   const fetchProfitViews = async () => {
@@ -95,6 +98,7 @@ export default function AdminAccountingPage() {
       booking_id: form.category === "booking" && form.booking_id ? form.booking_id : null,
       customer_id: form.category === "customer" && form.customer_id ? form.customer_id : null,
       package_id: form.category === "package" && form.package_id ? form.package_id : null,
+      wallet_account_id: form.wallet_account_id || null,
     };
     const { error } = await supabase.from("expenses").insert(payload);
     if (error) { toast.error(error.message); return; }
@@ -105,7 +109,7 @@ export default function AdminAccountingPage() {
 
   const startEdit = (e: any) => {
     setEditingId(e.id);
-    setEditForm({ title: e.title, amount: e.amount, expense_type: e.expense_type || "other", category: e.category || "general", note: e.note || "", date: e.date, booking_id: e.booking_id || "", customer_id: e.customer_id || "", package_id: e.package_id || "" });
+    setEditForm({ title: e.title, amount: e.amount, expense_type: e.expense_type || "other", category: e.category || "general", note: e.note || "", date: e.date, booking_id: e.booking_id || "", customer_id: e.customer_id || "", package_id: e.package_id || "", wallet_account_id: e.wallet_account_id || "" });
   };
 
   const saveEdit = async () => {
@@ -116,6 +120,7 @@ export default function AdminAccountingPage() {
       booking_id: editForm.category === "booking" && editForm.booking_id ? editForm.booking_id : null,
       customer_id: editForm.category === "customer" && editForm.customer_id ? editForm.customer_id : null,
       package_id: editForm.category === "package" && editForm.package_id ? editForm.package_id : null,
+      wallet_account_id: editForm.wallet_account_id || null,
     };
     const { error } = await supabase.from("expenses").update(payload).eq("id", editingId);
     if (error) { toast.error(error.message); return; }
@@ -245,7 +250,11 @@ export default function AdminAccountingPage() {
                 {ASSIGN_TO.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
               </select>
               <AssignmentFields data={form} setData={setForm} />
-              <input className={inputClass + " sm:col-span-2"} placeholder="Note (optional)" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+              <select className={inputClass} value={form.wallet_account_id} onChange={(e) => setForm({ ...form, wallet_account_id: e.target.value })}>
+                <option value="">Pay from Wallet (optional)</option>
+                {walletAccounts.map((w) => <option key={w.id} value={w.id}>{w.name} — {fmt(w.balance)}</option>)}
+              </select>
+              <input className={inputClass} placeholder="Note (optional)" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
               <button type="submit" className="bg-gradient-gold text-primary-foreground font-semibold py-2.5 rounded-md text-sm sm:col-span-2">Record Expense</button>
             </form>
           )}

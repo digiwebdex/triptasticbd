@@ -140,10 +140,11 @@ const AdminDashboardCharts = ({ bookings, payments, expenses = [], accounts = []
   const netProfit = totalRevenue - totalExpenses;
   const totalDue = filteredBookings.reduce((s: number, b: any) => s + Number(b.due_amount || 0), 0);
   const overduePayments = filteredPayments.filter((p: any) => p.status === "pending" && p.due_date && new Date(p.due_date) < new Date());
-  const cashAccount = accounts.find((a: any) => a.name === "Cash" || a.type === "asset");
-  const bankAccount = accounts.find((a: any) => a.name === "Bank" || (a.type === "asset" && a.name !== "Cash"));
-  const cashInHand = cashAccount ? Number(cashAccount.balance) : netProfit; // fallback
-  const bankBalance = bankAccount ? Number(bankAccount.balance) : 0;
+  const walletAccounts = accounts.filter((a: any) => a.type === "asset");
+  const cashInHand = walletAccounts.find((a: any) => a.name === "Cash")?.balance || 0;
+  const bankBalance = walletAccounts.find((a: any) => a.name === "Bank")?.balance || 0;
+  const bkashBalance = walletAccounts.find((a: any) => a.name === "bKash")?.balance || 0;
+  const nagadBalance = walletAccounts.find((a: any) => a.name === "Nagad")?.balance || 0;
 
   // Monthly profit chart (revenue - expenses per month)
   const monthlyProfitData = useMemo(() => {
@@ -243,7 +244,7 @@ const AdminDashboardCharts = ({ bookings, payments, expenses = [], accounts = []
           { label: "Total Revenue", value: `৳${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-primary", bgColor: "bg-primary/10" },
           { label: "Total Expenses", value: `৳${totalExpenses.toLocaleString()}`, icon: TrendingDown, color: "text-destructive", bgColor: "bg-destructive/10" },
           { label: "Net Profit", value: `৳${netProfit.toLocaleString()}`, icon: TrendingUp, color: netProfit >= 0 ? "text-emerald" : "text-destructive", bgColor: netProfit >= 0 ? "bg-emerald/10" : "bg-destructive/10" },
-          { label: "Cash in Hand", value: `৳${cashInHand.toLocaleString()}`, icon: Wallet, color: "text-primary", bgColor: "bg-primary/10" },
+          { label: "Cash in Hand", value: `৳${Number(cashInHand).toLocaleString()}`, icon: Wallet, color: "text-primary", bgColor: "bg-primary/10" },
         ].map((c) => (
           <div key={c.label} className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
@@ -256,8 +257,22 @@ const AdminDashboardCharts = ({ bookings, payments, expenses = [], accounts = []
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Bank Balance", value: `৳${bankBalance.toLocaleString()}`, icon: Landmark, color: "text-primary", bgColor: "bg-primary/10" },
+          { label: "bKash", value: `৳${Number(bkashBalance).toLocaleString()}`, icon: Wallet, color: "text-primary", bgColor: "bg-primary/10" },
+          { label: "Nagad", value: `৳${Number(nagadBalance).toLocaleString()}`, icon: Wallet, color: "text-primary", bgColor: "bg-primary/10" },
+          { label: "Bank", value: `৳${Number(bankBalance).toLocaleString()}`, icon: Landmark, color: "text-primary", bgColor: "bg-primary/10" },
           { label: "Pending Due", value: `৳${totalDue.toLocaleString()}`, icon: Receipt, color: "text-yellow-600", bgColor: "bg-yellow-500/10" },
+        ].map((c) => (
+          <div key={c.label} className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-muted-foreground">{c.label}</p>
+              <div className={`w-8 h-8 rounded-lg ${c.bgColor} flex items-center justify-center`}><c.icon className={`h-3.5 w-3.5 ${c.color}`} /></div>
+            </div>
+            <p className={`text-xl font-heading font-bold ${c.color}`}>{c.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {[
           { label: "Overdue Payments", value: overduePayments.length, icon: AlertTriangle, color: "text-destructive", bgColor: "bg-destructive/10" },
           { label: "Total Bookings", value: filteredBookings.length, icon: Package, color: "text-foreground", bgColor: "bg-secondary" },
         ].map((c) => (
