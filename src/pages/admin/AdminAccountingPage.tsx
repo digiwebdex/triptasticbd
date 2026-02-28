@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, X, Edit2, Trash2, Save, Filter, TrendingUp, TrendingDown, BarChart3 } from "lucide-react";
-import { useIsViewer } from "@/components/admin/AdminLayout";
+import { useIsViewer, useCanModifyFinancials } from "@/components/admin/AdminLayout";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 
@@ -40,6 +40,7 @@ const fmt = (n: number) => `৳${Number(n || 0).toLocaleString()}`;
 
 export default function AdminAccountingPage() {
   const isViewer = useIsViewer();
+  const canModify = useCanModifyFinancials();
   const [tab, setTab] = useState("expenses");
   const [expenses, setExpenses] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -191,7 +192,7 @@ export default function AdminAccountingPage() {
     <div>
       <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
         <h2 className="font-heading text-xl font-bold">Accounting & Profit Engine</h2>
-        {!isViewer && tab === "expenses" && (
+        {canModify && tab === "expenses" && (
           <button onClick={() => setShowForm(!showForm)} className="bg-gradient-gold text-primary-foreground text-sm font-semibold px-4 py-2 rounded-md flex items-center gap-2">
             {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
             {showForm ? "Cancel" : "Add Expense"}
@@ -310,8 +311,8 @@ export default function AdminAccountingPage() {
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <p className="font-heading font-bold text-destructive">{fmt(e.amount)}</p>
-                      {!isViewer && <button onClick={() => startEdit(e)} className="text-muted-foreground hover:text-foreground"><Edit2 className="h-3.5 w-3.5" /></button>}
-                      {!isViewer && <button onClick={() => setDeleteId(e.id)} className="text-destructive hover:underline"><Trash2 className="h-3.5 w-3.5" /></button>}
+                      {canModify && <button onClick={() => startEdit(e)} className="text-muted-foreground hover:text-foreground"><Edit2 className="h-3.5 w-3.5" /></button>}
+                      {canModify && <button onClick={() => setDeleteId(e.id)} className="text-destructive hover:underline"><Trash2 className="h-3.5 w-3.5" /></button>}
                     </div>
                   </div>
                 )}

@@ -13,6 +13,11 @@ import type { AppRole } from "@/hooks/useUserRole";
 const AdminRoleContext = createContext<AppRole>(null);
 export const useAdminRole = () => useContext(AdminRoleContext);
 export const useIsViewer = () => useContext(AdminRoleContext) === "viewer";
+/** Only admin, manager, accountant can modify financial data */
+export const useCanModifyFinancials = () => {
+  const role = useContext(AdminRoleContext);
+  return role === "admin" || role === "manager" || role === "accountant";
+};
 
 export default function AdminLayout() {
   useSessionTimeout();
@@ -39,6 +44,7 @@ export default function AdminLayout() {
       const roles = data.map((r: any) => r.role as string);
       if (roles.includes("admin")) setRole("admin");
       else if (roles.includes("manager")) setRole("manager");
+      else if (roles.includes("accountant")) setRole("accountant");
       else if (roles.includes("staff")) setRole("staff");
       else if (roles.includes("viewer")) setRole("viewer");
       else { toast.error("Access denied"); navigate("/dashboard"); return; }

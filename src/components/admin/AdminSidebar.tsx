@@ -15,18 +15,18 @@ import type { AppRole } from "@/hooks/useUserRole";
 
 // Role access matrix
 const menuItems = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, roles: ["admin", "manager", "staff", "viewer"] },
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, roles: ["admin", "manager", "accountant", "staff", "viewer"] },
   { title: "Bookings", url: "/admin/bookings", icon: FileText, roles: ["admin", "manager", "staff", "viewer"] },
   { title: "Customers", url: "/admin/customers", icon: Users, roles: ["admin", "manager", "staff", "viewer"] },
   { title: "Packages", url: "/admin/packages", icon: Package, roles: ["admin", "manager", "viewer"] },
   { title: "Hotels", url: "/admin/hotels", icon: Building2, roles: ["admin", "manager", "viewer"] },
-  { title: "Payments", url: "/admin/payments", icon: CreditCard, roles: ["admin", "manager", "staff", "viewer"] },
-  { title: "Due Alerts", url: "/admin/due-alerts", icon: AlertTriangle, roles: ["admin", "manager", "staff", "viewer"] },
+  { title: "Payments", url: "/admin/payments", icon: CreditCard, roles: ["admin", "manager", "accountant", "staff", "viewer"] },
+  { title: "Due Alerts", url: "/admin/due-alerts", icon: AlertTriangle, roles: ["admin", "manager", "accountant", "staff", "viewer"] },
   { title: "Notifications", url: "/admin/notifications", icon: Bell, roles: ["admin", "manager", "viewer"] },
-  { title: "Accounting", url: "/admin/accounting", icon: Calculator, roles: ["admin", "viewer"] },
-  { title: "Chart of Accounts", url: "/admin/chart-of-accounts", icon: BookOpen, roles: ["admin"] },
-  { title: "Receivables", url: "/admin/receivables", icon: Receipt, roles: ["admin", "manager", "viewer"] },
-  { title: "Reports", url: "/admin/reports", icon: BarChart3, roles: ["admin", "manager", "viewer"] },
+  { title: "Accounting", url: "/admin/accounting", icon: Calculator, roles: ["admin", "accountant", "viewer"] },
+  { title: "Chart of Accounts", url: "/admin/chart-of-accounts", icon: BookOpen, roles: ["admin", "accountant"] },
+  { title: "Receivables", url: "/admin/receivables", icon: Receipt, roles: ["admin", "manager", "accountant", "viewer"] },
+  { title: "Reports", url: "/admin/reports", icon: BarChart3, roles: ["admin", "manager", "accountant", "viewer"] },
   { title: "CMS", url: "/admin/cms", icon: Pencil, roles: ["admin"] },
   { title: "Settings", url: "/admin/settings", icon: Settings, roles: ["admin"] },
 ];

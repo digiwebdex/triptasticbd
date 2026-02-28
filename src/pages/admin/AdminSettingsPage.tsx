@@ -6,7 +6,7 @@ import AdminDocumentViewer from "@/components/AdminDocumentViewer";
 import { useAdminRole } from "@/components/admin/AdminLayout";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
-const ROLES = ["admin", "manager", "staff"];
+const ROLES = ["admin", "manager", "accountant", "staff"];
 
 export default function AdminSettingsPage() {
   const currentRole = useAdminRole();
@@ -117,11 +117,15 @@ export default function AdminSettingsPage() {
               </div>
               <div className="space-y-1">
                 <p className="font-semibold text-primary">Manager</p>
-                <p className="text-muted-foreground">Bookings, Customers, Packages, Hotels, Payments, Due Alerts, Reports</p>
+                <p className="text-muted-foreground">Bookings, Customers, Packages, Hotels, Payments, Due Alerts, Reports — can modify financial data</p>
+              </div>
+              <div className="space-y-1">
+                <p className="font-semibold text-primary">Accountant</p>
+                <p className="text-muted-foreground">Payments, Accounting, Chart of Accounts, Receivables, Reports — full financial write access</p>
               </div>
               <div className="space-y-1">
                 <p className="font-semibold text-primary">Staff</p>
-                <p className="text-muted-foreground">Bookings, Customers, Payments, Due Alerts (frontline operations)</p>
+                <p className="text-muted-foreground">Bookings, Customers, Payments, Due Alerts — view only for financial data</p>
               </div>
             </div>
           </div>
