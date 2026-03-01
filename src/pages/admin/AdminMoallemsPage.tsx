@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminRole, useIsViewer } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const emptyForm = {
 };
 
 export default function AdminMoallemsPage() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const isViewer = useIsViewer();
   const [moallems, setMoallems] = useState<Moallem[]>([]);
@@ -162,7 +164,7 @@ export default function AdminMoallemsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((m) => (
-            <Card key={m.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setViewItem(m)}>
+            <Card key={m.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/admin/moallems/${m.id}`)}>
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-base">{m.name}</CardTitle>
