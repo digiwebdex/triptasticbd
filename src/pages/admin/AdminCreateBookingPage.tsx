@@ -148,7 +148,6 @@ export default function AdminCreateBookingPage() {
         num_travelers: form.num_travelers,
         total_amount: form.total_amount,
         paid_amount: form.paid_amount,
-        due_amount: dueAmount,
         status: form.status,
         notes: form.notes.trim() || null,
         user_id: customerId,
