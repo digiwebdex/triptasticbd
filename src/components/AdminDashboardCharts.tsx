@@ -19,6 +19,8 @@ interface Props {
   financialSummary?: any;
   moallemPayments?: any[];
   supplierPayments?: any[];
+  moallems?: any[];
+  supplierAgents?: any[];
   onMarkPaid: (id: string) => void;
 }
 
@@ -123,7 +125,7 @@ const ReconciliationWidget = ({ bookings, payments }: { bookings: any[]; payment
   );
 };
 
-const AdminDashboardCharts = ({ bookings, payments, expenses = [], accounts = [], financialSummary, moallemPayments = [], supplierPayments = [], onMarkPaid }: Props) => {
+const AdminDashboardCharts = ({ bookings, payments, expenses = [], accounts = [], financialSummary, moallemPayments = [], supplierPayments = [], moallems = [], supplierAgents = [], onMarkPaid }: Props) => {
   const [dateFrom, setDateFrom] = useState(() => format(subMonths(new Date(), 11), "yyyy-MM-dd"));
   const [dateTo, setDateTo] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const [packageTypeFilter, setPackageTypeFilter] = useState("all");
@@ -156,6 +158,11 @@ const AdminDashboardCharts = ({ bookings, payments, expenses = [], accounts = []
   const totalSupplierPaid = supplierPayments.reduce((s: number, p: any) => s + Number(p.amount || 0), 0);
   const totalSupplierCost = filteredBookings.reduce((s: number, b: any) => s + Number(b.total_cost || 0), 0);
   const totalSupplierDue = Math.max(0, totalSupplierCost - totalSupplierPaid);
+  const totalMoallemDue = moallems.reduce((s: number, m: any) => s + Number(m.total_due || 0), 0);
+  const totalMoallems = moallems.length;
+  const totalAgents = supplierAgents.length;
+  const agentExpenses = expenses.filter((e: any) => e.category === "supplier" || e.expense_type === "supplier").reduce((s: number, e: any) => s + Number(e.amount || 0), 0) + totalSupplierPaid;
+  const overallProfit = totalRevenue - totalExpenses;
 
   // Monthly profit chart (revenue - expenses per month)
   const monthlyProfitData = useMemo(() => {
@@ -307,10 +314,26 @@ const AdminDashboardCharts = ({ bookings, payments, expenses = [], accounts = []
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Moallem Advance", value: `৳${totalMoallemAdvance.toLocaleString()}`, icon: Users, color: "text-primary", bgColor: "bg-primary/10" },
-          { label: "Supplier Cost", value: `৳${totalSupplierCost.toLocaleString()}`, icon: TrendingDown, color: "text-destructive", bgColor: "bg-destructive/10" },
+          { label: "Total Moallems", value: totalMoallems, icon: Users, color: "text-primary", bgColor: "bg-primary/10" },
+          { label: "Total Supplier Agents", value: totalAgents, icon: ShieldCheck, color: "text-blue-500", bgColor: "bg-blue-500/10" },
+          { label: "Moallem Due", value: `৳${totalMoallemDue.toLocaleString()}`, icon: Receipt, color: "text-yellow-600", bgColor: "bg-yellow-500/10" },
+          { label: "Agent Due", value: `৳${totalSupplierDue.toLocaleString()}`, icon: AlertTriangle, color: "text-destructive", bgColor: "bg-destructive/10" },
+        ].map((c) => (
+          <div key={c.label} className="bg-card border border-border rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-muted-foreground">{c.label}</p>
+              <div className={`w-8 h-8 rounded-lg ${c.bgColor} flex items-center justify-center`}><c.icon className={`h-3.5 w-3.5 ${c.color}`} /></div>
+            </div>
+            <p className={`text-xl font-heading font-bold ${c.color}`}>{c.value}</p>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: "Agent Expenses", value: `৳${agentExpenses.toLocaleString()}`, icon: TrendingDown, color: "text-destructive", bgColor: "bg-destructive/10" },
+          { label: "Moallem Advance", value: `৳${totalMoallemAdvance.toLocaleString()}`, icon: Wallet, color: "text-primary", bgColor: "bg-primary/10" },
           { label: "Supplier Paid", value: `৳${totalSupplierPaid.toLocaleString()}`, icon: CheckCircle2, color: "text-emerald", bgColor: "bg-emerald/10" },
-          { label: "Supplier Due", value: `৳${totalSupplierDue.toLocaleString()}`, icon: AlertTriangle, color: "text-yellow-600", bgColor: "bg-yellow-500/10" },
+          { label: "Profit", value: `৳${overallProfit.toLocaleString()}`, icon: TrendingUp, color: overallProfit >= 0 ? "text-emerald" : "text-destructive", bgColor: overallProfit >= 0 ? "bg-emerald/10" : "bg-destructive/10" },
         ].map((c) => (
           <div key={c.label} className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
@@ -375,7 +398,62 @@ const AdminDashboardCharts = ({ bookings, payments, expenses = [], accounts = []
         </div>
       </div>
 
-      {/* Booking Growth + Payment Collection */}
+      {/* Moallem & Supplier Overview Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h4 className="font-heading font-semibold mb-4 flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" /> Moallem & Supplier Overview
+          </h4>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={[
+                { name: "Moallem Advance", amount: totalMoallemAdvance },
+                { name: "Moallem Due", amount: totalMoallemDue },
+                { name: "Supplier Paid", amount: totalSupplierPaid },
+                { name: "Supplier Due", amount: totalSupplierDue },
+                { name: "Agent Expenses", amount: agentExpenses },
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 20%)" />
+                <XAxis dataKey="name" tick={{ fontSize: 9, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} tickFormatter={(v) => `৳${(v / 1000).toFixed(0)}k`} />
+                <Tooltip contentStyle={customTooltipStyle} formatter={(val: number) => `৳${val.toLocaleString()}`} />
+                <Bar dataKey="amount" radius={[4, 4, 0, 0]} name="Amount">
+                  <Cell fill={CHART_COLORS.gold} />
+                  <Cell fill={CHART_COLORS.destructive} />
+                  <Cell fill={CHART_COLORS.emerald} />
+                  <Cell fill={CHART_COLORS.muted} />
+                  <Cell fill={CHART_COLORS.blue} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h4 className="font-heading font-semibold mb-4 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" /> Financial Breakdown
+          </h4>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={[
+                  { name: "Revenue", value: totalRevenue },
+                  { name: "Supplier Cost", value: totalSupplierCost },
+                  { name: "Other Expenses", value: Math.max(0, totalExpenses - totalSupplierCost) },
+                  { name: "Profit", value: Math.max(0, overallProfit) },
+                ].filter(d => d.value > 0)} cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={3} dataKey="value">
+                  {[CHART_COLORS.emerald, CHART_COLORS.destructive, CHART_COLORS.muted, CHART_COLORS.gold].map((color, i) => (
+                    <Cell key={i} fill={color} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={customTooltipStyle} formatter={(val: number) => `৳${val.toLocaleString()}`} />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-card border border-border rounded-xl p-5">
           <h4 className="font-heading font-semibold mb-4 flex items-center gap-2">
