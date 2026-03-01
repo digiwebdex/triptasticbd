@@ -29,6 +29,8 @@ export default function AdminReportsPage() {
   const [selectedYear, setSelectedYear] = useState(String(getYear(new Date())));
   const [dateFrom, setDateFrom] = useState<Date>(startOfMonth(subMonths(new Date(), 0)));
   const [dateTo, setDateTo] = useState<Date>(new Date());
+  const [moallemDateFrom, setMoallemDateFrom] = useState<Date>(startOfMonth(subMonths(new Date(), 5)));
+  const [moallemDateTo, setMoallemDateTo] = useState<Date>(new Date());
 
   useEffect(() => {
     Promise.all([
@@ -203,7 +205,8 @@ export default function AdminReportsPage() {
     }> = {};
 
     // Build per-moallem data from bookings
-    bookings.filter((b) => b.moallem_id).forEach((b) => {
+    const mlInterval = { start: moallemDateFrom, end: moallemDateTo };
+    bookings.filter((b) => b.moallem_id && isWithinInterval(parseISO(b.created_at), mlInterval)).forEach((b) => {
       const ml = moallemMap[b.moallem_id];
       if (!map[b.moallem_id]) {
         map[b.moallem_id] = {
@@ -235,7 +238,7 @@ export default function AdminReportsPage() {
     });
 
     // Add expenses linked to moallem bookings
-    const moallemBookingIds = new Set(bookings.filter((b) => b.moallem_id).map((b) => b.id));
+    const moallemBookingIds = new Set(bookings.filter((b) => b.moallem_id && isWithinInterval(parseISO(b.created_at), mlInterval)).map((b) => b.id));
     expenses.forEach((e) => {
       if (e.booking_id && moallemBookingIds.has(e.booking_id)) {
         const bk = bookings.find((b) => b.id === e.booking_id);
@@ -246,7 +249,7 @@ export default function AdminReportsPage() {
     });
 
     // Add moallem deposits
-    moallemPayments.forEach((mp) => {
+    moallemPayments.filter((mp) => isWithinInterval(parseISO(mp.date), mlInterval)).forEach((mp) => {
       if (map[mp.moallem_id]) {
         map[mp.moallem_id].deposit += Number(mp.amount);
         map[mp.moallem_id].paymentDetails.push({
@@ -278,7 +281,7 @@ export default function AdminReportsPage() {
       ...d,
       profit: d.paidAmount - d.expenses,
     }));
-  }, [bookings, expenses, moallemPayments, moallemMap, profileMap]);
+  }, [bookings, expenses, moallemPayments, moallemMap, profileMap, moallemDateFrom, moallemDateTo]);
 
   // ── Export ──
   const getExportData = () => {
@@ -424,6 +427,7 @@ export default function AdminReportsPage() {
 
   const showDateRange = activeTab === "daily-financial";
   const showYearSelect = activeTab === "monthly-financial" || activeTab === "pnl";
+  const showMoallemDateRange = activeTab.startsWith("moallem-");
 
   return (
     <div className="space-y-4">
@@ -493,6 +497,41 @@ export default function AdminReportsPage() {
               <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
               <SelectContent>{years.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
             </Select>
+          )}
+          {showMoallemDateRange && (
+            <>
+              <div className="flex items-center gap-1.5">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">From:</span>
+              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-[160px] justify-start text-left font-normal">
+                    <CalendarIcon className="h-4 w-4 mr-2" />{format(moallemDateFrom, "dd MMM yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={moallemDateFrom} onSelect={(d) => d && setMoallemDateFrom(d)} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+              <span className="text-xs text-muted-foreground">To:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-[160px] justify-start text-left font-normal">
+                    <CalendarIcon className="h-4 w-4 mr-2" />{format(moallemDateTo, "dd MMM yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={moallemDateTo} onSelect={(d) => d && setMoallemDateTo(d)} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+              <div className="flex gap-1">
+                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => { setMoallemDateFrom(new Date()); setMoallemDateTo(new Date()); }}>আজ</Button>
+                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => { setMoallemDateFrom(startOfMonth(new Date())); setMoallemDateTo(new Date()); }}>এই মাস</Button>
+                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => { setMoallemDateFrom(startOfMonth(subMonths(new Date(), 2))); setMoallemDateTo(new Date()); }}>৩ মাস</Button>
+                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => { setMoallemDateFrom(startOfMonth(subMonths(new Date(), 11))); setMoallemDateTo(new Date()); }}>১ বছর</Button>
+              </div>
+            </>
           )}
         </div>
 
