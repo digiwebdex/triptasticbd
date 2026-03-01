@@ -65,10 +65,19 @@ const Dashboard = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) { navigate("/auth"); return; }
+      // Force password change for auto-created accounts
+      if (session.user?.user_metadata?.auto_created === true) {
+        navigate("/auth");
+        return;
+      }
       setUser(session.user);
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) { navigate("/auth"); return; }
+      if (session.user?.user_metadata?.auto_created === true) {
+        navigate("/auth");
+        return;
+      }
       setUser(session.user);
     });
     return () => subscription.unsubscribe();

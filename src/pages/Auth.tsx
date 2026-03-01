@@ -6,7 +6,7 @@ import logo from "@/assets/logo.jpg";
 import { Eye, EyeOff, Phone, Mail, Shield, CheckCircle2, XCircle } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 
-type AuthMode = "login" | "register" | "otp" | "forgot";
+type AuthMode = "login" | "register" | "otp" | "forgot" | "force_password_change";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -19,6 +19,8 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   const [otpPhone, setOtpPhone] = useState("");
   const [otpCode, setOtpCode] = useState("");
@@ -45,6 +47,18 @@ const Auth = () => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) throw error;
+
+      // Check if this is an auto-created account that needs password change
+      const isAutoCreated = data.user?.user_metadata?.auto_created === true;
+      if (isAutoCreated) {
+        setPassword("");
+        setNewPassword("");
+        setConfirmNewPassword("");
+        setMode("force_password_change");
+        setLoading(false);
+        return;
+      }
+
       const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
       const roles = (roleData || []).map((r: any) => r.role as string);
       const isAdminRole = roles.includes("admin") || roles.includes("manager") || roles.includes("staff");
@@ -56,6 +70,53 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const handleForcePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPasswordRulesValid) {
+      toast.error(t("auth.meetPwReq"));
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    setLoading(true);
+    try {
+      // Update password
+      const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
+      if (pwError) throw pwError;
+
+      // Clear the auto_created flag
+      const { error: metaError } = await supabase.auth.updateUser({
+        data: { auto_created: false },
+      });
+      if (metaError) console.error("Failed to clear auto_created flag:", metaError);
+
+      // Now navigate to dashboard
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+        const roles = (roleData || []).map((r: any) => r.role as string);
+        const isAdminRole = roles.includes("admin") || roles.includes("manager") || roles.includes("staff");
+        toast.success("Password updated successfully! Welcome!");
+        navigate(isAdminRole ? "/admin" : "/dashboard");
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const newPasswordRules = [
+    { label: t("auth.passwordRules.length"), test: (p: string) => p.length >= 8 },
+    { label: t("auth.passwordRules.upper"), test: (p: string) => /[A-Z]/.test(p) },
+    { label: t("auth.passwordRules.lower"), test: (p: string) => /[a-z]/.test(p) },
+    { label: t("auth.passwordRules.number"), test: (p: string) => /\d/.test(p) },
+    { label: t("auth.passwordRules.special"), test: (p: string) => /[!@#$%^&*(),.?\":{}|<>]/.test(p) },
+  ];
+  const newPasswordRulesValid = newPasswordRules.every((r) => r.test(newPassword));
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,12 +222,14 @@ const Auth = () => {
             {mode === "register" && t("auth.createAccount")}
             {mode === "otp" && t("auth.phoneLogin")}
             {mode === "forgot" && t("auth.resetPassword")}
+            {mode === "force_password_change" && "🔐 Change Your Password"}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {mode === "login" && t("auth.signInDesc")}
             {mode === "register" && t("auth.registerDesc")}
             {mode === "otp" && t("auth.otpDesc")}
             {mode === "forgot" && t("auth.forgotDesc")}
+            {mode === "force_password_change" && "Your account was auto-created. Please set a new password for security."}
           </p>
         </div>
 
@@ -317,6 +380,69 @@ const Auth = () => {
             <button type="submit" disabled={loading}
               className="w-full bg-gradient-gold text-primary-foreground font-semibold py-3 rounded-md text-sm hover:opacity-90 transition-opacity shadow-gold disabled:opacity-50">
               {loading ? t("auth.sending") : t("auth.sendResetLink")}
+            </button>
+          </form>
+        )}
+
+        {mode === "force_password_change" && (
+          <form onSubmit={handleForcePasswordChange} className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 text-sm text-center">
+              <Shield className="h-6 w-6 text-primary mx-auto mb-2" />
+              <p className="font-medium">Security Required</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Your account was created automatically during a guest booking. Please set a strong password to secure your account.
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">New Password</label>
+              <div className="relative">
+                <Shield className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                <input type={showPassword ? "text" : "password"} required value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)} className={`${inputClass} pl-10 pr-10`} placeholder="Enter new password" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {newPassword.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {newPasswordRules.map((rule) => (
+                    <div key={rule.label} className="flex items-center gap-2 text-xs">
+                      {rule.test(newPassword) ? (
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5 text-destructive" />
+                      )}
+                      <span className={rule.test(newPassword) ? "text-emerald-500" : "text-muted-foreground"}>
+                        {rule.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Confirm New Password</label>
+              <div className="relative">
+                <Shield className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                <input type={showPassword ? "text" : "password"} required value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)} className={`${inputClass} pl-10`}
+                  placeholder="Re-enter new password" />
+              </div>
+              {confirmNewPassword.length > 0 && newPassword !== confirmNewPassword && (
+                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                  <XCircle className="h-3.5 w-3.5" /> Passwords do not match
+                </p>
+              )}
+              {confirmNewPassword.length > 0 && newPassword === confirmNewPassword && newPasswordRulesValid && (
+                <p className="text-xs text-emerald-500 mt-1 flex items-center gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Passwords match
+                </p>
+              )}
+            </div>
+            <button type="submit" disabled={loading || !newPasswordRulesValid || newPassword !== confirmNewPassword}
+              className="w-full bg-gradient-gold text-primary-foreground font-semibold py-3 rounded-md text-sm hover:opacity-90 transition-opacity shadow-gold disabled:opacity-50">
+              {loading ? "Updating..." : "Set New Password & Continue"}
             </button>
           </form>
         )}
