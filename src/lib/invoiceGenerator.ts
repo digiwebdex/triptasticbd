@@ -85,6 +85,39 @@ function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string) {
   return 46;
 }
 
+function addSignatureSection(doc: jsPDF, y: number) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  y += 20;
+  
+  // Left signature
+  doc.setDrawColor(180);
+  doc.line(14, y, 80, y);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text("Customer Signature", 14, y + 5);
+
+  // Right signature
+  doc.line(pageWidth - 80, y, pageWidth - 14, y);
+  doc.text("Authorized Signature", pageWidth - 80, y + 5);
+
+  // Company seal
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "italic");
+  doc.text("Company Seal", pageWidth - 55, y + 10);
+
+  return y + 16;
+}
+
+function addFooter(doc: jsPDF) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "italic");
+  doc.setTextColor(150);
+  doc.text("This is a computer-generated document. For queries, contact: +880 1601-505050 | rahekaba.info@gmail.com", pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.setTextColor(0);
+}
+
 export async function generateInvoice(
   booking: InvoiceBooking,
   customer: InvoiceCustomer,
@@ -175,6 +208,11 @@ export async function generateInvoice(
   doc.text(`Paid: ${fmt(totalPaid)}`, 80, y + 7);
   doc.text(`Due: ${fmt(totalDue)}`, 140, y + 7);
   doc.setTextColor(0, 0, 0);
+  y += 24;
+
+  // Signature
+  y = addSignatureSection(doc, y);
+  addFooter(doc);
 
   doc.save(`Invoice_${booking.tracking_id}.pdf`);
 }
@@ -246,11 +284,95 @@ export async function generateReceipt(
   doc.text(`Total Paid So Far: ${fmt(totalPaidSoFar)}`, 18, y + 7);
   doc.text(`Remaining Due: ${fmt(Math.max(0, remaining))}`, 120, y + 7);
   doc.setTextColor(0, 0, 0);
+  y += 24;
 
-  y += 26;
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "italic");
-  doc.text("This is a computer-generated receipt and does not require a signature.", 14, y);
+  // Signature
+  y = addSignatureSection(doc, y);
+  addFooter(doc);
 
   doc.save(`Receipt_${receiptNum}.pdf`);
+}
+
+// ── Commission Receipt ──
+export interface CommissionReceiptData {
+  moallemName: string;
+  moallemPhone?: string | null;
+  bookingTrackingId: string;
+  packageName: string;
+  numTravelers: number;
+  commissionPerPerson: number;
+  totalCommission: number;
+  commissionPaid: number;
+  commissionDue: number;
+  paymentAmount: number;
+  paymentDate: string;
+  paymentMethod: string;
+  notes?: string | null;
+}
+
+export async function generateCommissionReceipt(
+  data: CommissionReceiptData,
+  company: CompanyInfo
+) {
+  const doc = new jsPDF();
+  const logoBase64 = await loadLogoBase64();
+  let y = addHeader(doc, company, logoBase64);
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("COMMISSION PAYMENT RECEIPT", 14, y);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Date: ${fmtDate(data.paymentDate)}`, pageWidth - 14 - 60, y + 6);
+  y += 14;
+
+  // Moallem info
+  doc.setFillColor(248, 248, 248);
+  doc.rect(14, y, pageWidth - 28, 18, "F");
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("Paid To (Moallem):", 18, y + 6);
+  doc.setFont("helvetica", "normal");
+  doc.text(`${data.moallemName}  |  Phone: ${data.moallemPhone || "N/A"}`, 18, y + 12);
+  y += 24;
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Description", "Details"]],
+    body: [
+      ["Booking ID", data.bookingTrackingId],
+      ["Package", data.packageName],
+      ["Travelers", String(data.numTravelers)],
+      ["Commission/Person", fmt(data.commissionPerPerson)],
+      ["Total Commission", fmt(data.totalCommission)],
+      ["Amount Paid Now", fmt(data.paymentAmount)],
+      ["Payment Method", data.paymentMethod || "Cash"],
+      ["Total Paid So Far", fmt(data.commissionPaid)],
+      ["Commission Due", fmt(data.commissionDue)],
+      ...(data.notes ? [["Notes", data.notes]] : []),
+    ],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [40, 46, 56] },
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 } },
+    margin: { left: 14, right: 14 },
+  });
+
+  y = (doc as any).lastAutoTable?.finalY || y + 40;
+  y += 8;
+
+  doc.setFillColor(40, 46, 56);
+  doc.rect(14, y, pageWidth - 28, 14, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Paid: ${fmt(data.paymentAmount)}`, 18, y + 9);
+  doc.text(`Remaining Due: ${fmt(Math.max(0, data.commissionDue))}`, 120, y + 9);
+  doc.setTextColor(0, 0, 0);
+  y += 20;
+
+  y = addSignatureSection(doc, y);
+  addFooter(doc);
+
+  doc.save(`Commission_Receipt_${data.bookingTrackingId}.pdf`);
 }

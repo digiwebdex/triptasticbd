@@ -10,172 +10,119 @@ type NotificationType =
   | "booking_created"
   | "booking_confirmed"
   | "booking_completed"
+  | "booking_status_updated"
   | "payment_received"
   | "payment_reminder"
+  | "supplier_payment_recorded"
+  | "commission_paid"
   | "custom";
 
 interface NotificationRequest {
   type: NotificationType;
   channels: ("email" | "sms")[];
-  // Target
   user_id: string;
   booking_id?: string;
   payment_id?: string;
-  // For custom / override
   custom_subject?: string;
   custom_message?: string;
-  // For payment_reminder
   amount?: number;
   due_date?: string;
   installment_number?: number;
+  // Extended fields
+  moallem_name?: string;
+  supplier_name?: string;
+  new_status?: string;
 }
 
 // --- Email templates ---
-function getEmailTemplate(
-  type: NotificationType,
-  data: {
-    name: string;
-    trackingId: string;
-    packageName: string;
-    totalAmount: number;
-    paidAmount: number;
-    dueAmount: number;
-    amount?: number;
-    dueDate?: string;
-    installmentNumber?: number;
-    customSubject?: string;
-    customMessage?: string;
-  }
-) {
-  const header = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f9f9f9;border-radius:8px">`;
-  const footer = `<hr style="border:none;border-top:1px solid #e0e0e0;margin:20px 0"/><p style="font-size:12px;color:#888">Rahe Kaba — Your trusted Hajj & Umrah partner</p></div>`;
+function getEmailTemplate(type: NotificationType, d: any) {
+  const header = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#ffffff;border:1px solid #e0e0e0;border-radius:8px">
+    <div style="text-align:center;padding:15px 0;border-bottom:2px solid #b8860b;margin-bottom:20px">
+      <h1 style="color:#b8860b;margin:0;font-size:22px">RAHE KABA</h1>
+      <p style="color:#888;margin:4px 0 0;font-size:12px">Hajj & Umrah Services</p>
+    </div>`;
+  const footer = `<hr style="border:none;border-top:1px solid #e0e0e0;margin:20px 0"/>
+    <p style="font-size:11px;color:#999;text-align:center">
+      Rahe Kaba Tours & Travels | +880 1601-505050 | rahekaba.info@gmail.com<br/>
+      Dailorbagh Palli Bidyut Adjacent, Sonargaon Thana Road, Narayanganj-Dhaka
+    </p></div>`;
+  const table = (rows: [string, string][]) => `<table style="width:100%;border-collapse:collapse;margin:16px 0">${rows.map(([k, v]) => `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;width:40%;background:#f9f9f9">${k}</td><td style="padding:8px;border:1px solid #ddd">${v}</td></tr>`).join("")}</table>`;
 
   switch (type) {
     case "booking_created":
       return {
-        subject: `📋 Booking Created — ${data.trackingId}`,
-        html: `${header}
-          <h2 style="color:#b8860b">Booking Created</h2>
-          <p>Dear <strong>${data.name}</strong>,</p>
-          <p>Your booking for <strong>${data.packageName}</strong> has been successfully created.</p>
-          <table style="width:100%;border-collapse:collapse;margin:16px 0">
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Tracking ID</td><td style="padding:8px;border:1px solid #ddd">${data.trackingId}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Package</td><td style="padding:8px;border:1px solid #ddd">${data.packageName}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Total Amount</td><td style="padding:8px;border:1px solid #ddd">৳${data.totalAmount.toLocaleString()}</td></tr>
-          </table>
-          <p>We'll keep you updated on your booking status. Thank you for choosing Rahe Kaba!</p>
-          ${footer}`,
+        subject: `📋 Booking Created — ${d.trackingId}`,
+        html: `${header}<h2 style="color:#b8860b">Booking Created</h2><p>Dear <strong>${d.name}</strong>,</p><p>Your booking for <strong>${d.packageName}</strong> has been created.</p>${table([["Tracking ID", d.trackingId], ["Package", d.packageName], ["Total Amount", `৳${d.totalAmount.toLocaleString()}`], ["Contact", "+880 1601-505050"]])}<p>We'll keep you updated. Thank you!</p>${footer}`,
       };
-
     case "booking_confirmed":
       return {
-        subject: `✅ Booking Confirmed — ${data.trackingId}`,
-        html: `${header}
-          <h2 style="color:#1a7f37">Booking Confirmed</h2>
-          <p>Dear <strong>${data.name}</strong>,</p>
-          <p>Your booking <strong>${data.trackingId}</strong> for <strong>${data.packageName}</strong> has been confirmed.</p>
-          <table style="width:100%;border-collapse:collapse;margin:16px 0">
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Tracking ID</td><td style="padding:8px;border:1px solid #ddd">${data.trackingId}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Total</td><td style="padding:8px;border:1px solid #ddd">৳${data.totalAmount.toLocaleString()}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Paid</td><td style="padding:8px;border:1px solid #ddd">৳${data.paidAmount.toLocaleString()}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Due</td><td style="padding:8px;border:1px solid #ddd">৳${data.dueAmount.toLocaleString()}</td></tr>
-          </table>
-          <p>Please ensure timely payments for remaining balance. Thank you!</p>
-          ${footer}`,
+        subject: `✅ Booking Confirmed — ${d.trackingId}`,
+        html: `${header}<h2 style="color:#1a7f37">Booking Confirmed</h2><p>Dear <strong>${d.name}</strong>,</p><p>Your booking <strong>${d.trackingId}</strong> has been confirmed.</p>${table([["Tracking ID", d.trackingId], ["Total", `৳${d.totalAmount.toLocaleString()}`], ["Paid", `৳${d.paidAmount.toLocaleString()}`], ["Due", `৳${d.dueAmount.toLocaleString()}`]])}<p>Please ensure timely payments. Thank you!</p>${footer}`,
       };
-
     case "booking_completed":
       return {
-        subject: `🎉 Booking Completed — ${data.trackingId}`,
-        html: `${header}
-          <h2 style="color:#1a7f37">Payment Completed ✅</h2>
-          <p>Dear <strong>${data.name}</strong>,</p>
-          <p>Your booking <strong>${data.trackingId}</strong> for <strong>${data.packageName}</strong> is fully paid!</p>
-          <table style="width:100%;border-collapse:collapse;margin:16px 0">
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Tracking ID</td><td style="padding:8px;border:1px solid #ddd">${data.trackingId}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Total Paid</td><td style="padding:8px;border:1px solid #ddd">৳${data.totalAmount.toLocaleString()}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Status</td><td style="padding:8px;border:1px solid #ddd;color:#1a7f37">Completed</td></tr>
-          </table>
-          <p>Thank you for choosing Rahe Kaba. We look forward to serving you!</p>
-          ${footer}`,
+        subject: `🎉 Booking Completed — ${d.trackingId}`,
+        html: `${header}<h2 style="color:#1a7f37">Payment Completed ✅</h2><p>Dear <strong>${d.name}</strong>,</p><p>Your booking <strong>${d.trackingId}</strong> is fully paid!</p>${table([["Tracking ID", d.trackingId], ["Total Paid", `৳${d.totalAmount.toLocaleString()}`], ["Status", "Completed"]])}<p>Thank you for choosing Rahe Kaba!</p>${footer}`,
       };
-
+    case "booking_status_updated":
+      return {
+        subject: `🔄 Booking Status Updated — ${d.trackingId}`,
+        html: `${header}<h2 style="color:#2563eb">Booking Status Updated</h2><p>Dear <strong>${d.name}</strong>,</p><p>Your booking <strong>${d.trackingId}</strong> status has been updated to <strong>${d.newStatus || "Updated"}</strong>.</p>${table([["Tracking ID", d.trackingId], ["New Status", d.newStatus || "Updated"], ["Total", `৳${d.totalAmount.toLocaleString()}`], ["Due", `৳${d.dueAmount.toLocaleString()}`]])}<p>Contact us for any queries: +880 1601-505050</p>${footer}`,
+      };
     case "payment_received":
       return {
-        subject: `💰 Payment Received — ${data.trackingId}`,
-        html: `${header}
-          <h2 style="color:#b8860b">Payment Received</h2>
-          <p>Dear <strong>${data.name}</strong>,</p>
-          <p>We've received your payment of <strong>৳${(data.amount || 0).toLocaleString()}</strong> for booking <strong>${data.trackingId}</strong>.</p>
-          <table style="width:100%;border-collapse:collapse;margin:16px 0">
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Amount Paid</td><td style="padding:8px;border:1px solid #ddd">৳${(data.amount || 0).toLocaleString()}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Total Paid</td><td style="padding:8px;border:1px solid #ddd">৳${data.paidAmount.toLocaleString()}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Remaining</td><td style="padding:8px;border:1px solid #ddd">৳${data.dueAmount.toLocaleString()}</td></tr>
-          </table>
-          <p>Thank you for your payment!</p>
-          ${footer}`,
+        subject: `💰 Payment Received — ${d.trackingId}`,
+        html: `${header}<h2 style="color:#b8860b">Payment Received</h2><p>Dear <strong>${d.name}</strong>,</p><p>We received <strong>৳${(d.amount || 0).toLocaleString()}</strong> for booking <strong>${d.trackingId}</strong>.</p>${table([["Amount Paid", `৳${(d.amount || 0).toLocaleString()}`], ["Total Paid", `৳${d.paidAmount.toLocaleString()}`], ["Remaining", `৳${d.dueAmount.toLocaleString()}`]])}<p>Thank you for your payment!</p>${footer}`,
       };
-
     case "payment_reminder":
       return {
-        subject: `⏰ Payment Reminder — ${data.trackingId}`,
-        html: `${header}
-          <h2 style="color:#d97706">Payment Reminder</h2>
-          <p>Dear <strong>${data.name}</strong>,</p>
-          <p>This is a reminder that installment <strong>#${data.installmentNumber || 1}</strong> of <strong>৳${(data.amount || 0).toLocaleString()}</strong> for booking <strong>${data.trackingId}</strong> is due on <strong>${data.dueDate}</strong>.</p>
-          <table style="width:100%;border-collapse:collapse;margin:16px 0">
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Installment</td><td style="padding:8px;border:1px solid #ddd">#${data.installmentNumber || 1}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Amount Due</td><td style="padding:8px;border:1px solid #ddd">৳${(data.amount || 0).toLocaleString()}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold">Due Date</td><td style="padding:8px;border:1px solid #ddd">${data.dueDate}</td></tr>
-          </table>
-          <p>Please make your payment at the earliest. Thank you!</p>
-          ${footer}`,
+        subject: `⏰ Payment Reminder — ${d.trackingId}`,
+        html: `${header}<h2 style="color:#d97706">Payment Reminder</h2><p>Dear <strong>${d.name}</strong>,</p><p>Installment <strong>#${d.installmentNumber || 1}</strong> of <strong>৳${(d.amount || 0).toLocaleString()}</strong> for booking <strong>${d.trackingId}</strong> is due on <strong>${d.dueDate}</strong>.</p>${table([["Installment", `#${d.installmentNumber || 1}`], ["Amount Due", `৳${(d.amount || 0).toLocaleString()}`], ["Due Date", d.dueDate]])}<p>Please pay at the earliest. Contact: +880 1601-505050</p>${footer}`,
       };
-
+    case "supplier_payment_recorded":
+      return {
+        subject: `📦 Supplier Payment Recorded — ${d.trackingId || "N/A"}`,
+        html: `${header}<h2 style="color:#2563eb">Supplier Payment Recorded</h2><p>A payment of <strong>৳${(d.amount || 0).toLocaleString()}</strong> has been recorded for supplier <strong>${d.supplierName || "N/A"}</strong>.</p>${table([["Supplier", d.supplierName || "N/A"], ["Amount", `৳${(d.amount || 0).toLocaleString()}`], ["Booking", d.trackingId || "N/A"]])}<p>This is an automated notification for your records.</p>${footer}`,
+      };
+    case "commission_paid":
+      return {
+        subject: `💼 Commission Paid — ${d.moallemName || "Moallem"}`,
+        html: `${header}<h2 style="color:#b8860b">Commission Payment</h2><p>A commission payment of <strong>৳${(d.amount || 0).toLocaleString()}</strong> has been recorded for Moallem <strong>${d.moallemName || "N/A"}</strong>.</p>${table([["Moallem", d.moallemName || "N/A"], ["Amount", `৳${(d.amount || 0).toLocaleString()}`], ["Booking", d.trackingId || "N/A"]])}<p>This is an automated notification.</p>${footer}`,
+      };
     case "custom":
       return {
-        subject: data.customSubject || "Notification from Rahe Kaba",
-        html: `${header}
-          <h2 style="color:#b8860b">${data.customSubject || "Message"}</h2>
-          <p>Dear <strong>${data.name}</strong>,</p>
-          <p>${data.customMessage || ""}</p>
-          ${footer}`,
+        subject: d.customSubject || "Notification from Rahe Kaba",
+        html: `${header}<h2 style="color:#b8860b">${d.customSubject || "Message"}</h2><p>Dear <strong>${d.name}</strong>,</p><p>${d.customMessage || ""}</p>${footer}`,
       };
-
     default:
-      return { subject: "Notification", html: `<p>${data.customMessage || ""}</p>` };
+      return { subject: "Notification", html: `<p>${d.customMessage || ""}</p>` };
   }
 }
 
 // --- SMS templates ---
-function getSmsMessage(
-  type: NotificationType,
-  data: {
-    name: string;
-    trackingId: string;
-    packageName: string;
-    totalAmount: number;
-    amount?: number;
-    dueDate?: string;
-    installmentNumber?: number;
-    customMessage?: string;
-  }
-): string {
+function getSmsMessage(type: NotificationType, d: any): string {
+  const contact = "Rahe Kaba: 01601-505050";
   switch (type) {
     case "booking_created":
-      return `Dear ${data.name}, your booking ${data.trackingId} for ${data.packageName} has been created. Total: ৳${data.totalAmount.toLocaleString()}. Thank you for choosing Rahe Kaba!`;
+      return `Dear ${d.name}, booking ${d.trackingId} for ${d.packageName} created. Total: ৳${d.totalAmount.toLocaleString()}. ${contact}`;
     case "booking_confirmed":
-      return `Dear ${data.name}, your booking ${data.trackingId} for ${data.packageName} has been confirmed. Thank you!`;
+      return `Dear ${d.name}, booking ${d.trackingId} confirmed. Due: ৳${d.dueAmount.toLocaleString()}. ${contact}`;
     case "booking_completed":
-      return `Dear ${data.name}, your booking ${data.trackingId} for ${data.packageName} is fully paid (৳${data.totalAmount.toLocaleString()}). Status: Completed. Thank you!`;
+      return `Dear ${d.name}, booking ${d.trackingId} fully paid (৳${d.totalAmount.toLocaleString()}). Status: Completed. ${contact}`;
+    case "booking_status_updated":
+      return `Dear ${d.name}, booking ${d.trackingId} status: ${d.newStatus || "Updated"}. Due: ৳${d.dueAmount.toLocaleString()}. ${contact}`;
     case "payment_received":
-      return `Dear ${data.name}, we received ৳${(data.amount || 0).toLocaleString()} for booking ${data.trackingId}. Thank you for your payment!`;
+      return `Dear ${d.name}, ৳${(d.amount || 0).toLocaleString()} received for ${d.trackingId}. Due: ৳${d.dueAmount.toLocaleString()}. ${contact}`;
     case "payment_reminder":
-      return `Dear ${data.name}, installment #${data.installmentNumber || 1} of ৳${(data.amount || 0).toLocaleString()} for booking ${data.trackingId} is due on ${data.dueDate}. Please pay at the earliest. Thank you!`;
+      return `Dear ${d.name}, installment #${d.installmentNumber || 1} of ৳${(d.amount || 0).toLocaleString()} for ${d.trackingId} due on ${d.dueDate}. ${contact}`;
+    case "supplier_payment_recorded":
+      return `Supplier payment: ৳${(d.amount || 0).toLocaleString()} recorded for ${d.supplierName || "supplier"}. Booking: ${d.trackingId || "N/A"}. ${contact}`;
+    case "commission_paid":
+      return `Commission: ৳${(d.amount || 0).toLocaleString()} paid to ${d.moallemName || "moallem"}. Booking: ${d.trackingId || "N/A"}. ${contact}`;
     case "custom":
-      return data.customMessage || "";
+      return d.customMessage || "";
     default:
-      return data.customMessage || "";
+      return d.customMessage || "";
   }
 }
 
@@ -185,7 +132,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth check — accept both service role calls (from triggers) and admin calls
     const authHeader = req.headers.get("Authorization");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -195,7 +141,6 @@ Deno.serve(async (req) => {
 
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
-      // Check if it's the service role key (from DB triggers)
       if (token !== serviceKey) {
         const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
           global: { headers: { Authorization: authHeader } },
@@ -203,16 +148,14 @@ Deno.serve(async (req) => {
         const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
         if (claimsError || !claimsData?.claims) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
         callerUserId = claimsData.claims.sub as string;
         const { data: isAdmin } = await adminClient.rpc("has_role", { _user_id: callerUserId, _role: "admin" });
         if (!isAdmin) {
           return new Response(JSON.stringify({ error: "Admin access required" }), {
-            status: 403,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
       }
@@ -223,42 +166,28 @@ Deno.serve(async (req) => {
 
     if (!type || !channels?.length || !user_id) {
       return new Response(JSON.stringify({ error: "type, channels, and user_id are required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // Fetch user data
-    const { data: profile } = await adminClient
-      .from("profiles")
-      .select("full_name, phone")
-      .eq("user_id", user_id)
-      .single();
-
+    const { data: profile } = await adminClient.from("profiles").select("full_name, phone").eq("user_id", user_id).single();
     const { data: authUser } = await adminClient.auth.admin.getUserById(user_id);
     const email = authUser?.user?.email;
     const name = profile?.full_name || "Valued Customer";
     const phone = profile?.phone;
 
-    // Fetch booking data if available
+    // Fetch booking data
     let booking: any = null;
     if (booking_id) {
-      const { data } = await adminClient
-        .from("bookings")
-        .select("*, packages(name)")
-        .eq("id", booking_id)
-        .single();
+      const { data } = await adminClient.from("bookings").select("*, packages(name)").eq("id", booking_id).single();
       booking = data;
     }
 
-    // Fetch payment data if available
+    // Fetch payment data
     let payment: any = null;
     if (payment_id) {
-      const { data } = await adminClient
-        .from("payments")
-        .select("*")
-        .eq("id", payment_id)
-        .single();
+      const { data } = await adminClient.from("payments").select("*").eq("id", payment_id).single();
       payment = data;
     }
 
@@ -274,6 +203,9 @@ Deno.serve(async (req) => {
       installmentNumber: body.installment_number || payment?.installment_number || 1,
       customSubject: body.custom_subject,
       customMessage: body.custom_message,
+      moallemName: body.moallem_name,
+      supplierName: body.supplier_name,
+      newStatus: body.new_status,
     };
 
     const results: { email?: string; sms?: string } = {};
@@ -294,19 +226,11 @@ Deno.serve(async (req) => {
           const emailData = await emailRes.json();
           results.email = emailRes.ok ? "sent" : `failed: ${JSON.stringify(emailData)}`;
 
-          // Log
           await adminClient.from("notification_logs").insert({
-            user_id,
-            booking_id: booking_id || null,
-            payment_id: payment_id || null,
-            event_type: type,
-            channel: "email",
-            recipient: email,
-            subject,
-            message: html,
-            status: emailRes.ok ? "sent" : "failed",
-            error_detail: emailRes.ok ? null : JSON.stringify(emailData),
-            sent_by: callerUserId,
+            user_id, booking_id: booking_id || null, payment_id: payment_id || null,
+            event_type: type, channel: "email", recipient: email, subject,
+            message: html, status: emailRes.ok ? "sent" : "failed",
+            error_detail: emailRes.ok ? null : JSON.stringify(emailData), sent_by: callerUserId,
           });
         } catch (e) {
           results.email = `error: ${e.message}`;
@@ -335,17 +259,10 @@ Deno.serve(async (req) => {
           results.sms = smsRes.ok ? "sent" : `failed: ${smsText}`;
 
           await adminClient.from("notification_logs").insert({
-            user_id,
-            booking_id: booking_id || null,
-            payment_id: payment_id || null,
-            event_type: type,
-            channel: "sms",
-            recipient: phone,
-            subject: null,
-            message,
-            status: smsRes.ok ? "sent" : "failed",
-            error_detail: smsRes.ok ? null : smsText,
-            sent_by: callerUserId,
+            user_id, booking_id: booking_id || null, payment_id: payment_id || null,
+            event_type: type, channel: "sms", recipient: phone, subject: null,
+            message, status: smsRes.ok ? "sent" : "failed",
+            error_detail: smsRes.ok ? null : smsText, sent_by: callerUserId,
           });
         } catch (e) {
           results.sms = `error: ${e.message}`;
@@ -361,14 +278,12 @@ Deno.serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ success: true, results }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error("Notification error:", err);
     return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
