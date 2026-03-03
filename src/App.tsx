@@ -20,6 +20,7 @@ const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const InvoicePage = lazy(() => import("./pages/InvoicePage"));
+const VerifyInvoice = lazy(() => import("./pages/VerifyInvoice"));
 
 // Lazy load admin pages (heavy: recharts, xlsx, jspdf)
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -67,6 +68,8 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/invoice" element={<InvoicePage />} />
+            <Route path="/verify/:invoiceNumber" element={<VerifyInvoice />} />
+            <Route path="/verify" element={<VerifyInvoice />} />
 
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />

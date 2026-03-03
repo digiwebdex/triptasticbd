@@ -1,13 +1,14 @@
 import QRCode from "qrcode";
 import jsPDF from "jspdf";
 
-const TRACKING_BASE_URL = "https://rahe-kaba-journeys.lovable.app/track";
+const TRACKING_BASE_URL = "https://rahe-kaba-journeys.lovable.app/verify";
 
 /**
  * Generate a QR code data URL for a booking tracking ID.
  */
 export async function generateTrackingQr(trackingId: string): Promise<string> {
-  const url = `${TRACKING_BASE_URL}?id=${encodeURIComponent(trackingId)}`;
+  const verificationId = generateVerificationId(trackingId);
+  const url = `${TRACKING_BASE_URL}/${encodeURIComponent(verificationId)}`;
   return QRCode.toDataURL(url, {
     width: 200,
     margin: 1,
