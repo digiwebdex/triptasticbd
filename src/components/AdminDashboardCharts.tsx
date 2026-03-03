@@ -71,7 +71,7 @@ const AdminDashboardCharts = ({
   return (
     <div className="space-y-5">
       {/* ═══ TOP KPI CARDS ═══ */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {[
           { label: "মোট বিক্রয়", value: fmt(totalSales), icon: DollarSign, color: "text-primary" },
           { label: "আয় প্রাপ্ত", value: fmt(totalIncome), icon: ArrowUpRight, color: "text-emerald" },
@@ -79,6 +79,7 @@ const AdminDashboardCharts = ({
           { label: "ক্যাশ ব্যালেন্স", value: fmt(cashBank), icon: Wallet, color: "text-primary" },
           { label: "মোট বুকিং", value: bookings.length, icon: Package, color: "text-foreground" },
           { label: "মোট হাজী", value: totalHajji, icon: Users, color: "text-foreground" },
+          { label: "কাস্টমার বকেয়া", value: fmt(customerDue), icon: UserCheck, color: customerDue > 0 ? "text-yellow-500" : "text-emerald" },
         ].map(k => (
           <div key={k.label} className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center justify-between mb-1">
