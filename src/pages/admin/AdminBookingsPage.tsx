@@ -77,6 +77,30 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
         </div>
       </div>
 
+      {/* Payment Timeline - Completed Payments with Dates */}
+      {(() => {
+        const completedPayments = payments.filter(p => p.status === "completed" && p.paid_at).sort((a, b) => new Date(a.paid_at).getTime() - new Date(b.paid_at).getTime());
+        return completedPayments.length > 0 ? (
+          <div>
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">পেমেন্ট টাইমলাইন ({completedPayments.length})</h4>
+            <div className="space-y-1.5">
+              {completedPayments.map((p: any, i: number) => (
+                <div key={p.id} className="flex items-center gap-3 bg-emerald-500/5 border border-emerald-500/15 rounded-lg px-3 py-2">
+                  <div className="flex items-center justify-center h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold shrink-0">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold">{new Date(p.paid_at).toLocaleDateString("en-GB")}</span>
+                    <span className="text-[10px] text-muted-foreground ml-2 capitalize">{p.payment_method || "manual"}</span>
+                  </div>
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{fmt(p.amount)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null;
+      })()}
+
       <div>
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Installment History ({payments.length})</h4>
         {payments.length > 0 ? (
@@ -95,8 +119,8 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
                     <td className="py-2 pr-3 font-medium">{p.installment_number || "—"}</td>
                     <td className="py-2 pr-3 font-medium">{fmt(p.amount)}</td>
                     <td className="py-2 pr-3 capitalize">{p.payment_method || "—"}</td>
-                    <td className="py-2 pr-3">{p.due_date ? new Date(p.due_date).toLocaleDateString() : "—"}</td>
-                    <td className="py-2 pr-3">{p.paid_at ? new Date(p.paid_at).toLocaleDateString() : "—"}</td>
+                    <td className="py-2 pr-3">{p.due_date ? new Date(p.due_date).toLocaleDateString("en-GB") : "—"}</td>
+                    <td className="py-2 pr-3">{p.paid_at ? new Date(p.paid_at).toLocaleDateString("en-GB") : "—"}</td>
                     <td className="py-2">
                       <Badge variant={p.status === "completed" ? "default" : "secondary"} className="text-[10px]">{p.status}</Badge>
                     </td>
@@ -150,14 +174,30 @@ export default function AdminBookingsPage() {
   const [viewBooking, setViewBooking] = useState<any>(null);
   const [statusChangeId, setStatusChangeId] = useState<string | null>(null);
   const [statusChangeVal, setStatusChangeVal] = useState("");
+  const [bookingPayments, setBookingPayments] = useState<Record<string, any[]>>({});
 
   const fetchBookings = () =>
     supabase.from("bookings").select("*, packages(name, type, duration_days, price), moallems(name, phone)")
       .order("created_at", { ascending: false })
       .then(({ data }) => setBookings(data || []));
 
+  const fetchAllPayments = () =>
+    supabase.from("payments").select("id, booking_id, amount, paid_at, payment_method, status")
+      .eq("status", "completed")
+      .not("paid_at", "is", null)
+      .order("paid_at", { ascending: true })
+      .then(({ data }) => {
+        const grouped: Record<string, any[]> = {};
+        (data || []).forEach((p: any) => {
+          if (!grouped[p.booking_id]) grouped[p.booking_id] = [];
+          grouped[p.booking_id].push(p);
+        });
+        setBookingPayments(grouped);
+      });
+
   useEffect(() => {
     fetchBookings();
+    fetchAllPayments();
     supabase.from("moallems").select("id, name, phone, status").eq("status", "active").order("name").then(({ data }) => setMoallems(data || []));
   }, []);
 
@@ -215,6 +255,7 @@ export default function AdminBookingsPage() {
     toast.success("Booking updated successfully");
     setEditingId(null);
     fetchBookings();
+    fetchAllPayments();
   };
 
   const confirmDelete = async () => {
@@ -450,6 +491,17 @@ export default function AdminBookingsPage() {
                 <div><p className="text-muted-foreground text-xs">Supplier Due</p><p className="font-medium text-destructive">{fmt(Number(b.supplier_due || 0))}</p></div>
                 <div><p className="text-muted-foreground text-xs">Profit</p><p className={`font-medium ${Number(b.profit_amount || 0) >= 0 ? "text-emerald-500" : "text-destructive"}`}>{fmt(Number(b.profit_amount || 0))}</p></div>
               </div>
+              {/* Payment History Chips */}
+              {bookingPayments[b.id] && bookingPayments[b.id].length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wide self-center mr-1">পেমেন্ট:</span>
+                  {bookingPayments[b.id].map((p: any) => (
+                    <span key={p.id} className="inline-flex items-center gap-1 text-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full px-2.5 py-0.5 font-medium">
+                      {new Date(p.paid_at).toLocaleDateString("en-GB")}: {fmt(p.amount)}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => setExpandedId(expandedId === b.id ? null : b.id)}
