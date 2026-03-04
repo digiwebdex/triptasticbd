@@ -354,9 +354,12 @@ function addPaymentHistoryTable(doc: jsPDF, y: number, payments: InvoicePayment[
 
   const completed = payments
     .filter(p => p.status === "completed")
-    .sort((a, b) => (a.installment_number || 0) - (b.installment_number || 0));
+    .sort((a, b) => new Date(a.paid_at || 0).getTime() - new Date(b.paid_at || 0).getTime());
+  const pending = payments
+    .filter(p => p.status === "pending")
+    .sort((a, b) => new Date(a.due_date || 0).getTime() - new Date(b.due_date || 0).getTime());
 
-  if (completed.length === 0) {
+  if (completed.length === 0 && pending.length === 0) {
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(130);
@@ -365,15 +368,30 @@ function addPaymentHistoryTable(doc: jsPDF, y: number, payments: InvoicePayment[
     return y + 10;
   }
 
-  autoTable(doc, {
-    startY: y,
-    head: [["#", "Date", "Method", "Amount (BDT)"]],
-    body: completed.map((p, i) => [
+  const totalPaid = completed.reduce((s, p) => s + Number(p.amount), 0);
+
+  const bodyRows = [
+    ...completed.map((p, i) => [
       String(i + 1),
       fmtDate(p.paid_at),
       (p.payment_method || "Manual").charAt(0).toUpperCase() + (p.payment_method || "manual").slice(1),
       Number(p.amount).toLocaleString(),
+      "Paid",
     ]),
+    ...pending.map((p, i) => [
+      String(completed.length + i + 1),
+      p.due_date ? fmtDate(p.due_date) + " (Due)" : "—",
+      "—",
+      Number(p.amount).toLocaleString(),
+      "Pending",
+    ]),
+  ];
+
+  autoTable(doc, {
+    startY: y,
+    head: [["#", "Date", "Method", "Amount (BDT)", "Status"]],
+    body: bodyRows,
+    foot: completed.length > 0 ? [["", "", "Total Paid", totalPaid.toLocaleString(), ""]] : undefined,
     styles: { fontSize: 7.5, cellPadding: 2.5 },
     headStyles: {
       fillColor: [DARK.r, DARK.g, DARK.b],
@@ -381,13 +399,31 @@ function addPaymentHistoryTable(doc: jsPDF, y: number, payments: InvoicePayment[
       fontSize: 7.5,
       fontStyle: "bold",
     },
+    footStyles: {
+      fillColor: [LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b],
+      textColor: [DARK.r, DARK.g, DARK.b],
+      fontStyle: "bold",
+      fontSize: 8,
+    },
     alternateRowStyles: { fillColor: [LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b] },
     columnStyles: {
       0: { cellWidth: 12, halign: "center" },
       3: { halign: "right", fontStyle: "bold" },
+      4: { cellWidth: 18, halign: "center" },
+    },
+    didParseCell: (data: any) => {
+      if (data.section === "body" && data.column.index === 4) {
+        if (data.cell.raw === "Paid") {
+          data.cell.styles.textColor = [34, 139, 34];
+          data.cell.styles.fontStyle = "bold";
+        } else if (data.cell.raw === "Pending") {
+          data.cell.styles.textColor = [210, 140, 20];
+          data.cell.styles.fontStyle = "bold";
+        }
+      }
     },
     margin: { left: 14, right: 14 },
-    tableWidth: 100,
+    tableWidth: 110,
   });
 
   return ((doc as any).lastAutoTable?.finalY || y + 20) + 6;
