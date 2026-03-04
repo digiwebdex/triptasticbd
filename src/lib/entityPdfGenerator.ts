@@ -60,10 +60,10 @@ function addSignatureAndFooter(doc: jsPDF, sig: SignatureData) {
 
   // Stamp & signature images
   if (sig.stamp_base64) {
-    try { doc.addImage(sig.stamp_base64, "PNG", rightCenter - 20, y - 38, 40, 40); } catch { /* skip */ }
+    try { doc.addImage(sig.stamp_base64, "PNG", rightCenter - 18, y - 42, 36, 36); } catch { /* skip */ }
   }
   if (sig.signature_base64) {
-    try { doc.addImage(sig.signature_base64, "PNG", rightCenter - 25, y - 18, 50, 18); } catch { /* skip */ }
+    try { doc.addImage(sig.signature_base64, "PNG", rightCenter - 22, y - 20, 44, 16); } catch { /* skip */ }
   }
 
   doc.setDrawColor(180);
@@ -123,7 +123,7 @@ export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyI
   let y = addHeader(doc, company, logoBase64);
   const pw = doc.internal.pageSize.getWidth();
 
-  if (qrDataUrl) addQrToDoc(doc, qrDataUrl, { size: 38, trackingId: firstTrackingId, position: "bottom" });
+  if (qrDataUrl) addQrToDoc(doc, qrDataUrl, { size: 26, trackingId: firstTrackingId, position: "bottom" });
 
   // Watermark based on moallem summary
   addPaymentWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));
@@ -239,7 +239,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
   let y = addHeader(doc, company, logoBase64);
   const pw = doc.internal.pageSize.getWidth();
 
-  if (qrDataUrl) addQrToDoc(doc, qrDataUrl, { size: 38, trackingId: firstTrackingId, position: "bottom" });
+  if (qrDataUrl) addQrToDoc(doc, qrDataUrl, { size: 26, trackingId: firstTrackingId, position: "bottom" });
 
   // Watermark based on supplier summary
   addPaymentWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));
@@ -333,7 +333,7 @@ export async function generateCustomerPdf(data: CustomerPdfData, company: Compan
   let y = addHeader(doc, company, logoBase64);
   const pw = doc.internal.pageSize.getWidth();
 
-  if (qrDataUrl) addQrToDoc(doc, qrDataUrl, { size: 38, trackingId: firstTrackingId, position: "bottom" });
+  if (qrDataUrl) addQrToDoc(doc, qrDataUrl, { size: 26, trackingId: firstTrackingId, position: "bottom" });
 
   // Watermark based on customer summary
   addPaymentWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));

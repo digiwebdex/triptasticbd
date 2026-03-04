@@ -416,10 +416,10 @@ function addSignatureSection(doc: jsPDF, y: number, sig: SignatureData): number 
   const rightCenter = pageWidth - 47;
 
   if (sig.stamp_base64) {
-    try { doc.addImage(sig.stamp_base64, "PNG", rightCenter - 20, y - 38, 40, 40); } catch { /* skip */ }
+    try { doc.addImage(sig.stamp_base64, "PNG", rightCenter - 18, y - 42, 36, 36); } catch { /* skip */ }
   }
   if (sig.signature_base64) {
-    try { doc.addImage(sig.signature_base64, "PNG", rightCenter - 25, y - 18, 50, 18); } catch { /* skip */ }
+    try { doc.addImage(sig.signature_base64, "PNG", rightCenter - 22, y - 20, 44, 16); } catch { /* skip */ }
   }
 
   doc.setDrawColor(180);
@@ -479,7 +479,7 @@ async function generateIndividualInvoice(
   let y = addHeader(doc, { name: "RAHE KABA", phone: "+880 1601-505050", email: "rahekaba.info@gmail.com", address: "Dailorbagh Palli Bidyut Adjacent, Sonargaon Thana Road, Narayanganj-Dhaka" } as CompanyInfo, logoBase64);
 
   // QR verification stamp
-  addQrToDoc(doc, qrDataUrl, { size: 38, trackingId: booking.tracking_id, position: "bottom" });
+  addQrToDoc(doc, qrDataUrl, { size: 26, trackingId: booking.tracking_id, position: "bottom" });
 
   // Payment watermark
   addPaymentWatermark(doc, getWatermarkStatus(Number(booking.paid_amount), Number(booking.due_amount || 0)));
@@ -556,7 +556,7 @@ async function generateFamilyInvoice(
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = addHeader(doc, { name: "RAHE KABA", phone: "+880 1601-505050", email: "rahekaba.info@gmail.com", address: "Dailorbagh Palli Bidyut Adjacent, Sonargaon Thana Road, Narayanganj-Dhaka" } as CompanyInfo, logoBase64);
 
-  addQrToDoc(doc, qrDataUrl, { size: 38, trackingId: booking.tracking_id, position: "bottom" });
+  addQrToDoc(doc, qrDataUrl, { size: 26, trackingId: booking.tracking_id, position: "bottom" });
   addPaymentWatermark(doc, getWatermarkStatus(Number(booking.paid_amount), Number(booking.due_amount || 0)));
 
   y = addInvoiceTitleBlock(doc, y, booking.tracking_id, new Date().toISOString(), booking.packages?.start_date || null, booking.status, true);
@@ -688,7 +688,7 @@ export async function generateReceipt(
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = addHeader(doc, company, logoBase64);
 
-  addQrToDoc(doc, qrDataUrl, { size: 38, trackingId: booking.tracking_id, position: "bottom" });
+  addQrToDoc(doc, qrDataUrl, { size: 26, trackingId: booking.tracking_id, position: "bottom" });
   addPaymentWatermark(doc, "paid");
 
   // Receipt title
@@ -785,7 +785,7 @@ export async function generateCommissionReceipt(
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = addHeader(doc, company, logoBase64);
 
-  addQrToDoc(doc, qrDataUrl, { size: 38, trackingId: data.bookingTrackingId, position: "bottom" });
+  addQrToDoc(doc, qrDataUrl, { size: 26, trackingId: data.bookingTrackingId, position: "bottom" });
   addPaymentWatermark(doc, getWatermarkStatus(data.commissionPaid, data.commissionDue));
 
   doc.setFillColor(DARK.r, DARK.g, DARK.b);
