@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.daily-summary-sms]
 verify_jwt = false
+
+[functions.daily-backup]
+verify_jwt = false
