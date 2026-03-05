@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, X, Bell, PenTool } from "lucide-react";
+import { Plus, X, Bell, PenTool, Database } from "lucide-react";
 import AdminDocumentViewer from "@/components/AdminDocumentViewer";
 import { useAdminRole } from "@/components/admin/AdminLayout";
 import NotificationSettingsManager from "@/components/admin/NotificationSettingsManager";
 import SignatureSettingsManager from "@/components/admin/SignatureSettingsManager";
 import AdminUserManager from "@/components/admin/AdminUserManager";
+import BackupRestoreManager from "@/components/admin/BackupRestoreManager";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 
@@ -99,6 +100,18 @@ export default function AdminSettingsPage() {
           </h2>
           <div className="bg-card border border-border rounded-lg p-5">
             <SignatureSettingsManager />
+          </div>
+        </section>
+      )}
+
+      {/* Backup & Restore (Admin only) */}
+      {currentRole === "admin" && (
+        <section>
+          <h2 className="font-heading text-xl font-bold flex items-center gap-2 mb-4">
+            <Database className="h-5 w-5 text-primary" /> ব্যাকআপ ও রিস্টোর
+          </h2>
+          <div className="bg-card border border-border rounded-lg p-5">
+            <BackupRestoreManager />
           </div>
         </section>
       )}
