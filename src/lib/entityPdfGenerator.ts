@@ -226,7 +226,7 @@ export interface SupplierPdfData {
   notes?: string | null;
   bookings: { tracking_id: string; guest_name: string; package_name: string; total: number; cost: number; paid_to_supplier: number; supplier_due: number; status: string }[];
   agentPayments: { amount: number; date: string; method: string; notes?: string | null }[];
-  summary: { totalBookings: number; totalTravelers: number; totalCost: number; totalPaid: number; totalDue: number; profit: number };
+  summary: { totalBookings: number; totalTravelers: number; totalCost: number; totalPaid: number; totalDue: number };
 }
 
 export async function generateSupplierPdf(data: SupplierPdfData, company: CompanyInfo) {
@@ -269,7 +269,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
   doc.setTextColor(255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.text(`Bookings: ${data.summary.totalBookings} | Cost: ${fmt(data.summary.totalCost)} | Paid: ${fmt(data.summary.totalPaid)} | Due: ${fmt(data.summary.totalDue)} | Profit: ${fmt(data.summary.profit)}`, 18, y + 8);
+  doc.text(`Bookings: ${data.summary.totalBookings} | Cost: ${fmt(data.summary.totalCost)} | Paid: ${fmt(data.summary.totalPaid)} | Due: ${fmt(data.summary.totalDue)}`, 18, y + 8);
   doc.setTextColor(0);
   y += 18;
 
