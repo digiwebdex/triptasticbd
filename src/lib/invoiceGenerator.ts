@@ -833,7 +833,7 @@ export async function generateCommissionReceipt(
   let y = addHeader(doc, company, logoBase64);
 
 
-  addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: data.bookingTrackingId, position: "left" });
+  addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: data.bookingTrackingId, position: "top" });
   addPaymentWatermark(doc, getWatermarkStatus(data.commissionPaid, data.commissionDue));
 
   doc.setFillColor(DARK.r, DARK.g, DARK.b);
