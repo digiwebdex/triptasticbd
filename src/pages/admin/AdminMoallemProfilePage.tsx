@@ -169,8 +169,7 @@ export default function AdminMoallemProfilePage() {
       name: moallem.name, phone: moallem.phone, address: moallem.address,
       nid_number: moallem.nid_number, contract_date: moallem.contract_date,
       status: moallem.status, notes: moallem.notes,
-      bookings: bookings
-        .filter(b => Number(b.due_amount || 0) > 0)
+      bookings: (pdfBookingFilter === "due" ? bookings.filter(b => Number(b.due_amount || 0) > 0) : bookings)
         .map(b => ({
           tracking_id: b.tracking_id, guest_name: b.guest_name || "—",
           package_name: b.packages?.name || "—",
