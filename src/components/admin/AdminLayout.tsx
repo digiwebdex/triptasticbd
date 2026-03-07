@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { auth as api } from "@/lib/api";
 import { toast } from "sonner";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -42,21 +42,18 @@ export default function AdminLayout() {
 
   useEffect(() => {
     const checkAccess = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await api.getSession();
       if (!session) { navigate("/auth"); return; }
 
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id);
+      const { data: { user } } = await api.getUser();
+      const roles: string[] = user?.roles || [];
 
-      if (!data || data.length === 0) {
+      if (roles.length === 0) {
         toast.error("Access denied");
         navigate("/dashboard");
         return;
       }
 
-      const roles = data.map((r: any) => r.role as string);
       if (roles.includes("admin")) setRole("admin");
       else if (roles.includes("accountant")) setRole("accountant");
       else if (roles.includes("booking")) setRole("booking");

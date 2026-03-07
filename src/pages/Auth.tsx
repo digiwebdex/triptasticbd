@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { auth as api } from "@/lib/api";
 import { toast } from "sonner";
 import logo from "@/assets/logo.jpg";
 import { Eye, EyeOff, Phone, Mail, Shield, CheckCircle2, XCircle } from "lucide-react";
@@ -44,14 +44,12 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      const { data, error } = await api.signInWithPassword({ email: email.trim(), password });
       if (error) throw error;
 
-
-      const { data: roleData, error: roleError } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
-      console.log("Role query result:", { roleData, roleError, userId: data.user.id });
-      const roles = (roleData || []).map((r: any) => r.role as string);
-      const isAdminRole = roles.includes("admin") || roles.includes("manager") || roles.includes("staff") || roles.includes("accountant") || roles.includes("booking") || roles.includes("cms") || roles.includes("viewer");
+      const roles = data?.user?.roles || [];
+      console.log("Login roles:", roles, "userId:", data?.user?.id);
+      const isAdminRole = roles.some((r: string) => ["admin", "manager", "staff", "accountant", "booking", "cms", "viewer"].includes(r));
       toast.success(t("auth.welcomeBackToast"));
       navigate(isAdminRole ? "/admin" : "/dashboard");
     } catch (err: any) {
@@ -75,12 +73,11 @@ const Auth = () => {
     setLoading(true);
     try {
       const normalizedPhone = phone.trim() ? normalizePhone(phone) : "";
-      const { error } = await supabase.auth.signUp({
+      const { error } = await api.signUp({
         email: email.trim(),
         password,
         options: {
           data: { full_name: fullName.trim(), phone: normalizedPhone },
-          emailRedirectTo: window.location.origin,
         },
       });
       if (error) throw error;
@@ -101,11 +98,8 @@ const Auth = () => {
     }
     setLoading(true);
     try {
-      const res = await supabase.functions.invoke("send-otp", { body: { phone: cleaned, action: "send" } });
-      if (res.error) throw new Error(res.error.message);
-      if (res.data?.error) throw new Error(res.data.error);
-      toast.success(t("auth.otpSentSuccess"));
-      setOtpSent(true);
+      // OTP not supported with custom backend yet
+      toast.error("OTP login is not available at this time");
     } catch (err: any) {
       toast.error(err.message || "Failed to send OTP");
     } finally {
@@ -120,18 +114,7 @@ const Auth = () => {
     }
     setLoading(true);
     try {
-      const cleaned = otpPhone.trim().replace(/[^\d+]/g, "");
-      const res = await supabase.functions.invoke("send-otp", { body: { phone: cleaned, action: "verify", code: otpCode } });
-      if (res.error) throw new Error(res.error.message);
-      if (res.data?.error) throw new Error(res.data.error);
-      if (res.data?.access_token && res.data?.refresh_token) {
-        const { error } = await supabase.auth.setSession({ access_token: res.data.access_token, refresh_token: res.data.refresh_token });
-        if (error) throw error;
-        toast.success(t("auth.loggedIn"));
-        navigate("/dashboard");
-      } else {
-        toast.error(t("auth.authFailed"));
-      }
+      toast.error("OTP login is not available at this time");
     } catch (err: any) {
       toast.error(err.message || "OTP verification failed");
     } finally {
@@ -143,9 +126,7 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+      const { error } = await api.resetPasswordForEmail(resetEmail.trim());
       if (error) throw error;
       toast.success(t("auth.resetLinkSent"));
     } catch (err: any) {
