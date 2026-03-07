@@ -34,6 +34,7 @@ export default function AdminMoallemProfilePage() {
   const [commissionPayments, setCommissionPayments] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pdfBookingFilter, setPdfBookingFilter] = useState<"due" | "all">("due");
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showCommissionForm, setShowCommissionForm] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -168,8 +169,7 @@ export default function AdminMoallemProfilePage() {
       name: moallem.name, phone: moallem.phone, address: moallem.address,
       nid_number: moallem.nid_number, contract_date: moallem.contract_date,
       status: moallem.status, notes: moallem.notes,
-      bookings: bookings
-        .filter(b => Number(b.due_amount || 0) > 0)
+      bookings: (pdfBookingFilter === "due" ? bookings.filter(b => Number(b.due_amount || 0) > 0) : bookings)
         .map(b => ({
           tracking_id: b.tracking_id, guest_name: b.guest_name || "—",
           package_name: b.packages?.name || "—",
@@ -239,7 +239,16 @@ export default function AdminMoallemProfilePage() {
           <p className="text-sm text-muted-foreground">মোয়াল্লেম প্রোফাইল</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={handleDownloadStatement}><Download className="h-4 w-4 mr-1" /> স্টেটমেন্ট PDF</Button>
+          <div className="flex items-center gap-1">
+            <Select value={pdfBookingFilter} onValueChange={(v: "due" | "all") => setPdfBookingFilter(v)}>
+              <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="due">শুধু বকেয়া</SelectItem>
+                <SelectItem value="all">সব বুকিং</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" onClick={handleDownloadStatement}><Download className="h-4 w-4 mr-1" /> PDF</Button>
+          </div>
           {!isViewer && (
             <>
               <Button variant="outline" size="sm" onClick={() => setShowCommissionForm(true)}><Plus className="h-4 w-4 mr-1" /> কমিশন</Button>
