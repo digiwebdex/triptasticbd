@@ -114,18 +114,7 @@ const Auth = () => {
     }
     setLoading(true);
     try {
-      const cleaned = otpPhone.trim().replace(/[^\d+]/g, "");
-      const res = await supabase.functions.invoke("send-otp", { body: { phone: cleaned, action: "verify", code: otpCode } });
-      if (res.error) throw new Error(res.error.message);
-      if (res.data?.error) throw new Error(res.data.error);
-      if (res.data?.access_token && res.data?.refresh_token) {
-        const { error } = await supabase.auth.setSession({ access_token: res.data.access_token, refresh_token: res.data.refresh_token });
-        if (error) throw error;
-        toast.success(t("auth.loggedIn"));
-        navigate("/dashboard");
-      } else {
-        toast.error(t("auth.authFailed"));
-      }
+      toast.error("OTP login is not available at this time");
     } catch (err: any) {
       toast.error(err.message || "OTP verification failed");
     } finally {
