@@ -2,6 +2,25 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import logoImg from "@/assets/logo-nobg.png";
+import QRCode from "qrcode";
+
+const COMPANY_URL = "https://rahe-kaba-journeys.lovable.app";
+
+async function generateCompanyQr(): Promise<string> {
+  try {
+    return await QRCode.toDataURL(COMPANY_URL, {
+      width: 200, margin: 1,
+      color: { dark: "#282E38", light: "#FFFFFF" },
+      errorCorrectionLevel: "M",
+    });
+  } catch { return ""; }
+}
+
+function addQrToReport(doc: jsPDF, qrDataUrl: string) {
+  if (!qrDataUrl) return;
+  const pw = doc.internal.pageSize.getWidth();
+  try { doc.addImage(qrDataUrl, "PNG", pw - 30, 6, 16, 16); } catch { /* skip */ }
+}
 
 interface ReportData {
   title: string;
@@ -74,7 +93,7 @@ export interface HajjiReportData {
 }
 
 export async function exportPDF({ title, columns, rows, summary }: ReportData) {
-  const logoBase64 = await loadLogoBase64();
+  const [logoBase64, qrDataUrl] = await Promise.all([loadLogoBase64(), generateCompanyQr()]);
   const doc = new jsPDF();
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
@@ -82,6 +101,8 @@ export async function exportPDF({ title, columns, rows, summary }: ReportData) {
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 25);
+
+  addQrToReport(doc, qrDataUrl);
 
   const fmtCell = (val: string | number) =>
     typeof val === "number" ? `BDT ${val.toLocaleString("en-IN")}` : val;
@@ -120,7 +141,7 @@ export async function exportPDF({ title, columns, rows, summary }: ReportData) {
 }
 
 export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
-  const logoBase64 = await loadLogoBase64();
+  const [logoBase64, qrDataUrl] = await Promise.all([loadLogoBase64(), generateCompanyQr()]);
   const doc = new jsPDF({ orientation: "landscape" });
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -130,6 +151,8 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 25);
+
+  addQrToReport(doc, qrDataUrl);
 
   let y = 30;
   const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
