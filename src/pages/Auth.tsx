@@ -98,11 +98,8 @@ const Auth = () => {
     }
     setLoading(true);
     try {
-      const res = await supabase.functions.invoke("send-otp", { body: { phone: cleaned, action: "send" } });
-      if (res.error) throw new Error(res.error.message);
-      if (res.data?.error) throw new Error(res.data.error);
-      toast.success(t("auth.otpSentSuccess"));
-      setOtpSent(true);
+      // OTP not supported with custom backend yet
+      toast.error("OTP login is not available at this time");
     } catch (err: any) {
       toast.error(err.message || "Failed to send OTP");
     } finally {
