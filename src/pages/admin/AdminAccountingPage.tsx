@@ -57,7 +57,7 @@ const fmt = (n: number) => `৳${Number(n || 0).toLocaleString()}`;
 export default function AdminAccountingPage() {
   const isViewer = useIsViewer();
   const canModify = useCanModifyFinancials();
-  const [tab, setTab] = useState("expenses");
+  const [tab, setTab] = useState("cashbook");
   const [expenses, setExpenses] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(() => {
     const params = new URLSearchParams(window.location.search);
