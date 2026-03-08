@@ -372,7 +372,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
       startY: y,
       head: [["Date", "Pilgrim Count", "Contract Amount", "Paid", "Due"]],
       body: data.contracts.map(c => [fmtDate(c.created_at), String(c.pilgrim_count), fmt(c.contract_amount), fmt(c.total_paid), fmt(c.total_due)]),
-      styles: { fontSize: 7 },
+      styles: { fontSize: 7, font: "NotoSansBengali" },
       headStyles: { fillColor: [40, 46, 56] },
       margin: { left: 14, right: 14 },
     });
