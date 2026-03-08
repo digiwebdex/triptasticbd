@@ -1265,6 +1265,44 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_agent_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          quantity: number
+          supplier_agent_id: string
+          total_amount: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          quantity?: number
+          supplier_agent_id: string
+          total_amount?: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          quantity?: number
+          supplier_agent_id?: string
+          total_amount?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_agent_items_supplier_agent_id_fkey"
+            columns: ["supplier_agent_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_agent_payments: {
         Row: {
           amount: number
