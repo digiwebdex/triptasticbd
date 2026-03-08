@@ -113,9 +113,13 @@ export default function AdminSupplierAgentProfilePage() {
   if (loading) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   if (!agent) return <div className="text-center py-20 text-muted-foreground">সাপ্লায়ার এজেন্ট পাওয়া যায়নি</div>;
 
+  const itemsTotal = supplierItems.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0);
   const totalCost = bookings.reduce((s, b) => s + Number(b.total_cost || 0), 0);
   const totalAgentPaid = agentPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
-  const totalDue = Math.max(0, totalCost - totalAgentPaid);
+  const contractedAmount = Number(agent.contracted_amount || 0);
+  // Use items total if items exist, otherwise fall back to contracted_amount
+  const totalBilled = itemsTotal > 0 ? itemsTotal : contractedAmount;
+  const totalDue = Math.max(0, totalBilled - totalAgentPaid);
 
   const filterByDate = (items: any[]) => items.filter(p => {
     if (dateFrom && p.date < dateFrom) return false;
