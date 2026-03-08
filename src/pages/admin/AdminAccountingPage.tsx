@@ -73,6 +73,7 @@ export default function AdminAccountingPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [packages, setPackages] = useState<any[]>([]);
   const [walletAccounts, setWalletAccounts] = useState<any[]>([]);
+  const [dailyCashbookEntries, setDailyCashbookEntries] = useState<any[]>([]);
   const [revenue, setRevenue] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const [filterAssign, setFilterAssign] = useState("all");
