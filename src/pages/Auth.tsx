@@ -150,16 +150,12 @@ const Auth = () => {
           <h1 className="font-heading text-2xl font-bold mt-4">
             {mode === "login" && t("auth.welcomeBack")}
             {mode === "register" && t("auth.createAccount")}
-            {mode === "otp" && t("auth.phoneLogin")}
             {mode === "forgot" && t("auth.resetPassword")}
-            
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {mode === "login" && t("auth.signInDesc")}
             {mode === "register" && t("auth.registerDesc")}
-            {mode === "otp" && t("auth.otpDesc")}
             {mode === "forgot" && t("auth.forgotDesc")}
-            
           </p>
         </div>
 
