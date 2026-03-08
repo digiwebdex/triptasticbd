@@ -243,7 +243,12 @@ async function addCustomerSection(
   doc.setFont("helvetica", "bold");
   doc.text("Name:", col1, row);
   doc.setFont("helvetica", "normal");
-  doc.text(customer.full_name || "N/A", col1 + 18, row);
+  const custName = customer.full_name || "N/A";
+  if (hasBengali(custName)) {
+    await addBengaliText(doc, custName, col1 + 18, row, { fontSize: 8 });
+  } else {
+    doc.text(custName, col1 + 18, row);
+  }
 
   doc.setFont("helvetica", "bold");
   doc.text("Phone:", col2, row);
