@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
+const fsp = require('fs/promises');
 const multer = require('multer');
 const { query } = require('./config/database');
 const { authenticate, requireRole, optionalAuth } = require('./middleware/auth');
