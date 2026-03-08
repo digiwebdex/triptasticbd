@@ -171,7 +171,7 @@ export default function AdminCalculatorPage() {
           </div>
           <div className="bg-secondary/30 rounded-lg p-3 text-center">
             <p className="text-[10px] uppercase text-muted-foreground mb-1">জন প্রতি লাভ</p>
-            <p className={`text-lg font-bold ${profitPerPerson >= 0 ? "text-emerald-500" : "text-destructive"}`}>{fmt(profitPerPerson)}</p>
+            <p className={`text-lg font-bold ${profitPerPerson >= 0 ? "text-green-500" : "text-destructive"}`}>{fmt(profitPerPerson)}</p>
           </div>
         </div>
 
