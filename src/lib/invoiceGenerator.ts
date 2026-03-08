@@ -538,7 +538,7 @@ async function generateIndividualInvoice(
   y = addInvoiceTitleBlock(doc, y, booking.tracking_id, new Date().toISOString(), booking.packages?.start_date || null, booking.status, false);
 
   // Customer section
-  y = addCustomerSection(doc, y, customer, moallemName);
+  y = await addCustomerSection(doc, y, customer, moallemName);
 
   // Service table
   y = addSectionTitle(doc, y, "SERVICE DETAILS");
