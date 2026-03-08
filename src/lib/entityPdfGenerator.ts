@@ -354,7 +354,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
       startY: y,
       head: [["Amount", "Date", "Method", "Notes"]],
       body: data.agentPayments.map(p => [fmt(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
-      styles: { fontSize: 7 },
+      styles: { fontSize: 7, font: "NotoSansBengali" },
       headStyles: { fillColor: [60, 70, 85] },
       margin: { left: 14, right: 14 },
     });
