@@ -398,7 +398,7 @@ function addPaymentHistoryTable(doc: jsPDF, y: number, payments: InvoicePayment[
     head: [["#", "Date", "Method", "Amount (BDT)", "Status"]],
     body: bodyRows,
     foot: completed.length > 0 ? [["", "", "Total Paid", totalPaid.toLocaleString(), ""]] : undefined,
-    styles: { fontSize: 7.5, cellPadding: 2.5, font: "NotoSansBengali" },
+    styles: { fontSize: 7.5, cellPadding: 2.5, font: "helvetica" },
     headStyles: {
       fillColor: [DARK.r, DARK.g, DARK.b],
       textColor: [255, 255, 255],
