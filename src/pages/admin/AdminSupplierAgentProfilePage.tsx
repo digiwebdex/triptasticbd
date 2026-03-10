@@ -133,6 +133,31 @@ export default function AdminSupplierAgentProfilePage() {
     } finally { setPaymentLoading(false); }
   };
 
+  const startEditPayment = (p: any) => {
+    setEditPaymentId(p.id);
+    setEditPaymentForm({ amount: String(p.amount), payment_method: p.payment_method || "cash", date: p.date || "", notes: p.notes || "" });
+    setShowEditPaymentModal(true);
+  };
+
+  const handleSavePaymentEdit = async () => {
+    if (!editPaymentId) return;
+    const { error } = await supabase.from("supplier_agent_payments").update({
+      amount: parseFloat(editPaymentForm.amount), payment_method: editPaymentForm.payment_method,
+      date: editPaymentForm.date || undefined, notes: editPaymentForm.notes || null,
+    }).eq("id", editPaymentId);
+    if (error) { toast({ title: "আপডেট ব্যর্থ", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "পেমেন্ট আপডেট হয়েছে" });
+    setEditPaymentId(null); setShowEditPaymentModal(false); loadData();
+  };
+
+  const confirmDeletePayment = async () => {
+    if (!deletePaymentId) return;
+    const { error } = await supabase.from("supplier_agent_payments").delete().eq("id", deletePaymentId);
+    if (error) { toast({ title: "মুছতে ব্যর্থ", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "পেমেন্ট মুছে ফেলা হয়েছে" });
+    setDeletePaymentId(null); loadData();
+  };
+
   if (loading) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   if (!agent) return <div className="text-center py-20 text-muted-foreground">সাপ্লায়ার এজেন্ট পাওয়া যায়নি</div>;
 
