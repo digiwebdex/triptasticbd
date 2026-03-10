@@ -341,6 +341,11 @@ export default function AdminSupplierAgentProfilePage() {
         <DialogContent>
           <DialogHeader><DialogTitle>সাপ্লায়ার পেমেন্ট রেকর্ড</DialogTitle><DialogDescription>পেমেন্ট তথ্য দিন</DialogDescription></DialogHeader>
           <div className="space-y-3">
+            <div><label className="text-xs text-muted-foreground block mb-1">সার্ভিস ধরন</label>
+              <Select value={paymentForm.service_type || ""} onValueChange={(v) => setPaymentForm({ ...paymentForm, service_type: v })}>
+                <SelectTrigger><SelectValue placeholder="-- সার্ভিস নির্বাচন করুন --" /></SelectTrigger>
+                <SelectContent>{SERVICE_TYPES.filter(s => s.value).map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+              </Select></div>
             <div><label className="text-xs text-muted-foreground block mb-1">পরিমাণ (৳) *</label>
               <Input type="number" min={0} value={paymentForm.amount} onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })} /></div>
             <div><label className="text-xs text-muted-foreground block mb-1">পদ্ধতি</label>
