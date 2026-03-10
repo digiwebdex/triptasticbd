@@ -676,10 +676,10 @@ export default function AdminMoallemProfilePage() {
       {renderPaymentDialog("মোয়াল্লেম পেমেন্ট রেকর্ড", showPaymentForm, setShowPaymentForm, paymentForm, setPaymentForm, handleRecordPayment)}
       {renderPaymentDialog("কমিশন পরিশোধ রেকর্ড", showCommissionForm, setShowCommissionForm, commissionForm, setCommissionForm, handleRecordCommission)}
 
-      {/* Add Service Item Dialog */}
-      <Dialog open={showItemForm} onOpenChange={setShowItemForm}>
+      {/* Add/Edit Service Item Dialog */}
+      <Dialog open={showItemForm} onOpenChange={(o) => { if (!o) { setShowItemForm(false); setEditItemId(null); setItemForm({ description: "", quantity: "1", unit_price: "0" }); } }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>সার্ভিস আইটেম যোগ করুন</DialogTitle><DialogDescription>মোয়াল্লেম কী কী সার্ভিস দিয়েছে তা লিখুন</DialogDescription></DialogHeader>
+          <DialogHeader><DialogTitle>{editItemId ? "সার্ভিস আইটেম সম্পাদনা" : "সার্ভিস আইটেম যোগ করুন"}</DialogTitle><DialogDescription>মোয়াল্লেম কী কী সার্ভিস দিয়েছে তা লিখুন</DialogDescription></DialogHeader>
           <div className="space-y-3">
             <div><label className="text-xs text-muted-foreground block mb-1">বিবরণ *</label>
               <Input value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} placeholder="যেমন: উমরাহ ভিসা, টিকেট..." /></div>
@@ -695,11 +695,49 @@ export default function AdminMoallemProfilePage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowItemForm(false)}>বাতিল</Button>
-            <Button onClick={handleAddItem}>যোগ করুন</Button>
+            <Button variant="outline" onClick={() => { setShowItemForm(false); setEditItemId(null); setItemForm({ description: "", quantity: "1", unit_price: "0" }); }}>বাতিল</Button>
+            <Button onClick={handleSaveItem}>{editItemId ? "আপডেট করুন" : "যোগ করুন"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Payment Modal */}
+      <Dialog open={showEditPaymentModal} onOpenChange={(o) => { if (!o) { setShowEditPaymentModal(false); setEditPaymentId(null); } }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editPaymentType === "commission" ? "কমিশন পেমেন্ট সম্পাদনা" : "পেমেন্ট সম্পাদনা"}</DialogTitle><DialogDescription>পেমেন্ট তথ্য পরিবর্তন করুন</DialogDescription></DialogHeader>
+          <div className="space-y-3">
+            <div><label className="text-xs text-muted-foreground block mb-1">পরিমাণ (৳) *</label>
+              <Input type="number" min={0} value={editPaymentForm.amount} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, amount: e.target.value })} /></div>
+            <div><label className="text-xs text-muted-foreground block mb-1">পদ্ধতি</label>
+              <Select value={editPaymentForm.payment_method} onValueChange={(v) => setEditPaymentForm({ ...editPaymentForm, payment_method: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{PAYMENT_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+              </Select></div>
+            <div><label className="text-xs text-muted-foreground block mb-1">তারিখ</label>
+              <Input type="date" value={editPaymentForm.date} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, date: e.target.value })} /></div>
+            <div><label className="text-xs text-muted-foreground block mb-1">নোট</label>
+              <Input value={editPaymentForm.notes} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, notes: e.target.value })} /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowEditPaymentModal(false); setEditPaymentId(null); }}>বাতিল</Button>
+            <Button onClick={handleSavePaymentEdit}>আপডেট করুন</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Payment Confirmation */}
+      {deletePaymentId && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setDeletePaymentId(null)}>
+          <div className="bg-card border border-border rounded-xl p-6 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-heading font-bold text-lg mb-2">পেমেন্ট মুছবেন?</h3>
+            <p className="text-sm text-muted-foreground mb-4">এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।</p>
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setDeletePaymentId(null)}>বাতিল</Button>
+              <Button variant="destructive" onClick={confirmDeletePayment}>মুছুন</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
