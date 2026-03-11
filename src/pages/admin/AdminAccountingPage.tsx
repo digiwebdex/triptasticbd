@@ -639,10 +639,10 @@ export default function AdminAccountingPage() {
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={() => setShowForm(false)} className="text-sm px-4 py-2 rounded-md bg-secondary">বাতিল</button>
+              <button type="button" onClick={() => setShowForm(false)} className="text-sm px-4 py-2 rounded-md bg-secondary">Cancel</button>
               <button type="submit"
                 className="text-sm px-4 py-2 rounded-md bg-gradient-gold text-primary-foreground font-semibold hover:opacity-90 transition-opacity shadow-gold flex items-center gap-2">
-                <Save className="h-4 w-4" /> খরচ রেকর্ড করুন
+                <Save className="h-4 w-4" /> Record Expense
               </button>
             </div>
           </form>
