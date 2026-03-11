@@ -514,7 +514,7 @@ export default function AdminBookingsPage() {
                   <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalSelling.toLocaleString()}</div>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground block mb-1">Paid (৳)</label>
+                  <label className="text-xs text-muted-foreground block mb-1">Paid (BDT)</label>
                   <input className={inputClass} type="number" min={0} max={editTotalSelling} value={editForm.paid_amount}
                     onChange={(e) => setEditForm((f: any) => ({ ...f, paid_amount: Math.min(Math.max(0, parseFloat(e.target.value) || 0), editTotalSelling) }))} />
                 </div>
