@@ -414,9 +414,9 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
                   <span className="font-medium">{viewHotel.distance_to_haram || "—"}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground text-xs block">স্ট্যাটাস</span>
+                   <span className="text-muted-foreground text-xs block">Status</span>
                   <span className={`font-medium ${viewHotel.is_active ? "text-emerald" : "text-destructive"}`}>
-                    {viewHotel.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}
+                    {viewHotel.is_active ? "Active" : "Inactive"}
                   </span>
                 </div>
               </div>
