@@ -210,7 +210,7 @@ export default function AdminDueAlertsPage() {
         <TableCell>{getName(p)}</TableCell>
         <TableCell className="text-xs">{getPhone(p)}</TableCell>
         <TableCell className="text-center">{p.installment_number || "—"}</TableCell>
-        <TableCell className="font-medium">৳{Number(p.amount).toLocaleString()}</TableCell>
+        <TableCell className="font-medium">BDT {Number(p.amount).toLocaleString()}</TableCell>
         <TableCell>{dueDate ? format(dueDate, "dd MMM yyyy") : "No date set"}</TableCell>
         <TableCell>
           {type === "booking_due" ? (
