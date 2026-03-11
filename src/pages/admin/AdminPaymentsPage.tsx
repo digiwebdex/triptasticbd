@@ -917,9 +917,9 @@ export default function AdminPaymentsPage() {
             </div>
             {walletAccounts.length > 0 && (
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">ওয়ালেট অ্যাকাউন্ট</label>
+                <label className="text-xs text-muted-foreground block mb-1">Wallet Account</label>
                 <select className={inputClass} value={addForm.wallet_account_id} onChange={(e) => setAddForm({ ...addForm, wallet_account_id: e.target.value })}>
-                  <option value="">-- ঐচ্ছিক --</option>
+                  <option value="">-- Optional --</option>
                   {walletAccounts.map((w) => <option key={w.id} value={w.id}>{w.name} — {fmt(w.balance)}</option>)}
                 </select>
               </div>
