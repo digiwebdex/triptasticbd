@@ -1036,17 +1036,17 @@ export default function AdminPaymentsPage() {
               )}
               {viewPayment.receipt_file_path && (
                 <div className="border-t border-border/50 pt-3">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">রিসিট ফাইল</h4>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Receipt File</h4>
                   <button
                     onClick={async () => {
                       const { data } = await supabase.storage.from("payment-receipts").createSignedUrl(viewPayment.receipt_file_path, 300);
                       if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-                      else toast.error("ফাইল লোড করা যায়নি");
+                      else toast.error("Failed to load file");
                     }}
                     className="flex items-center gap-2 text-xs text-primary hover:underline"
                   >
                     <FileText className="h-3.5 w-3.5" />
-                    রিসিট দেখুন / ডাউনলোড
+                    View / Download Receipt
                   </button>
                 </div>
               )}
