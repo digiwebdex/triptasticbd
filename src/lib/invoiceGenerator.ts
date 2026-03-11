@@ -662,6 +662,7 @@ async function generateFamilyInvoice(
       6: { halign: "right", fontStyle: "bold" },
     },
     margin: { left: 14, right: 14 },
+    didDrawCell: bengaliCellHook,
   });
 
   y = ((doc as any).lastAutoTable?.finalY || y + 20) + 6;
