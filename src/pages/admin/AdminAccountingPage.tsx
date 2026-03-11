@@ -359,7 +359,7 @@ export default function AdminAccountingPage() {
           <p className="text-2xl font-heading font-bold text-primary">{fmt(revenue)}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
-          <p className="text-sm text-muted-foreground">মোট খরচ</p>
+          <p className="text-sm text-muted-foreground">Total Expense</p>
           <p className="text-2xl font-heading font-bold text-destructive">{fmt(totalExpenses)}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
