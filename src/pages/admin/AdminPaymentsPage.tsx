@@ -911,7 +911,7 @@ export default function AdminPaymentsPage() {
                 </div>
               )}
               <div>
-                <label className="text-xs text-muted-foreground block mb-1">তারিখ *</label>
+                <label className="text-xs text-muted-foreground block mb-1">Date *</label>
                 <input className={inputClass} type="date" value={addForm.paid_date} onChange={(e) => setAddForm({ ...addForm, paid_date: e.target.value })} />
               </div>
             </div>
