@@ -479,7 +479,7 @@ export default function AdminBookingsPage() {
                     onChange={(e) => setEditForm((f: any) => ({ ...f, cost_price_per_person: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground block mb-1">Extra Expense (৳)</label>
+                  <label className="text-xs text-muted-foreground block mb-1">Extra Expense (BDT)</label>
                   <input className={inputClass} type="number" min={0} value={editForm.extra_expense}
                     onChange={(e) => setEditForm((f: any) => ({ ...f, extra_expense: e.target.value }))} />
                 </div>
