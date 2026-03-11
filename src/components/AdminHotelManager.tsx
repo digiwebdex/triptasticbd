@@ -410,7 +410,7 @@ const AdminHotelManager = ({ hotels, onRefresh }: Props) => {
                   <span className="font-medium">{viewHotel.location}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground text-xs block">হারাম থেকে দূরত্ব</span>
+                  <span className="text-muted-foreground text-xs block">Distance to Haram</span>
                   <span className="font-medium">{viewHotel.distance_to_haram || "—"}</span>
                 </div>
                 <div>
