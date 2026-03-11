@@ -584,8 +584,8 @@ export default function AdminAccountingPage() {
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="sm:col-span-2">
-                <label className="text-xs text-muted-foreground block mb-1">শিরোনাম *</label>
-                <input className={inputClass} placeholder="খরচের শিরোনাম" required value={form.title}
+                <label className="text-xs text-muted-foreground block mb-1">Title *</label>
+                <input className={inputClass} placeholder="Expense title" required value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={200} />
               </div>
               <div>
