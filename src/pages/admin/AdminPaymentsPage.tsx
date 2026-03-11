@@ -1100,7 +1100,7 @@ export default function AdminPaymentsPage() {
               <input className={inputClass} type="date" value={editForm.date || ""} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground block mb-1">নোট</label>
+              <label className="text-xs text-muted-foreground block mb-1">Notes</label>
               <textarea className={inputClass + " resize-none"} rows={2} value={editForm.notes || ""} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
             </div>
           </div>
