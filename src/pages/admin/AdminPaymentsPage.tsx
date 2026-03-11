@@ -967,7 +967,7 @@ export default function AdminPaymentsPage() {
       <Dialog open={!!viewPayment} onOpenChange={(o) => { if (!o) setViewPayment(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading">পেমেন্ট বিবরণ</DialogTitle>
+            <DialogTitle className="font-heading">Payment Details</DialogTitle>
           </DialogHeader>
           {viewPayment && (() => {
             const vBadge = getTypeBadge(viewPayment._type);
