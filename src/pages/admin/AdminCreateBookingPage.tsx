@@ -300,7 +300,7 @@ export default function AdminCreateBookingPage() {
                   <label className="text-xs text-muted-foreground block mb-1">Package</label>
                   <select className={inputClass} value={m.package_id} onChange={(e) => updateMember(m.id, "package_id", e.target.value)}>
                     <option value="">-- Package --</option>
-                    {packages.map(p => <option key={p.id} value={p.id}>{p.name} — ৳{Number(p.price).toLocaleString()}</option>)}
+                    {packages.map(p => <option key={p.id} value={p.id}>{p.name} — BDT {Number(p.price).toLocaleString()}</option>)}
                   </select>
                 </div>
                 <div>
