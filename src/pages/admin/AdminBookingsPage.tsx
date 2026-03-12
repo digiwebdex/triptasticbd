@@ -26,8 +26,9 @@ import { cn } from "@/lib/utils";
 const inputClass = "w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 const STATUSES = ["pending", "confirmed", "visa_processing", "ticket_issued", "completed", "cancelled"];
 const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
-const normalizeBookingType = (value?: string | null) => (value || "").toLowerCase();
-const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBookingType(value) === "family" || memberCount > 0;
+const normalizeBookingType = (value?: string | null) => (value || "").trim().toLowerCase();
+const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBookingType(value).includes("family") || memberCount > 0;
+const toMoney = (value: any) => Math.max(0, Number(value || 0));
 
 function BookingDetail({ bookingId }: { bookingId: string }) {
   const [payments, setPayments] = useState<any[]>([]);
