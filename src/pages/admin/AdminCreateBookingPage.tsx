@@ -26,6 +26,7 @@ export default function AdminCreateBookingPage() {
   const [bookingType, setBookingType] = useState<"individual" | "family">("individual");
 
   // Individual form
+  const [walletAccounts, setWalletAccounts] = useState<any[]>([]);
   const [form, setForm] = useState({
     guest_name: "",
     guest_phone: "",
@@ -36,6 +37,8 @@ export default function AdminCreateBookingPage() {
     selling_price_per_person: 0,
     discount: 0,
     paid_amount: 0,
+    payment_method: "cash",
+    wallet_account_id: "",
     status: "pending",
     notes: "",
     moallem_id: "",
@@ -48,9 +51,11 @@ export default function AdminCreateBookingPage() {
     Promise.all([
       supabase.from("packages").select("id, name, type, price, duration_days").eq("is_active", true).order("name"),
       supabase.from("moallems").select("id, name, phone, status").eq("status", "active").order("name"),
-    ]).then(([pkgRes, moaRes]) => {
+      supabase.from("accounts" as any).select("*").eq("type", "asset"),
+    ]).then(([pkgRes, moaRes, walletRes]) => {
       setPackages(pkgRes.data || []);
       setMoallems(moaRes.data || []);
+      setWalletAccounts((walletRes.data as any[]) || []);
     });
   }, []);
 
@@ -189,9 +194,10 @@ export default function AdminCreateBookingPage() {
           customer_id: selectedCustomerId,
           amount: form.paid_amount,
           status: "completed",
-          payment_method: "manual",
+          payment_method: form.payment_method || "cash",
           installment_number: 1,
           paid_at: new Date().toISOString(),
+          wallet_account_id: form.wallet_account_id || null,
           notes: "Initial payment (admin booking)",
         });
       }
@@ -368,6 +374,24 @@ export default function AdminCreateBookingPage() {
             <label className="text-xs text-muted-foreground block mb-1">Paid Amount (BDT)</label>
             <input className={inputClass} type="number" min={0} max={totalSellingPrice} value={form.paid_amount}
               onChange={(e) => setForm(f => ({ ...f, paid_amount: Math.max(0, parseFloat(e.target.value) || 0) }))} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Payment Method</label>
+            <select className={inputClass} value={form.payment_method} onChange={(e) => setForm({ ...form, payment_method: e.target.value })}>
+              <option value="cash">Cash</option>
+              <option value="bkash">bKash</option>
+              <option value="nagad">Nagad</option>
+              <option value="bank">Bank Transfer</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Wallet Account</label>
+            <select className={inputClass} value={form.wallet_account_id} onChange={(e) => setForm({ ...form, wallet_account_id: e.target.value })}>
+              <option value="">Auto (based on method)</option>
+              {walletAccounts.map((w: any) => (
+                <option key={w.id} value={w.id}>{w.name} — BDT {Number(w.balance || 0).toLocaleString()}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Status</label>
