@@ -690,7 +690,7 @@ export default function AdminBookingsPage() {
             <>
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <p className="font-mono font-bold text-primary text-sm">{b.tracking_id}{b.booking_type === "family" ? <Badge variant="outline" className="ml-2 text-[10px]">Family</Badge> : ""}</p>
+                  <p className="font-mono font-bold text-primary text-sm">{b.tracking_id}{isFamilyBooking(b.booking_type) ? <Badge variant="outline" className="ml-2 text-[10px]">Family</Badge> : ""}</p>
                   <p className="text-sm text-muted-foreground">{b.guest_name || "Unknown"}{b.guest_passport ? ` (${b.guest_passport})` : ""} • {b.packages?.name || "N/A"}{b.moallems?.name ? ` • Moallem: ${b.moallems.name}` : ""}</p>
                 </div>
                 <div className="flex items-center gap-2">
