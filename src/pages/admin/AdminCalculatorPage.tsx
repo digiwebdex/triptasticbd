@@ -389,6 +389,15 @@ export default function AdminCalculatorPage() {
           </p>
         )}
       </div>
+
+      {/* PDF Download - only show when data is filled */}
+      {(costPerPerson > 0 || sellingPricePerPerson > 0) && (
+        <div className="flex justify-center">
+          <Button size="lg" onClick={handleDownloadPdf} className="gap-2">
+            <FileDown className="h-5 w-5" /> Download PDF Report
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
