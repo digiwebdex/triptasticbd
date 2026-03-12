@@ -33,7 +33,8 @@ export interface InvoiceBooking {
   status: string;
   booking_type?: string;
   moallem_id?: string | null;
-  packages?: { name: string; type?: string; duration_days?: number | null; start_date?: string | null } | null;
+  package_id?: string | null;
+  packages?: { name: string; type?: string; duration_days?: number | null; start_date?: string | null; price?: number | null } | null;
   selling_price_per_person?: number | null;
   notes?: string | null;
 }
@@ -60,7 +61,14 @@ export interface BookingMember {
 }
 
 // ── Helpers ──
-const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
+const formatAmount = (value: number) => {
+  const numericValue = Number(value || 0);
+  return numericValue.toLocaleString("en-IN", {
+    minimumFractionDigits: Number.isInteger(numericValue) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+};
+const fmt = (n: number) => `BDT ${formatAmount(n)}`;
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
