@@ -109,23 +109,66 @@ async function fetchMoallemName(moallemId: string): Promise<string> {
 
 const normalizeBookingType = (value?: string | null) => (value || "").trim().toLowerCase();
 
+const cleanText = (...values: unknown[]): string => {
+  for (const value of values) {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) return trimmed;
+      continue;
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return String(value);
+    }
+  }
+
+  return "";
+};
+
+async function fetchPackageNameMap(packageIds: string[]): Promise<Record<string, string>> {
+  const uniqueIds = Array.from(new Set(packageIds.filter(Boolean)));
+  if (uniqueIds.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("packages")
+    .select("id, name")
+    .in("id", uniqueIds);
+
+  if (error) {
+    console.error("fetchPackageNameMap error:", error);
+    return {};
+  }
+
+  return (data || []).reduce<Record<string, string>>((acc, row: any) => {
+    const id = cleanText(row?.id);
+    const name = cleanText(row?.name);
+    if (id && name) acc[id] = name;
+    return acc;
+  }, {});
+}
+
 function normalizeMembers(members: Partial<BookingMember>[], fallbackPackageName: string): BookingMember[] {
   return (members || []).map((member, index) => {
-    const rawPackage = (member as any)?.packages;
-    const packageName = Array.isArray(rawPackage)
-      ? rawPackage[0]?.name
-      : rawPackage?.name;
+    const memberAny = member as any;
+    const rawPackage = memberAny?.packages;
+    const packageName = cleanText(
+      Array.isArray(rawPackage) ? rawPackage[0]?.name : rawPackage?.name,
+      memberAny?.package_name,
+      memberAny?.packageName,
+      fallbackPackageName,
+      "N/A"
+    );
 
-    const selling = Math.max(0, Number(member.selling_price || 0));
-    const discount = Math.min(Math.max(0, Number(member.discount || 0)), selling);
+    const selling = Math.max(0, Number(memberAny?.selling_price ?? memberAny?.price ?? 0));
+    const discount = Math.min(Math.max(0, Number(memberAny?.discount ?? 0)), selling);
     const fallbackFinal = Math.max(0, selling - discount);
-    const finalPrice = Math.max(0, Number(member.final_price ?? fallbackFinal));
+    const finalPrice = Math.max(0, Number(memberAny?.final_price ?? memberAny?.finalPrice ?? fallbackFinal));
 
     return {
-      full_name: (member.full_name || `Traveler ${index + 1}`).trim(),
-      passport_number: member.passport_number?.trim() || null,
-      package_id: member.package_id || null,
-      packages: { name: packageName || fallbackPackageName || "N/A" },
+      full_name: cleanText(memberAny?.full_name, memberAny?.fullName, memberAny?.name, `Traveler ${index + 1}`),
+      passport_number: cleanText(memberAny?.passport_number, memberAny?.passportNumber, memberAny?.passport) || null,
+      package_id: cleanText(memberAny?.package_id, memberAny?.packageId) || null,
+      packages: { name: packageName },
       selling_price: selling,
       discount,
       final_price: finalPrice,
