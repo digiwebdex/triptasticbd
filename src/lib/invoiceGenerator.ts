@@ -184,6 +184,32 @@ async function fetchPackageNameMap(packageIds: string[]): Promise<Record<string,
   }, {} as Record<string, string>);
 }
 
+async function fetchBookingGuestFallback(trackingId: string): Promise<{ guest_name: string | null; guest_passport: string | null } | null> {
+  const normalizedTrackingId = cleanText(trackingId).toUpperCase();
+  if (!normalizedTrackingId) return null;
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("guest_name, guest_passport")
+    .eq("tracking_id", normalizedTrackingId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("fetchBookingGuestFallback error:", error);
+    return null;
+  }
+
+  return {
+    guest_name: (data as any)?.guest_name || null,
+    guest_passport: (data as any)?.guest_passport || null,
+  };
+}
+
+const hasMeaningfulName = (value?: string | null) => {
+  const normalized = cleanText(value);
+  return Boolean(normalized && !isGenericTravelerLabel(normalized));
+};
+
 function normalizeMembers(members: Partial<BookingMember>[], fallbackPackageName: string): BookingMember[] {
   return (members || []).map((member, index) => {
     const memberAny = member as any;
