@@ -34,6 +34,8 @@ export interface InvoiceBooking {
   booking_type?: string;
   moallem_id?: string | null;
   package_id?: string | null;
+  guest_name?: string | null;
+  guest_passport?: string | null;
   packages?: { name: string; type?: string; duration_days?: number | null; start_date?: string | null; price?: number | null } | null;
   selling_price_per_person?: number | null;
   notes?: string | null;
