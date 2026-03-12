@@ -173,7 +173,16 @@ export default function InvoicePage() {
                 <p><span className="text-gray-500">Phone:</span> {customer.phone || booking.guest_phone || "N/A"}</p>
                 <p><span className="text-gray-500">Passport:</span> {customer.passport_number || booking.guest_passport || "N/A"}</p>
                 <p><span className="text-gray-500">Address:</span> {customer.address || booking.guest_address || "N/A"}</p>
+                {(customer.email || booking.guest_email) && (
+                  <p><span className="text-gray-500">Email:</span> {customer.email || booking.guest_email}</p>
+                )}
+                {customer.moallem_name && (
+                  <p><span className="text-gray-500">Moallem:</span> {customer.moallem_name}</p>
+                )}
               </div>
+              {booking.notes && (
+                <p className="text-sm mt-2"><span className="text-gray-500">Notes:</span> {booking.notes}</p>
+              )}
             </div>
 
             {/* Package Info */}
