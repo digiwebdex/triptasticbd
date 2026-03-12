@@ -26,8 +26,9 @@ import { cn } from "@/lib/utils";
 const inputClass = "w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 const STATUSES = ["pending", "confirmed", "visa_processing", "ticket_issued", "completed", "cancelled"];
 const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
-const normalizeBookingType = (value?: string | null) => (value || "").toLowerCase();
-const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBookingType(value) === "family" || memberCount > 0;
+const normalizeBookingType = (value?: string | null) => (value || "").trim().toLowerCase();
+const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBookingType(value).includes("family") || memberCount > 0;
+const toMoney = (value: any) => Math.max(0, Number(value || 0));
 
 function BookingDetail({ bookingId }: { bookingId: string }) {
   const [payments, setPayments] = useState<any[]>([]);
@@ -253,14 +254,48 @@ export default function AdminBookingsPage() {
       console.error("startEdit booking_members load error:", membersError);
     }
 
-    const members = membersData || [];
-    setEditMembers(members);
+    const existingMembers = (membersData || []).map((m: any, index: number) => {
+      const selling = toMoney(m.selling_price);
+      const discount = Math.min(toMoney(m.discount), selling);
+      const final = Math.max(0, toMoney(m.final_price || selling - discount));
 
-    if (isFamilyBooking(normalizedType, members.length)) {
+      return {
+        ...m,
+        temp_id: m.id || `tmp-${index}-${crypto.randomUUID()}`,
+        full_name: m.full_name || "",
+        passport_number: m.passport_number || "",
+        package_id: m.package_id || b.package_id || null,
+        selling_price: selling,
+        discount,
+        final_price: final,
+      };
+    });
+
+    const travelerCount = Math.max(Number(b.num_travelers || 1), existingMembers.length, 1);
+    const shouldUseFamily = isFamilyBooking(normalizedType, existingMembers.length) || travelerCount > 1;
+    const fallbackUnit = toMoney(b.selling_price_per_person) || Math.round(toMoney(b.total_amount) / travelerCount);
+
+    const fallbackMembers = Array.from({ length: travelerCount }, (_, index) => {
+      const discount = Math.min(index === 0 ? toMoney(b.discount) : 0, fallbackUnit);
+      return {
+        temp_id: `tmp-${index}-${crypto.randomUUID()}`,
+        full_name: index === 0 ? (b.guest_name || "") : "",
+        passport_number: index === 0 ? (b.guest_passport || "") : "",
+        package_id: b.package_id || null,
+        selling_price: fallbackUnit,
+        discount,
+        final_price: Math.max(0, fallbackUnit - discount),
+      };
+    });
+
+    const hydratedMembers = existingMembers.length > 0 ? existingMembers : (shouldUseFamily ? fallbackMembers : []);
+    setEditMembers(hydratedMembers);
+
+    if (shouldUseFamily) {
       setEditForm((prev: any) => ({
         ...prev,
         booking_type: "family",
-        num_travelers: Math.max(members.length, Number(prev.num_travelers || 1), 1),
+        num_travelers: Math.max(hydratedMembers.length, Number(prev.num_travelers || 1), 1),
       }));
     }
   };
@@ -277,41 +312,68 @@ export default function AdminBookingsPage() {
   const saveEdit = async () => {
     if (!editingId) return;
     const isFamily = isFamilyBooking(editForm.booking_type, editMembers.length);
-    const sellingPP = Math.max(0, parseFloat(editForm.selling_price_per_person) || 0);
-    const costPP = Math.max(0, parseFloat(editForm.cost_price_per_person) || 0);
-    const commPP = Math.max(0, parseFloat(editForm.commission_per_person) || 0);
-    const extraExp = Math.max(0, parseFloat(editForm.extra_expense) || 0);
-    const travelers = isFamily
-      ? Math.max(editMembers.length, parseInt(editForm.num_travelers) || 1, 1)
-      : (parseInt(editForm.num_travelers) || 1);
+    const sellingPP = toMoney(editForm.selling_price_per_person);
+    const costPP = toMoney(editForm.cost_price_per_person);
+    const commPP = toMoney(editForm.commission_per_person);
+    const extraExp = toMoney(editForm.extra_expense);
 
-    // For family bookings, total comes from member sum
-    let totalSelling: number;
-    if (isFamily && editMembers.length > 0) {
-      totalSelling = editMembers.reduce((s, m) => s + Number(m.final_price || 0), 0);
-    } else {
-      totalSelling = sellingPP * travelers;
-    }
+    const preparedMembers = editMembers.map((m: any, idx: number) => {
+      const selling = toMoney(m.selling_price);
+      const discount = Math.min(toMoney(m.discount), selling);
+      const finalPrice = Math.max(0, toMoney(m.final_price || selling - discount));
+
+      return {
+        ...m,
+        full_name: (m.full_name || `Traveler ${idx + 1}`).trim(),
+        passport_number: m.passport_number?.trim() || null,
+        package_id: m.package_id || null,
+        selling_price: selling,
+        discount,
+        final_price: finalPrice,
+      };
+    });
+
+    const travelers = isFamily
+      ? Math.max(preparedMembers.length, parseInt(editForm.num_travelers) || 1, 1)
+      : Math.max(parseInt(editForm.num_travelers) || 1, 1);
+
+    const totalSelling = (isFamily && preparedMembers.length > 0)
+      ? preparedMembers.reduce((s: number, m: any) => s + Number(m.final_price || 0), 0)
+      : sellingPP * travelers;
 
     const totalCostVal = costPP * travelers;
     const totalCommVal = commPP * travelers;
-    const paid = Math.min(Math.max(0, parseFloat(editForm.paid_amount) || 0), totalSelling);
+    const paid = Math.min(toMoney(editForm.paid_amount), totalSelling);
     const due = Math.max(0, totalSelling - paid);
     const profit = totalSelling - totalCostVal - totalCommVal - extraExp;
 
-    // Save family members first
-    if (isFamily && editMembers.length > 0) {
-      for (const m of editMembers) {
-        if (m.id) {
-          await supabase.from("booking_members").update({
+    if (isFamily && preparedMembers.length > 0) {
+      const memberResults = await Promise.all(
+        preparedMembers.map((m: any) => {
+          const memberPayload = {
             full_name: m.full_name,
-            passport_number: m.passport_number || null,
-            selling_price: Number(m.selling_price || 0),
-            discount: Number(m.discount || 0),
-            final_price: Number(m.final_price || 0),
-            package_id: m.package_id || null,
-          }).eq("id", m.id);
-        }
+            passport_number: m.passport_number,
+            selling_price: m.selling_price,
+            discount: m.discount,
+            final_price: m.final_price,
+            package_id: m.package_id,
+          };
+
+          if (m.id) {
+            return supabase.from("booking_members").update(memberPayload).eq("id", m.id);
+          }
+
+          return supabase.from("booking_members").insert({
+            ...memberPayload,
+            booking_id: editingId,
+          });
+        })
+      );
+
+      const memberError = memberResults.find((result: any) => result.error)?.error;
+      if (memberError) {
+        toast.error(memberError.message || "Failed to save traveler details");
+        return;
       }
     }
 
@@ -582,19 +644,44 @@ export default function AdminBookingsPage() {
               {/* Family Members Editing Section */}
               {isEditingFamily && (
                 <div className="border border-primary/30 rounded-lg p-3 space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <h4 className="text-sm font-semibold flex items-center gap-1.5">
                       <User className="h-4 w-4 text-primary" />
                       Family Members ({editMembers.length})
                     </h4>
-                    <Badge variant="outline" className="text-[10px]">Family Booking</Badge>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const defaultPrice = toMoney(editForm.selling_price_per_person || b.selling_price_per_person || 0);
+                          const nextCount = editMembers.length + 1;
+                          setEditMembers((prev: any[]) => ([
+                            ...prev,
+                            {
+                              temp_id: `tmp-${crypto.randomUUID()}`,
+                              full_name: "",
+                              passport_number: "",
+                              package_id: b.package_id || null,
+                              selling_price: defaultPrice,
+                              discount: 0,
+                              final_price: defaultPrice,
+                            },
+                          ]));
+                          setEditForm((prev: any) => ({ ...prev, booking_type: "family", num_travelers: Math.max(Number(prev.num_travelers || 1), nextCount) }));
+                        }}
+                        className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md bg-primary text-primary-foreground"
+                      >
+                        <Plus className="h-3 w-3" /> Add Traveler
+                      </button>
+                      <Badge variant="outline" className="text-[10px]">Family Booking</Badge>
+                    </div>
                   </div>
                   {editMembers.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No traveler rows found yet for this family booking.</p>
                   ) : (
                     <>
                       {editMembers.map((m: any, idx: number) => (
-                        <div key={m.id} className="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-secondary/30 rounded-md p-2">
+                        <div key={m.id || m.temp_id || `member-${idx}`} className="grid grid-cols-2 sm:grid-cols-6 gap-2 bg-secondary/30 rounded-md p-2">
                           <div>
                             <label className="text-[10px] text-muted-foreground block mb-0.5">Name</label>
                             <input className={inputClass + " text-xs"} value={m.full_name}
@@ -614,12 +701,17 @@ export default function AdminBookingsPage() {
                               }} />
                           </div>
                           <div>
+                            <label className="text-[10px] text-muted-foreground block mb-0.5">Package</label>
+                            <div className={`${inputClass} text-xs bg-muted/50`}>{b.packages?.name || "N/A"}</div>
+                          </div>
+                          <div>
                             <label className="text-[10px] text-muted-foreground block mb-0.5">Selling Price</label>
                             <input className={inputClass + " text-xs"} type="number" min={0} value={m.selling_price}
                               onChange={(e) => {
                                 const updated = [...editMembers];
-                                const sp = Number(e.target.value) || 0;
-                                updated[idx] = { ...updated[idx], selling_price: sp, final_price: sp - Number(updated[idx].discount || 0) };
+                                const sp = toMoney(e.target.value);
+                                const discount = Math.min(toMoney(updated[idx].discount), sp);
+                                updated[idx] = { ...updated[idx], selling_price: sp, discount, final_price: Math.max(0, sp - discount) };
                                 setEditMembers(updated);
                               }} />
                           </div>
@@ -628,8 +720,9 @@ export default function AdminBookingsPage() {
                             <input className={inputClass + " text-xs"} type="number" min={0} value={m.discount}
                               onChange={(e) => {
                                 const updated = [...editMembers];
-                                const d = Number(e.target.value) || 0;
-                                updated[idx] = { ...updated[idx], discount: d, final_price: Number(updated[idx].selling_price || 0) - d };
+                                const selling = toMoney(updated[idx].selling_price);
+                                const d = Math.min(toMoney(e.target.value), selling);
+                                updated[idx] = { ...updated[idx], discount: d, final_price: Math.max(0, selling - d) };
                                 setEditMembers(updated);
                               }} />
                           </div>
