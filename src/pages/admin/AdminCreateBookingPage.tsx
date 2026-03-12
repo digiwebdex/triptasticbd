@@ -194,9 +194,10 @@ export default function AdminCreateBookingPage() {
           customer_id: selectedCustomerId,
           amount: form.paid_amount,
           status: "completed",
-          payment_method: "manual",
+          payment_method: form.payment_method || "cash",
           installment_number: 1,
           paid_at: new Date().toISOString(),
+          wallet_account_id: form.wallet_account_id || null,
           notes: "Initial payment (admin booking)",
         });
       }
