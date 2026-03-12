@@ -34,6 +34,8 @@ export interface InvoiceBooking {
   booking_type?: string;
   moallem_id?: string | null;
   package_id?: string | null;
+  guest_name?: string | null;
+  guest_passport?: string | null;
   packages?: { name: string; type?: string; duration_days?: number | null; start_date?: string | null; price?: number | null } | null;
   selling_price_per_person?: number | null;
   notes?: string | null;
@@ -144,6 +146,16 @@ const toPackageShortLabel = (value: string): string => {
   return `${label.slice(0, 17)}…`;
 };
 
+const extractDelimitedValues = (value?: string | null): string[] => {
+  const source = cleanText(value);
+  if (!source) return [];
+
+  return source
+    .split(/[\n,;|/]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
 async function fetchPackageNameMap(packageIds: string[]): Promise<Record<string, string>> {
   const uniqueIds = Array.from(new Set(packageIds.filter(Boolean)));
   if (uniqueIds.length === 0) return {};
@@ -184,8 +196,24 @@ function normalizeMembers(members: Partial<BookingMember>[], fallbackPackageName
     const finalPrice = Math.max(0, Number(memberAny?.final_price ?? memberAny?.finalPrice ?? fallbackFinal));
 
     return {
-      full_name: cleanText(memberAny?.full_name, memberAny?.fullName, memberAny?.name, `Traveler ${index + 1}`),
-      passport_number: cleanText(memberAny?.passport_number, memberAny?.passportNumber, memberAny?.passport) || null,
+      full_name: cleanText(
+        memberAny?.full_name,
+        memberAny?.fullName,
+        memberAny?.name,
+        memberAny?.traveler_name,
+        memberAny?.travelerName,
+        memberAny?.member_name,
+        memberAny?.memberName
+      ),
+      passport_number: cleanText(
+        memberAny?.passport_number,
+        memberAny?.passportNumber,
+        memberAny?.passport,
+        memberAny?.traveler_passport,
+        memberAny?.travelerPassport,
+        memberAny?.member_passport,
+        memberAny?.memberPassport
+      ) || null,
       package_id: cleanText(memberAny?.package_id, memberAny?.packageId) || null,
       packages: { name: packageName },
       selling_price: selling,
@@ -906,6 +934,8 @@ export async function generateInvoice(
 
   const customerName = cleanText(customer.full_name, "Primary Traveler");
   const customerPassport = cleanText(customer.passport_number);
+  const fallbackGuestNames = extractDelimitedValues(normalizedBooking.guest_name);
+  const fallbackGuestPassports = extractDelimitedValues(normalizedBooking.guest_passport);
 
   const invoiceMembers = rawInvoiceMembers.map((member, index) => {
     const resolvedPackageName = cleanText(
@@ -917,12 +947,22 @@ export async function generateInvoice(
 
     const resolvedName = cleanText(
       member.full_name,
+      (member as any)?.traveler_name,
+      (member as any)?.travelerName,
+      (member as any)?.member_name,
+      (member as any)?.memberName,
+      fallbackGuestNames[index],
       index === 0 ? customerName : "",
       `Traveler ${index + 1}`
     );
 
     const resolvedPassport = cleanText(
       member.passport_number,
+      (member as any)?.traveler_passport,
+      (member as any)?.travelerPassport,
+      (member as any)?.member_passport,
+      (member as any)?.memberPassport,
+      fallbackGuestPassports[index],
       index === 0 ? customerPassport : ""
     );
 
