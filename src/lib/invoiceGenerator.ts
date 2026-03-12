@@ -550,10 +550,9 @@ async function generateIndividualInvoice(
 
   autoTable(doc, {
     startY: y,
-    head: [["Description", "Package", "Qty", "Unit Price (BDT)", "Discount (BDT)", "Total (BDT)"]],
+    head: [["Package", "Qty", "Unit Price (BDT)", "Discount (BDT)", "Total (BDT)"]],
     body: [
       [
-        `${booking.packages?.type || "Hajj"} Service`,
         booking.packages?.name || "N/A",
         String(booking.num_travelers),
         unitPrice.toLocaleString(),
@@ -569,11 +568,10 @@ async function generateIndividualInvoice(
       fontStyle: "bold",
     },
     columnStyles: {
-      0: { cellWidth: 45 },
-      2: { halign: "center", cellWidth: 15 },
+      1: { halign: "center", cellWidth: 15 },
+      2: { halign: "right" },
       3: { halign: "right" },
-      4: { halign: "right" },
-      5: { halign: "right", fontStyle: "bold" },
+      4: { halign: "right", fontStyle: "bold" },
     },
     margin: { left: 14, right: 14 },
     didDrawCell: bengaliCellHook,
