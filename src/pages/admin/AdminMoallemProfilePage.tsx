@@ -721,11 +721,8 @@ export default function AdminMoallemProfilePage() {
         <DialogContent>
           <DialogHeader><DialogTitle>{editPaymentType === "commission" ? "Edit Commission Payment" : "Edit Payment"}</DialogTitle><DialogDescription>Modify payment details</DialogDescription></DialogHeader>
           <div className="space-y-3">
-            <div><label className="text-xs text-muted-foreground block mb-1">Service Type</label>
-              <Select value={editPaymentForm.service_type || ""} onValueChange={(v) => setEditPaymentForm({ ...editPaymentForm, service_type: v })}>
-                <SelectTrigger><SelectValue placeholder="-- Select Service --" /></SelectTrigger>
-                <SelectContent>{SERVICE_TYPES.filter(s => s.value).map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
-              </Select></div>
+            <div><label className="text-xs text-muted-foreground block mb-1">Date</label>
+              <Input type="date" value={editPaymentForm.date} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, date: e.target.value })} /></div>
             <div><label className="text-xs text-muted-foreground block mb-1">Amount (BDT) *</label>
               <Input type="number" min={0} value={editPaymentForm.amount} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, amount: e.target.value })} /></div>
             <div><label className="text-xs text-muted-foreground block mb-1">Method</label>
@@ -733,17 +730,15 @@ export default function AdminMoallemProfilePage() {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{PAYMENT_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
               </Select></div>
-            <div><label className="text-xs text-muted-foreground block mb-1">Date</label>
-              <Input type="date" value={editPaymentForm.date} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, date: e.target.value })} /></div>
+            <div><label className="text-xs text-muted-foreground block mb-1">Service Type</label>
+              <Select value={editPaymentForm.service_type || ""} onValueChange={(v) => setEditPaymentForm({ ...editPaymentForm, service_type: v })}>
+                <SelectTrigger><SelectValue placeholder="-- Select Service --" /></SelectTrigger>
+                <SelectContent>{SERVICE_TYPES.filter(s => s.value).map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+              </Select></div>
             <div><label className="text-xs text-muted-foreground block mb-1">Booking (Optional)</label>
               <select className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm" value={editPaymentForm.booking_id} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, booking_id: e.target.value })}>
                 <option value="">-- No Booking --</option>
                 {bookings.map(b => <option key={b.id} value={b.id}>{b.tracking_id} — {b.guest_name || "—"}</option>)}
-              </select></div>
-            <div><label className="text-xs text-muted-foreground block mb-1">Wallet Account</label>
-              <select className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm" value={editPaymentForm.wallet_account_id} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, wallet_account_id: e.target.value })}>
-                <option value="">-- No Account --</option>
-                {walletAccounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select></div>
             <div><label className="text-xs text-muted-foreground block mb-1">Notes</label>
               <Input value={editPaymentForm.notes} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, notes: e.target.value })} /></div>

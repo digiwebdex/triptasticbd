@@ -434,6 +434,8 @@ export default function AdminSupplierAgentProfilePage() {
         <DialogContent>
           <DialogHeader><DialogTitle>Edit Supplier Payment</DialogTitle><DialogDescription>Modify payment details</DialogDescription></DialogHeader>
           <div className="space-y-3">
+            <div><label className="text-xs text-muted-foreground block mb-1">Date</label>
+              <Input type="date" value={editPaymentForm.date} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, date: e.target.value })} /></div>
             <div><label className="text-xs text-muted-foreground block mb-1">Service Type</label>
               <Select value={editPaymentForm.service_type || ""} onValueChange={(v) => setEditPaymentForm({ ...editPaymentForm, service_type: v })}>
                 <SelectTrigger><SelectValue placeholder="-- Select Service --" /></SelectTrigger>
@@ -446,13 +448,6 @@ export default function AdminSupplierAgentProfilePage() {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{PAYMENT_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
               </Select></div>
-            <div><label className="text-xs text-muted-foreground block mb-1">Date</label>
-              <Input type="date" value={editPaymentForm.date} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, date: e.target.value })} /></div>
-            <div><label className="text-xs text-muted-foreground block mb-1">Wallet Account</label>
-              <select className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm" value={editPaymentForm.wallet_account_id} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, wallet_account_id: e.target.value })}>
-                <option value="">-- No Account --</option>
-                {accounts.filter((a: any) => ["asset", "wallet"].includes(a.type) || ["Cash", "bKash", "Nagad", "Bank"].includes(a.name)).map((a: any) => <option key={a.id} value={a.id}>{a.name}</option>)}
-              </select></div>
             <div><label className="text-xs text-muted-foreground block mb-1">Notes</label>
               <Input value={editPaymentForm.notes} onChange={(e) => setEditPaymentForm({ ...editPaymentForm, notes: e.target.value })} /></div>
           </div>
