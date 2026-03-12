@@ -693,9 +693,9 @@ async function generateIndividualInvoice(
       [
         booking.packages?.name || "N/A",
         String(booking.num_travelers),
-        unitPrice.toLocaleString(),
-        discount.toLocaleString(),
-        Number(booking.total_amount).toLocaleString(),
+        formatAmount(unitPrice),
+        formatAmount(discount),
+        formatAmount(Number(booking.total_amount)),
       ],
     ],
     styles: { fontSize: 8, cellPadding: 3, font: "NotoSansBengali" },
