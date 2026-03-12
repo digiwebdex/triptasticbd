@@ -29,9 +29,9 @@ const DEFAULT_ITEMS: CostItem[] = [
 const fmt = (n: number) => `BDT ${n.toLocaleString("en-IN")}`;
 
 export default function AdminCalculatorPage() {
-  const [groupName, setGroupName] = useState("March Umrah Group");
+  const [groupName, setGroupName] = useState("");
   const [groupDate, setGroupDate] = useState("");
-  const [totalHajji, setTotalHajji] = useState(68);
+  const [totalHajji, setTotalHajji] = useState(0);
   const [sellingPricePerPerson, setSellingPricePerPerson] = useState(0);
   const [items, setItems] = useState<CostItem[]>(DEFAULT_ITEMS);
 
