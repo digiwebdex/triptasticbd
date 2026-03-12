@@ -951,12 +951,16 @@ export async function generateInvoice(
       "N/A"
     );
 
-    const resolvedName = cleanText(
+    const rawMemberName = cleanText(
       member.full_name,
       (member as any)?.traveler_name,
       (member as any)?.travelerName,
       (member as any)?.member_name,
-      (member as any)?.memberName,
+      (member as any)?.memberName
+    );
+
+    const resolvedName = cleanText(
+      isGenericTravelerLabel(rawMemberName) ? "" : rawMemberName,
       fallbackGuestNames[index],
       index === 0 ? customerName : "",
       `Traveler ${index + 1}`
