@@ -129,6 +129,40 @@ async function fetchMoallemName(moallemId: string): Promise<string> {
   return data?.name || "N/A";
 }
 
+const normalizeBookingType = (value?: string | null) => (value || "").trim().toLowerCase();
+
+function buildFallbackMembers(booking: InvoiceBooking, customer: InvoiceCustomer): BookingMember[] {
+  const travelerCount = Math.max(Number(booking.num_travelers || 0), 0);
+  if (travelerCount <= 1) return [];
+
+  const totalFinalCents = Math.max(0, Math.round(Number(booking.total_amount || 0) * 100));
+  const totalDiscountCents = Math.max(0, Math.round(Number(booking.discount || 0) * 100));
+  const totalGrossCents = totalFinalCents + totalDiscountCents;
+  const packageName = booking.packages?.name || "N/A";
+
+  const distribute = (total: number, count: number, index: number) => {
+    const base = Math.floor(total / count);
+    const remainder = total % count;
+    return base + (index < remainder ? 1 : 0);
+  };
+
+  return Array.from({ length: travelerCount }, (_, index) => {
+    const grossCents = distribute(totalGrossCents, travelerCount, index);
+    const discountCents = distribute(totalDiscountCents, travelerCount, index);
+    const finalCents = Math.max(0, grossCents - discountCents);
+
+    return {
+      full_name: index === 0 ? (customer.full_name || "Primary Traveler") : `Traveler ${index + 1}`,
+      passport_number: index === 0 ? (customer.passport_number || null) : null,
+      selling_price: grossCents / 100,
+      discount: discountCents / 100,
+      final_price: finalCents / 100,
+      packages: { name: packageName },
+      package_id: null,
+    };
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════
 // SHARED LAYOUT FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
