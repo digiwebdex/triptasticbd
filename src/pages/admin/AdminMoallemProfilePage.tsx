@@ -64,7 +64,7 @@ export default function AdminMoallemProfilePage() {
   // Edit/Delete payment state
   const [editPaymentId, setEditPaymentId] = useState<string | null>(null);
   const [editPaymentType, setEditPaymentType] = useState<"payment" | "commission">("payment");
-  const [editPaymentForm, setEditPaymentForm] = useState({ amount: "", payment_method: "cash", date: "", notes: "" });
+  const [editPaymentForm, setEditPaymentForm] = useState({ amount: "", payment_method: "cash", date: "", notes: "", service_type: "", booking_id: "", wallet_account_id: "" });
   const [showEditPaymentModal, setShowEditPaymentModal] = useState(false);
   const [deletePaymentId, setDeletePaymentId] = useState<string | null>(null);
   const [deletePaymentType, setDeletePaymentType] = useState<"payment" | "commission">("payment");
