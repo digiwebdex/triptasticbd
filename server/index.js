@@ -115,17 +115,22 @@ const createCrudRoutes = (tableName, options = {}) => {
     }
   });
 
-  // Create
+  // Create (supports single object or array of objects)
   router.post('/', writeAuth ? authenticate : optionalAuth, adminOnly ? requireRole('admin') : (req, res, next) => next(), async (req, res) => {
     try {
-      const keys = Object.keys(req.body);
-      const values = Object.values(req.body);
-      const placeholders = keys.map((_, i) => `$${i + 1}`);
-      const result = await query(
-        `INSERT INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`,
-        values
-      );
-      res.status(201).json(result.rows[0]);
+      const rows = Array.isArray(req.body) ? req.body : [req.body];
+      const results = [];
+      for (const row of rows) {
+        const keys = Object.keys(row);
+        const values = Object.values(row);
+        const placeholders = keys.map((_, i) => `$${i + 1}`);
+        const result = await query(
+          `INSERT INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`,
+          values
+        );
+        results.push(result.rows[0]);
+      }
+      res.status(201).json(Array.isArray(req.body) ? results : results[0]);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
