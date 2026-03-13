@@ -118,18 +118,31 @@ const createCrudRoutes = (tableName, options = {}) => {
   // Create (supports single object or array of objects)
   router.post('/', writeAuth ? authenticate : optionalAuth, adminOnly ? requireRole('admin') : (req, res, next) => next(), async (req, res) => {
     try {
+      const validColumn = (col) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(col);
+      const quote = (identifier) => `"${String(identifier).replace(/"/g, '""')}"`;
       const rows = Array.isArray(req.body) ? req.body : [req.body];
       const results = [];
-      for (const row of rows) {
-        const keys = Object.keys(row);
-        const values = Object.values(row);
+
+      for (const rawRow of rows) {
+        if (!rawRow || typeof rawRow !== 'object' || Array.isArray(rawRow)) {
+          return res.status(400).json({ error: 'Invalid payload format for insert' });
+        }
+
+        const entries = Object.entries(rawRow).filter(([key, value]) => validColumn(key) && value !== undefined);
+        if (!entries.length) {
+          return res.status(400).json({ error: 'No valid columns provided for insert' });
+        }
+
+        const keys = entries.map(([key]) => key);
+        const values = entries.map(([, value]) => value);
         const placeholders = keys.map((_, i) => `$${i + 1}`);
         const result = await query(
-          `INSERT INTO ${tableName} (${keys.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`,
+          `INSERT INTO ${tableName} (${keys.map(quote).join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`,
           values
         );
         results.push(result.rows[0]);
       }
+
       res.status(201).json(Array.isArray(req.body) ? results : results[0]);
     } catch (err) {
       res.status(500).json({ error: err.message });
