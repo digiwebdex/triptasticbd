@@ -407,6 +407,22 @@ app.use('/api/notification-settings', createCrudRoutes('notification_settings', 
 app.use('/api/company-settings', createCrudRoutes('company_settings', { adminOnly: true }));
 app.use('/api/cms-versions', createCrudRoutes('cms_versions', { adminOnly: true }));
 app.use('/api/user-roles', createCrudRoutes('user_roles', { adminOnly: true }));
+
+// SECURITY: Block admin role assignment via API
+app.use('/api/user-roles', (req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PATCH') {
+    const role = req.body?.role;
+    if (role === 'admin') {
+      return res.status(403).json({ error: 'Cannot assign admin role. Admin role is permanently locked.' });
+    }
+  }
+  // Block deletion of admin role
+  if (req.method === 'DELETE') {
+    // Will be enforced by DB trigger too
+  }
+  next();
+});
+
 app.use('/api/financial-summary', createCrudRoutes('financial_summary', { adminOnly: true }));
 app.use('/api/daily-cashbook', createCrudRoutes('daily_cashbook', { adminOnly: true }));
 

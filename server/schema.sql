@@ -21,6 +21,64 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TYPE app_role AS ENUM ('admin', 'user', 'manager', 'staff', 'viewer', 'accountant', 'booking', 'cms');
 
 -- =============================================
+-- SECURITY: Admin Protection Functions & Triggers
+-- =============================================
+
+-- Prevent creating new admin roles
+CREATE OR REPLACE FUNCTION protect_admin_role_insert()
+RETURNS trigger AS $$
+BEGIN
+  IF NEW.role = 'admin' AND NEW.user_id != '9c56194a-b0f9-4878-ac57-e97371acd199' THEN
+    RAISE EXCEPTION 'Cannot assign admin role to any user. Admin role is permanently locked.';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Prevent changing admin role
+CREATE OR REPLACE FUNCTION protect_admin_role_update()
+RETURNS trigger AS $$
+BEGIN
+  -- Cannot change primary admin's role
+  IF OLD.user_id = '9c56194a-b0f9-4878-ac57-e97371acd199' AND OLD.role = 'admin' AND NEW.role != 'admin' THEN
+    RAISE EXCEPTION 'Cannot change the primary admin role';
+  END IF;
+  -- Cannot give admin role to anyone else
+  IF NEW.role = 'admin' AND NEW.user_id != '9c56194a-b0f9-4878-ac57-e97371acd199' THEN
+    RAISE EXCEPTION 'Cannot assign admin role. Admin role is permanently locked.';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Prevent deleting primary admin role
+CREATE OR REPLACE FUNCTION protect_admin_role_delete()
+RETURNS trigger AS $$
+BEGIN
+  IF OLD.user_id = '9c56194a-b0f9-4878-ac57-e97371acd199' AND OLD.role = 'admin' THEN
+    RAISE EXCEPTION 'Cannot delete the primary admin role';
+  END IF;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Prevent deleting/banning primary admin user
+CREATE OR REPLACE FUNCTION protect_admin_user()
+RETURNS trigger AS $$
+BEGIN
+  IF OLD.id = '9c56194a-b0f9-4878-ac57-e97371acd199' THEN
+    IF TG_OP = 'DELETE' THEN
+      RAISE EXCEPTION 'Cannot delete the primary admin account';
+    END IF;
+    IF TG_OP = 'UPDATE' AND NEW.is_banned = true THEN
+      RAISE EXCEPTION 'Cannot ban the primary admin account';
+    END IF;
+  END IF;
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+-- =============================================
 -- TABLES
 -- =============================================
 

@@ -177,6 +177,12 @@ router.post('/reset-password', async (req, res) => {
 router.post('/admin/create-user', authenticate, requireRole('admin'), async (req, res) => {
   try {
     const { email, password, full_name, phone, role } = req.body;
+
+    // SECURITY: Block creation of admin accounts
+    if (role === 'admin') {
+      return res.status(403).json({ error: 'Cannot create admin accounts. Admin role is permanently locked.' });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
     const userId = uuidv4();
 
@@ -199,6 +205,12 @@ router.post('/admin/create-user', authenticate, requireRole('admin'), async (req
 router.post('/admin/manage-user', authenticate, requireRole('admin'), async (req, res) => {
   try {
     const { user_id, action } = req.body;
+
+    // SECURITY: Protect primary admin from being banned
+    if (user_id === '9c56194a-b0f9-4878-ac57-e97371acd199') {
+      return res.status(403).json({ error: 'Cannot modify the primary admin account' });
+    }
+
     if (action === 'ban') {
       await query('UPDATE users SET is_banned = true WHERE id = $1', [user_id]);
       await query('DELETE FROM sessions WHERE user_id = $1', [user_id]);
