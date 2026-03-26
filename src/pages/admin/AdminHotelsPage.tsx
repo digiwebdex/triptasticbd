@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/api";
 import AdminHotelManager from "@/components/AdminHotelManager";
 
 export default function AdminHotelsPage() {

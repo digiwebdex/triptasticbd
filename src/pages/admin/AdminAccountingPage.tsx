@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/api";
 import { toast } from "sonner";
 import { Plus, X, Edit2, Trash2, Save, Filter, TrendingUp, TrendingDown, BarChart3, Search, FileDown, FileSpreadsheet } from "lucide-react";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
