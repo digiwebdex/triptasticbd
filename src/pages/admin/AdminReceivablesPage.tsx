@@ -137,7 +137,7 @@ export default function AdminReceivablesPage() {
     const overdueAmt = b.pendingPayments.filter((p) => p.daysOverdue > 0).reduce((ss, p) => ss + p.amount, 0);
     return s + overdueAmt;
   }, 0);
-  const totalCollected = bookings.reduce((s, b) => s + b.paid_amount, 0);
+  const totalCollected = completedPaymentsTotal;
   const overdueCount = bookings.filter((b) => b.pendingPayments.some((p) => p.daysOverdue > 0)).length;
 
   const handleExportPDF = () => {
