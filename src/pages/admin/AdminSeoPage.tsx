@@ -262,7 +262,7 @@ export default function AdminSeoPage() {
             <CardContent>
               <div className="border rounded-lg p-4 bg-card max-w-xl">
                 <p className="text-primary text-lg font-medium truncate">{settings.site_title}</p>
-                <p className="text-emerald-600 dark:text-emerald-400 text-sm">{settings.base_url}</p>
+                <p className="text-accent-foreground text-sm">{settings.base_url}</p>
                 <p className="text-muted-foreground text-sm line-clamp-2">{settings.site_description}</p>
               </div>
             </CardContent>
