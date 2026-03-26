@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/api";
 import { toast } from "sonner";
 import { Plus, X, Bell, PenTool, Database, Lock } from "lucide-react";
 import AdminDocumentViewer from "@/components/AdminDocumentViewer";

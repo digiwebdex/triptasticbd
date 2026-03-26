@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCmsVersions } from "@/hooks/useSiteContent";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/api";
 import { toast } from "sonner";
 import { History, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/api";
 import AdminDashboardCharts from "@/components/AdminDashboardCharts";
 
 export default function AdminDashboardPage() {
