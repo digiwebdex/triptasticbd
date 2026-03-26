@@ -30,6 +30,8 @@ const Booking = () => {
   const [user, setUser] = useState<any>(null);
   const [pkg, setPkg] = useState<any>(null);
   const [plans, setPlans] = useState<any[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState(0);
