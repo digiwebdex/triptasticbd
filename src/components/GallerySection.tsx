@@ -121,7 +121,7 @@ export default function GallerySection() {
                     src={item.src}
                     muted
                     playsInline
-                    preload="none"
+                    preload="metadata"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 )}
