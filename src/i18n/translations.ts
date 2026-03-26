@@ -267,6 +267,14 @@ export const translations: Record<Language, Record<string, string>> = {
     "booking.payLaterNote": "Payment is not required now. You can pay later.",
     "booking.paymentStatus": "Payment Status",
     "booking.notPaid": "Pay Later",
+    "booking.personalDetails": "Personal Details",
+    "booking.fullName": "Full Name",
+    "booking.fullNamePlaceholder": "Enter your full name",
+    "booking.phoneNumber": "Phone Number",
+    "booking.passportOptional": "Passport Number (Optional)",
+    "booking.passportPlaceholder": "Passport number",
+    "booking.address": "Address",
+    "booking.addressPlaceholder": "Your address",
 
     // Dashboard
     "dashboard.bookings": "Bookings",
