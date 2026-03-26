@@ -39,7 +39,7 @@ const Footer = () => {
                 <span className="block text-xs tracking-[0.2em] text-muted-foreground uppercase">{tagline}</span>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+            <p className="text-sm text-white/60 leading-relaxed">{description}</p>
           </div>
 
           <div>
