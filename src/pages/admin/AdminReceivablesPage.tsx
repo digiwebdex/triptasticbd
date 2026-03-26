@@ -73,21 +73,31 @@ export default function AdminReceivablesPage() {
         });
       });
 
-      const mapped: BookingReceivable[] = (bkRes.data || []).map((b: any) => ({
-        id: b.id,
-        tracking_id: b.tracking_id,
-        guest_name: b.guest_name,
-        total_amount: Number(b.total_amount),
-        paid_amount: Number(b.paid_amount),
-        due_amount: Number(b.due_amount ?? b.total_amount - b.paid_amount),
-        status: b.status,
-        created_at: b.created_at,
-        user_id: b.user_id,
-        package_name: b.packages?.name || "—",
-        package_type: b.packages?.type || "—",
-        num_travelers: b.num_travelers || 1,
-        pendingPayments: pendingByBooking[b.id] || [],
-      }));
+      const mapped: BookingReceivable[] = (bkRes.data || [])
+        .filter((b: any) => b.status !== "cancelled")
+        .map((b: any) => {
+          const dueAmt = Math.max(0, Number(b.due_amount ?? b.total_amount - b.paid_amount));
+          const hasPending = (pendingByBooking[b.id] || []).length > 0;
+          // If booking has due but no scheduled installments, treat as overdue (no due_date = overdue)
+          const syntheticOverdue = dueAmt > 0 && !hasPending;
+          return {
+            id: b.id,
+            tracking_id: b.tracking_id,
+            guest_name: b.guest_name,
+            total_amount: Number(b.total_amount),
+            paid_amount: Number(b.paid_amount),
+            due_amount: dueAmt,
+            status: b.status,
+            created_at: b.created_at,
+            user_id: b.user_id,
+            package_name: b.packages?.name || "—",
+            package_type: b.packages?.type || "—",
+            num_travelers: b.num_travelers || 1,
+            pendingPayments: syntheticOverdue
+              ? [{ id: "synthetic-" + b.id, amount: dueAmt, due_date: null, installment_number: null, daysOverdue: differenceInDays(today, new Date(b.created_at)) }]
+              : pendingByBooking[b.id] || [],
+          };
+        });
 
       setBookings(mapped);
       setLoading(false);
