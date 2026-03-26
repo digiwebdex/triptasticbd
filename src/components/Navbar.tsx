@@ -97,7 +97,7 @@ const Navbar = () => {
             className="flex items-center gap-1 text-xs font-medium border border-border px-2 py-1.5 rounded-md"
           >
             <Globe className="h-3.5 w-3.5" />
-            {language === "en" ? "বাং" : "EN"}
+            {language === "bn" ? "EN" : "বাং"}
           </button>
           <button onClick={() => setOpen(!open)} className="text-foreground p-2">
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
