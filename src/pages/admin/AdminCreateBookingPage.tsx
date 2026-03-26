@@ -433,6 +433,51 @@ export default function AdminCreateBookingPage() {
         </div>
       )}
 
+      {/* Document Upload */}
+      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+        <h3 className="font-heading font-semibold text-sm flex items-center gap-2">
+          <Upload className="h-4 w-4 text-primary" /> Upload Documents (Optional)
+        </h3>
+        <p className="text-xs text-muted-foreground">Upload passport, NID, and photo. Max 5MB per file. Supported: PDF, JPG, PNG.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {DOC_TYPES.map(doc => (
+            <div key={doc.key} className="border border-dashed border-border rounded-lg p-4 text-center space-y-2">
+              <File className="h-6 w-6 mx-auto text-muted-foreground" />
+              <p className="text-xs font-medium text-foreground">{doc.label}</p>
+              {docFiles[doc.key] ? (
+                <div className="space-y-1">
+                  <p className="text-xs text-primary truncate">{docFiles[doc.key]!.name}</p>
+                  <button onClick={() => setDocFiles(prev => ({ ...prev, [doc.key]: null }))}
+                    className="text-xs text-destructive hover:underline flex items-center gap-1 mx-auto">
+                    <X className="h-3 w-3" /> Remove
+                  </button>
+                </div>
+              ) : uploadedDocs[doc.key] ? (
+                <div className="flex items-center gap-1 justify-center text-xs text-green-600">
+                  <CheckCircle className="h-3 w-3" /> Uploaded
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRefs.current[doc.key]?.click()}
+                  className="text-xs bg-secondary hover:bg-muted text-foreground px-3 py-1.5 rounded-md transition-colors">
+                  Choose File
+                </button>
+              )}
+              <input
+                ref={el => { fileInputRefs.current[doc.key] = el; }}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="hidden"
+                onChange={(e) => handleDocSelect(doc.key, e.target.files?.[0] || null)}
+              />
+              {docUploading === doc.key && (
+                <p className="text-xs text-primary animate-pulse">Uploading...</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Moallem & Payment */}
       <div className="bg-card border border-border rounded-xl p-5 space-y-4">
         <h3 className="font-heading font-semibold text-sm">Additional Information</h3>
