@@ -220,6 +220,8 @@ const tableUrlMap: Record<string, string> = {
   daily_cashbook: '/daily-cashbook',
   moallem_items: '/moallem-items',
   supplier_agent_items: '/supplier-agent-items',
+  refunds: '/refunds',
+  cancellation_policies: '/cancellation-policies',
 };
 
 // =============================================
