@@ -223,10 +223,10 @@ export default function AdminSeoPage() {
               <CardTitle>Google সার্চ প্রিভিউ</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-lg p-4 bg-white max-w-xl">
-                <p className="text-blue-700 text-lg font-medium truncate">{settings.site_title}</p>
-                <p className="text-green-700 text-sm">{settings.base_url}</p>
-                <p className="text-gray-600 text-sm line-clamp-2">{settings.site_description}</p>
+              <div className="border rounded-lg p-4 bg-card max-w-xl">
+                <p className="text-primary text-lg font-medium truncate">{settings.site_title}</p>
+                <p className="text-emerald-600 dark:text-emerald-400 text-sm">{settings.base_url}</p>
+                <p className="text-muted-foreground text-sm line-clamp-2">{settings.site_description}</p>
               </div>
             </CardContent>
           </Card>
