@@ -1266,3 +1266,39 @@ CREATE TABLE IF NOT EXISTS supplier_agent_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_supplier_agent_items_supplier_id ON supplier_agent_items(supplier_agent_id);
+
+-- =============================================
+-- CANCELLATION POLICIES & REFUNDS
+-- =============================================
+CREATE TABLE IF NOT EXISTS cancellation_policies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  refund_type TEXT NOT NULL DEFAULT 'percentage' CHECK (refund_type IN ('percentage', 'flat')),
+  refund_value NUMERIC NOT NULL DEFAULT 0,
+  min_days_before_departure INTEGER DEFAULT 0,
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS refunds (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+  policy_id UUID REFERENCES cancellation_policies(id),
+  original_amount NUMERIC NOT NULL DEFAULT 0,
+  refund_amount NUMERIC NOT NULL DEFAULT 0,
+  deduction_amount NUMERIC NOT NULL DEFAULT 0,
+  refund_method TEXT DEFAULT 'cash',
+  wallet_account_id UUID REFERENCES accounts(id),
+  reason TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'processed', 'rejected')),
+  processed_by UUID,
+  processed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_refunds_booking_id ON refunds(booking_id);
+CREATE INDEX IF NOT EXISTS idx_refunds_status ON refunds(status);
