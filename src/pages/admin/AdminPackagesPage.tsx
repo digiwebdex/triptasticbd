@@ -29,7 +29,15 @@ export default function AdminPackagesPage() {
   const [uploading, setUploading] = useState(false);
   const [viewPkg, setViewPkg] = useState<any>(null);
 
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [searchParams] = useSearchParams();
+  const urlType = searchParams.get("type");
+  const [typeFilter, setTypeFilter] = useState(urlType || "all");
+
+  // Sync with URL param changes (sidebar navigation)
+  useEffect(() => {
+    if (urlType) setTypeFilter(urlType);
+    else setTypeFilter("all");
+  }, [urlType]);
 
   const fetchPkgs = () => supabase.from("packages").select("*").order("created_at", { ascending: false }).then(({ data }) => setPackages(data || []));
   useEffect(() => { fetchPkgs(); }, []);
