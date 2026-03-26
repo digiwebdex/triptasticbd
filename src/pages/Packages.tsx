@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import heroImage from "@/assets/hero-kaaba.jpg";
 import medinaImage from "@/assets/medina-mosque.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 
 const fallbackImages = [heroImage, medinaImage];
 
@@ -64,6 +65,16 @@ const Packages = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Packages - হজ্জ, উমরাহ ও ট্যুর প্যাকেজ"
+        description="রাহে কাবা ট্যুরস - সাশ্রয়ী মূল্যে হজ্জ, উমরাহ, ভিসা ও ট্যুর প্যাকেজ। Affordable Hajj, Umrah & Tour packages."
+        canonicalUrl="/packages"
+        keywords="Hajj package, Umrah package, হজ্জ প্যাকেজ, উমরাহ প্যাকেজ, ভিসা, ট্যুর"
+        jsonLd={breadcrumbJsonLd([
+          { name: "Home", url: "/" },
+          { name: "Packages", url: "/packages" },
+        ])}
+      />
       <Navbar />
 
       <div className="relative pt-20 pb-16 overflow-hidden">

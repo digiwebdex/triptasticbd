@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
+import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
 
 const Contact = () => {
   const { data: content } = useSiteContent("contact");
@@ -44,6 +45,16 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Contact Us - যোগাযোগ"
+        description="রাহে কাবা ট্যুরস এর সাথে যোগাযোগ করুন। ফোন, ইমেইল বা অফিসে আসুন। Contact Rahe Kaba Tours."
+        canonicalUrl="/contact"
+        keywords="যোগাযোগ, contact, Rahe Kaba contact, phone, email"
+        jsonLd={breadcrumbJsonLd([
+          { name: "Home", url: "/" },
+          { name: "Contact", url: "/contact" },
+        ])}
+      />
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
