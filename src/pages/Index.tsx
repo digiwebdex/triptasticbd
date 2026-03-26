@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import BackToTop from "@/components/BackToTop";
 import { useSectionVisibility } from "@/hooks/useSectionVisibility";
+import SEOHead, { organizationJsonLd } from "@/components/SEOHead";
 
 // Lazy load below-fold sections
 const GuidelineSection = lazy(() => import("@/components/GuidelineSection"));
