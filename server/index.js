@@ -34,7 +34,9 @@ app.use('/api/auth', authRoutes);
 // =============================================
 const createCrudRoutes = (tableName, options = {}) => {
   const router = express.Router();
-  const { readAuth = true, writeAuth = true, adminOnly = false, selectFields = '*', orderBy = 'created_at DESC' } = options;
+  // Use id DESC as safe default because some tables (site_content/company_settings/financial_summary/user_roles)
+  // do not have created_at.
+  const { readAuth = true, writeAuth = true, adminOnly = false, selectFields = '*', orderBy = 'id DESC' } = options;
 
   // List
   router.get('/', readAuth ? authenticate : optionalAuth, async (req, res) => {
