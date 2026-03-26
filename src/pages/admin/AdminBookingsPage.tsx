@@ -484,21 +484,39 @@ export default function AdminBookingsPage() {
   const handleDownloadInvoice = async (b: any) => {
     setGeneratingId(b.id);
     try {
-      const [paymentsRes, bookingRes, company] = await Promise.all([
+      // Fetch payments, booking members, package info, and company in parallel
+      // VPS API doesn't support nested selects, so fetch separately
+      const [paymentsRes, membersRes, company] = await Promise.all([
         supabase.from("payments").select("*").eq("booking_id", b.id).order("installment_number", { ascending: true }),
-        supabase
-          .from("bookings")
-          .select("*, packages(name, type, duration_days, start_date, price), booking_members(full_name, passport_number, selling_price, discount, final_price, package_id, packages(name))")
-          .eq("id", b.id)
-          .maybeSingle(),
+        supabase.from("booking_members").select("*").eq("booking_id", b.id).order("created_at", { ascending: true }),
         getCompanyInfoForPdf(),
       ]);
 
-      const invoiceBooking = bookingRes.data
-        ? { ...bookingRes.data, packages: bookingRes.data.packages || b.packages }
-        : b;
+      // Build package info from the already-loaded booking data (from fetchBookings which uses custom JOIN route)
+      const invoiceBooking = { ...b };
 
-      const memberRows = ((bookingRes.data as any)?.booking_members || []) as any[];
+      // If package info missing, fetch it separately
+      if (!invoiceBooking.packages && invoiceBooking.package_id) {
+        const { data: pkgData } = await supabase.from("packages").select("name, type, duration_days, start_date, price").eq("id", invoiceBooking.package_id).maybeSingle();
+        if (pkgData) invoiceBooking.packages = pkgData;
+      }
+
+      const memberRows = (membersRes.data || []) as any[];
+
+      // If members have package_id but no package name, fetch package names
+      const memberPackageIds = memberRows.filter((m: any) => m.package_id && !m.packages).map((m: any) => m.package_id);
+      if (memberPackageIds.length > 0) {
+        const uniqueIds = Array.from(new Set(memberPackageIds));
+        const { data: pkgs } = await supabase.from("packages").select("id, name").in("id", uniqueIds);
+        const pkgMap: Record<string, string> = {};
+        (pkgs || []).forEach((p: any) => { pkgMap[p.id] = p.name; });
+        memberRows.forEach((m: any) => {
+          if (m.package_id && pkgMap[m.package_id]) {
+            m.packages = { name: pkgMap[m.package_id] };
+          }
+        });
+      }
+
       const travelerCount = Number(invoiceBooking.num_travelers || 0);
 
       await generateInvoice(
