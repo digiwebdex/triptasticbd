@@ -4,8 +4,10 @@ export const translations: Record<Language, Record<string, string>> = {
   en: {
     // Navbar
     "nav.home": "Home",
+    "nav.services": "Services",
     "nav.packages": "Packages",
     "nav.hotels": "Hotels",
+    "nav.gallery": "Gallery",
     "nav.about": "About",
     "nav.contact": "Contact",
     "nav.track": "Track",
