@@ -442,6 +442,17 @@ const BACKUP_TABLES = [
   'blog_posts', 'cms_versions', 'daily_cashbook',
 ];
 
+const RESTORE_ORDER = [
+  'accounts', 'packages', 'installment_plans', 'hotels', 'hotel_rooms',
+  'moallems', 'supplier_agents', 'supplier_contracts',
+  'profiles', 'site_content', 'company_settings', 'blog_posts', 'notification_settings',
+  'bookings', 'hotel_bookings', 'booking_members', 'booking_documents',
+  'payments', 'expenses', 'transactions',
+  'moallem_items', 'supplier_agent_items',
+  'moallem_payments', 'moallem_commission_payments', 'supplier_agent_payments', 'supplier_contract_payments',
+  'notification_logs', 'cms_versions', 'user_roles', 'financial_summary', 'daily_cashbook',
+];
+
 const backupsDir = path.join(__dirname, 'backups');
 if (!fs.existsSync(backupsDir)) fs.mkdirSync(backupsDir, { recursive: true });
 
@@ -492,38 +503,74 @@ app.post('/api/backup/restore', authenticate, requireRole('admin'), async (req, 
   try {
     const { fileName, mode } = req.body;
     if (!fileName) return res.status(400).json({ error: 'fileName required' });
+
+    const restoreMode = mode === 'full' ? 'full' : 'merge';
     const filePath = path.join(backupsDir, path.basename(fileName));
     if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Backup not found' });
+
     const raw = await fsp.readFile(filePath, 'utf-8');
     const backup = JSON.parse(raw);
-    const results = [];
+    const backupTables = Object.keys(backup.tables || {}).filter((table) => BACKUP_TABLES.includes(table));
+    const orderedTables = [
+      ...RESTORE_ORDER.filter((table) => backupTables.includes(table)),
+      ...backupTables.filter((table) => !RESTORE_ORDER.includes(table)),
+    ];
 
-    for (const [table, rows] of Object.entries(backup.tables || {})) {
+    if (orderedTables.length === 0) {
+      return res.status(400).json({ error: 'No valid tables found in backup file' });
+    }
+
+    const results = [];
+    const quote = (id) => `"${String(id).replace(/"/g, '""')}"`;
+
+    if (restoreMode === 'full') {
+      for (const table of [...orderedTables].reverse()) {
+        try {
+          await query(`DELETE FROM ${quote(table)}`);
+        } catch (e) {
+          results.push({ table, status: 'delete_error', error: e.message });
+        }
+      }
+    }
+
+    for (const table of orderedTables) {
+      const rows = backup.tables?.[table];
       if (!Array.isArray(rows) || rows.length === 0) {
         results.push({ table, status: 'skipped', reason: 'empty' });
         continue;
       }
+
       try {
-        if (mode === 'full') {
-          await query(`DELETE FROM ${table}`);
-        }
         const keys = Object.keys(rows[0]);
-        const quote = (id) => `"${String(id).replace(/"/g, '""')}"`;
+        if (!keys.length) {
+          results.push({ table, status: 'skipped', reason: 'no_columns' });
+          continue;
+        }
+
+        const updateCols = keys.filter((k) => k !== 'id');
         for (const row of rows) {
-          const values = keys.map(k => row[k]);
+          const values = keys.map((k) => row[k]);
           const placeholders = keys.map((_, i) => `$${i + 1}`);
-          const sql = mode === 'full'
-            ? `INSERT INTO ${table} (${keys.map(quote).join(',')}) VALUES (${placeholders.join(',')}) ON CONFLICT DO NOTHING`
-            : `INSERT INTO ${table} (${keys.map(quote).join(',')}) VALUES (${placeholders.join(',')}) ON CONFLICT (id) DO UPDATE SET ${keys.filter(k => k !== 'id').map((k, i) => `${quote(k)} = EXCLUDED.${quote(k)}`).join(', ')}`;
+
+          const sql = `
+            INSERT INTO ${quote(table)} (${keys.map(quote).join(', ')})
+            VALUES (${placeholders.join(', ')})
+            ON CONFLICT (id) DO ${updateCols.length
+              ? `UPDATE SET ${updateCols.map((k) => `${quote(k)} = EXCLUDED.${quote(k)}`).join(', ')}`
+              : 'NOTHING'}
+          `;
+
           await query(sql, values);
         }
+
         results.push({ table, status: 'restored', rows: rows.length });
       } catch (e) {
         results.push({ table, status: 'error', error: e.message });
       }
     }
-    const restored = results.filter(r => r.status === 'restored').length;
-    res.json({ success: true, restored, results });
+
+    const restored = results.filter((r) => r.status === 'restored').length;
+    res.json({ success: true, restored, mode: restoreMode, results });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
