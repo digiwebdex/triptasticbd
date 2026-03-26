@@ -9,7 +9,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | https://github.com/digiwebdex/rahe-kaba-journeys-44e58262 |
+| **Repository** | https://github.com/digiwebdex/rahe-kaba-journeys-35ffd43e |
 | **Branch** | `main` |
 | **Owner** | digiwebdex |
 | **Sync** | Bidirectional (Lovable ↔ GitHub) |
