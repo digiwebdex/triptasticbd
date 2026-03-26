@@ -52,6 +52,7 @@ const AdminReceivablesPage = lazy(() => import("./pages/admin/AdminReceivablesPa
 const AdminRefundsPage = lazy(() => import("./pages/admin/AdminRefundsPage"));
 const AdminAnalyticsPage = lazy(() => import("./pages/admin/AdminAnalyticsPage"));
 const AdminSeoPage = lazy(() => import("./pages/admin/AdminSeoPage"));
+const AdminPaymentMethodsPage = lazy(() => import("./pages/admin/AdminPaymentMethodsPage"));
 
 const queryClient = new QueryClient();
 
