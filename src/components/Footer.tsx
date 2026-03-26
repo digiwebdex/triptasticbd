@@ -43,8 +43,8 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-heading font-semibold mb-4 text-primary">{t("footer.quickLinks")}</h4>
-            <ul className="space-y-2.5 text-sm text-muted-foreground">
+            <h4 className="font-heading font-semibold mb-4 text-gold-light">{t("footer.quickLinks")}</h4>
+            <ul className="space-y-2.5 text-sm text-white/60">
               {quickLinks.map((l) => (
                 <li key={l.href}>
                   <a href={l.href} className="hover:text-primary transition-colors">{l.label}</a>
