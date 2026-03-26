@@ -50,6 +50,27 @@ const Booking = () => {
 
   const [createdBooking, setCreatedBooking] = useState<{ id: string; tracking_id: string } | null>(null);
 
+  const normalizePaymentMethods = (value: unknown) => {
+    let methods = value;
+    if (typeof methods === "string") {
+      try {
+        methods = JSON.parse(methods);
+      } catch {
+        return [];
+      }
+    }
+
+    if (!Array.isArray(methods)) return [];
+
+    return methods
+      .filter((method: any) => method && method.enabled)
+      .map((method: any) => ({
+        ...method,
+        enabled: Boolean(method.enabled),
+        charge_percent: Number(method.charge_percent || 0),
+      }));
+  };
+
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -71,23 +92,32 @@ const Booking = () => {
         }
       }
 
-      const [pkgRes, planRes, pmRes] = await Promise.all([
+      const [pkgRes, planRes] = await Promise.all([
         packageId
           ? supabase.from("packages").select("*").eq("id", packageId).eq("is_active", true).single()
           : Promise.resolve({ data: null }),
         supabase.from("installment_plans").select("*").eq("is_active", true).order("num_installments"),
-        supabase.from("company_settings").select("setting_value").eq("setting_key", "payment_methods").maybeSingle(),
       ]);
 
       setPkg(pkgRes.data);
       setPlans(planRes.data || []);
-      if (pmRes.data?.setting_value) {
-        const methods = typeof pmRes.data.setting_value === "string"
-          ? JSON.parse(pmRes.data.setting_value)
-          : pmRes.data.setting_value;
-        const enabled = Array.isArray(methods) ? methods.filter((m: any) => m.enabled) : [];
-        setPaymentMethods(enabled);
+
+      try {
+        const pmResponse = await fetch("/api/public/payment-methods");
+        if (pmResponse.ok) {
+          const methods = normalizePaymentMethods(await pmResponse.json());
+          setPaymentMethods(methods);
+          if (methods.length > 0) {
+            setSelectedPaymentMethod((current) => current ?? methods[0].id);
+          }
+        } else {
+          setPaymentMethods([]);
+        }
+      } catch (error) {
+        console.error("Failed to load public payment methods", error);
+        setPaymentMethods([]);
       }
+
       setLoading(false);
     };
     init();

@@ -219,6 +219,58 @@ const createCrudRoutes = (tableName, options = {}) => {
 // =============================================
 
 // Public routes (no auth)
+app.get('/api/public/payment-methods', async (_req, res) => {
+  try {
+    const result = await query(`
+      SELECT setting_value
+      FROM company_settings
+      WHERE setting_key = 'payment_methods'
+      LIMIT 1
+    `);
+
+    if (!result.rows[0]?.setting_value) {
+      return res.json([]);
+    }
+
+    let methods = result.rows[0].setting_value;
+    if (typeof methods === 'string') {
+      try {
+        methods = JSON.parse(methods);
+      } catch {
+        methods = [];
+      }
+    }
+
+    if (!Array.isArray(methods)) {
+      return res.json([]);
+    }
+
+    const safeMethods = methods
+      .filter((method) => method && method.enabled)
+      .map((method) => ({
+        id: method.id,
+        name: method.name,
+        name_bn: method.name_bn,
+        icon: method.icon,
+        category: method.category,
+        enabled: Boolean(method.enabled),
+        account_name: method.account_name || '',
+        account_number: method.account_number || '',
+        instructions: method.instructions || '',
+        instructions_bn: method.instructions_bn || '',
+        charge_percent: Number(method.charge_percent || 0),
+        min_amount: Number(method.min_amount || 0),
+        max_amount: Number(method.max_amount || 0),
+        is_sandbox: Boolean(method.is_sandbox),
+      }));
+
+    return res.json(safeMethods);
+  } catch (err) {
+    console.error('GET /api/public/payment-methods error:', err.message);
+    return res.status(500).json({ error: 'Failed to load payment methods' });
+  }
+});
+
 app.use('/api/packages', createCrudRoutes('packages', { readAuth: false, writeAuth: true, adminOnly: true }));
 app.use('/api/hotels', createCrudRoutes('hotels', { readAuth: false, writeAuth: true, adminOnly: true }));
 app.use('/api/hotel-rooms', createCrudRoutes('hotel_rooms', { readAuth: false, writeAuth: true, adminOnly: true }));
