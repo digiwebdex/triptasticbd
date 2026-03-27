@@ -198,7 +198,7 @@ export default function InvoicePage() {
                 <div className="border border-gray-700 rounded p-1.5 mt-1 flex flex-col items-center">
                   <p className="text-[7px] font-bold text-green-700 mb-0.5">✓ Verified Booking</p>
                   <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://rahe-kaba-journeys.lovable.app/verify/${generateVerificationId(booking.tracking_id)}`)}`}
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://manasiktravelhub.com/verify/${generateVerificationId(booking.tracking_id)}`)}`}
                     alt="QR Code"
                     className="w-[72px] h-[72px]"
                     style={{ imageRendering: "pixelated" }}

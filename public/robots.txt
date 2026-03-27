@@ -19,4 +19,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-Sitemap: https://rahekaba.com/sitemap.xml
+Sitemap: https://manasiktravelhub.com/sitemap.xml

@@ -1,7 +1,7 @@
 import QRCode from "qrcode";
 import jsPDF from "jspdf";
 
-const TRACKING_BASE_URL = "https://rahe-kaba-journeys.lovable.app/verify";
+const TRACKING_BASE_URL = "https://manasiktravelhub.com/verify";
 
 /**
  * Generate a QR code data URL for a booking tracking ID.

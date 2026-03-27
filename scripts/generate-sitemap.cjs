@@ -4,7 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const BASE_URL = "https://rahekaba.com";
+const BASE_URL = "https://manasiktravelhub.com";
 const TODAY = new Date().toISOString().split("T")[0];
 
 const staticRoutes = [

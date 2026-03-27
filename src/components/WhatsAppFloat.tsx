@@ -7,10 +7,10 @@ const WhatsAppFloat = () => {
   const { language } = useLanguage();
   const lc = content?.[language];
 
-  const phone = content?.phone || "8801601505050";
+  const phone = content?.phone || "8801711993562";
   const defaultMsg = language === "bn"
-    ? "আসসালামু আলাইকুম! RAHE KABA তে স্বাগতম। কিভাবে সাহায্য করতে পারি?"
-    : "Assalamu Alaikum! Welcome to RAHE KABA. How can we help?";
+    ? "আসসালামু আলাইকুম! Manasik Travel Hub এ স্বাগতম। কিভাবে সাহায্য করতে পারি?"
+    : "Assalamu Alaikum! Welcome to Manasik Travel Hub. How can we help?";
   const message = encodeURIComponent(lc?.message || defaultMsg);
   const buttonText = lc?.button_text || "আপনাকে কিভাবে সহযোগিতা করতে পারি";
 

@@ -31,7 +31,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         canonicalUrl="/"
-        keywords="হজ্জ, উমরাহ, Hajj, Umrah, Visa, Tour, Bangladesh, রাহে কাবা, Rahe Kaba"
+        keywords="হজ্জ, উমরাহ, Hajj, Umrah, Visa, Tour, Bangladesh, মানাসিক ট্রাভেল হাব, Manasik Travel Hub, Tangail"
         jsonLd={organizationJsonLd()}
       />
       <Navbar />

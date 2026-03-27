@@ -170,10 +170,10 @@ export default function VerifyInvoice() {
 
             <div className="bg-gray-50 border-t border-gray-100 px-6 py-4 text-center">
               <p className="text-xs text-gray-400">
-                RAHE KABA Tours & Travels — Hajj & Umrah Services
+                Manasik Travel Hub — Hajj & Umrah Services
               </p>
               <p className="text-xs text-gray-400 mt-1">
-                +880 1601-505050 | rahekaba.info@gmail.com
+                +880 1711-993562 | manasiktravelhub@gmail.com
               </p>
             </div>
           </div>

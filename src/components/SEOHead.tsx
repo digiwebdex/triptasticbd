@@ -12,11 +12,11 @@ interface SEOHeadProps {
   lang?: string;
 }
 
-const SITE_NAME = "Rahe Kaba Tours and Travels";
+const SITE_NAME = "Manasik Travel Hub";
 const DEFAULT_DESCRIPTION =
-  "রাহে কাবা ট্যুরস অ্যান্ড ট্রাভেলস - হজ্জ, উমরাহ ও ভিসা সেবায় বাংলাদেশের বিশ্বস্ত প্রতিষ্ঠান। Trusted Hajj, Umrah, Visa & Tour services from Bangladesh.";
-const DEFAULT_OG_IMAGE = "/assets/logo.jpg";
-const BASE_URL = "https://rahekaba.com";
+  "মানাসিক ট্রাভেল হাব - হজ্জ, উমরাহ ও ভিসা সেবায় বাংলাদেশের বিশ্বস্ত প্রতিষ্ঠান। Trusted Hajj, Umrah, Visa & Tour services from Bangladesh.";
+const DEFAULT_OG_IMAGE = "/assets/logo.png";
+const BASE_URL = "https://manasiktravelhub.com";
 
 export default function SEOHead({
   title,
@@ -84,16 +84,19 @@ export function organizationJsonLd() {
     "@type": "TravelAgency",
     name: SITE_NAME,
     url: BASE_URL,
-    logo: `${BASE_URL}/assets/logo.jpg`,
+    logo: `${BASE_URL}/assets/logo.png`,
     description: DEFAULT_DESCRIPTION,
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Dhaka",
+      streetAddress: "595/1, Milk Vita Road, Three-way Intersection, Dewla",
+      addressLocality: "Tangail Sadar, Tangail",
       addressCountry: "BD",
     },
-    sameAs: ["https://www.facebook.com/rahekaba"],
+    telephone: "+8801711993562",
+    sameAs: ["https://www.facebook.com/profile.php?id=61585173125908"],
     contactPoint: {
       "@type": "ContactPoint",
+      telephone: "+8801711993562",
       contactType: "customer service",
       availableLanguage: ["Bengali", "English"],
     },
@@ -125,7 +128,7 @@ export function productJsonLd(pkg: {
     "@type": "Product",
     name: pkg.name,
     description: pkg.description || "",
-    image: pkg.image || `${BASE_URL}/assets/logo.jpg`,
+    image: pkg.image || `${BASE_URL}/assets/logo.png`,
     url: pkg.url.startsWith("http") ? pkg.url : `${BASE_URL}${pkg.url}`,
     offers: {
       "@type": "Offer",

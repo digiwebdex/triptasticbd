@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth as api } from "@/lib/api";
 import { toast } from "sonner";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.png";
 import { Eye, EyeOff, Phone, Mail, Shield, CheckCircle2, XCircle } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { normalizePhone, getPhoneError, handlePhoneChange } from "@/lib/phoneValidation";

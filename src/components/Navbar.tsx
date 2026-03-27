@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Menu, X, Phone, User, Globe } from "lucide-react";
 import { supabase } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.png";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -12,7 +12,7 @@ const Navbar = () => {
   const { data: content } = useSiteContent("navbar");
   const { language, setLanguage, t } = useLanguage();
 
-  const phone = content?.phone || "+880 1601-505050";
+  const phone = content?.phone || "+880 1711-993562";
 
   const navLinks = [
     { label: t("nav.home"), href: "/" },
@@ -39,10 +39,10 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-soft">
       <div className="container mx-auto flex items-center justify-between h-20 px-4">
         <a href="/" className="flex items-center gap-3">
-          <img src={logo} alt="RAHE KABA Logo" className="h-14 w-14 rounded-md object-cover" />
+          <img src={logo} alt="Manasik Travel Hub Logo" className="h-14 w-auto object-contain" />
           <div className="hidden sm:block">
-            <span className="font-heading text-xl font-bold text-primary">RAHE KABA</span>
-            <span className="block text-xs tracking-[0.25em] text-muted-foreground uppercase">Tours & Travels</span>
+            <span className="font-heading text-xl font-bold text-foreground">MANASIK</span>
+            <span className="block text-xs tracking-[0.2em] text-muted-foreground uppercase">Travel Hub</span>
           </div>
         </a>
 

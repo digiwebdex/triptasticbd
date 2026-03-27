@@ -7,15 +7,15 @@ import { getSignatureData, SignatureData } from "./pdfSignature";
 import { registerBengaliFont, bengaliCellHook } from "./pdfFontLoader";
 
 // ── Brand Constants ──
-const GOLD = { r: 198, g: 165, b: 92 };
-const DARK = { r: 40, g: 46, b: 56 };
-const COMPANY_URL = "https://rahe-kaba-journeys.lovable.app";
+const GOLD = { r: 245, g: 158, b: 11 };
+const DARK = { r: 35, g: 40, b: 48 };
+const COMPANY_URL = "https://manasiktravelhub.com";
 const COMPANY = {
-  name: "RAHE KABA Tours & Travels",
+  name: "Manasik Travel Hub",
   tagline: "Hajj & Umrah Services",
-  phone: "+880 1601-505050",
-  email: "rahekaba.info@gmail.com",
-  address: "Dailorbagh Palli Bidyut Adjacent, Sonargaon Thana Road, Narayanganj-Dhaka",
+  phone: "+880 1711-993562",
+  email: "manasiktravelhub@gmail.com",
+  address: "595/1, Milk Vita Road, Three-way Intersection, Dewla, Tangail Sadar, Tangail",
 };
 
 // ── Interfaces ──

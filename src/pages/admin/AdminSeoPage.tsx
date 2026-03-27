@@ -74,11 +74,11 @@ const DEFAULT_FB_CONFIG: FBPixelConfig = {
 };
 
 const DEFAULT_SEO: SeoSettings = {
-  site_title: "Rahe Kaba Tours and Travels",
-  site_description: "রাহে কাবা ট্যুরস অ্যান্ড ট্রাভেলস - হজ্জ, উমরাহ ও ভিসা সেবায় বাংলাদেশের বিশ্বস্ত প্রতিষ্ঠান।",
-  site_keywords: "হজ্জ, উমরাহ, ভিসা, ট্যুর, বাংলাদেশ, রাহে কাবা, hajj, umrah, visa, tour",
-  og_image: "/assets/logo.jpg",
-  base_url: "https://rahekaba.com",
+  site_title: "Manasik Travel Hub",
+  site_description: "মানাসিক ট্রাভেল হাব - হজ্জ, উমরাহ ও ভিসা সেবায় বাংলাদেশের বিশ্বস্ত প্রতিষ্ঠান।",
+  site_keywords: "হজ্জ, উমরাহ, ভিসা, ট্যুর, বাংলাদেশ, মানাসিক ট্রাভেল হাব, hajj, umrah, visa, tour, tangail",
+  og_image: "/assets/logo.png",
+  base_url: "https://manasiktravelhub.com",
   google_analytics_id: "",
   google_search_console: "",
   facebook_pixel_id: "",
