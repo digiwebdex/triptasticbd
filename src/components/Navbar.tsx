@@ -8,6 +8,8 @@ import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const { data: content } = useSiteContent("navbar");
