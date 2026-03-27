@@ -65,8 +65,8 @@ const HeroSection = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Dark overlay with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsl(220,25%,10%)]/70 via-[hsl(220,25%,10%)]/40 to-[hsl(220,25%,10%)]/80" />
+      {/* Lighter overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
 
       {/* Decorative Islamic geometric corner patterns */}
       <div className="absolute top-0 left-0 w-40 h-40 opacity-10">
@@ -136,9 +136,9 @@ const HeroSection = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-relaxed mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.8] mb-6 drop-shadow-lg"
             dir="rtl"
-            style={{ fontFamily: "var(--font-arabic)" }}
+            style={{ fontFamily: "'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', serif" }}
           >
             وَأَتِمُّوا الْحَجَّ وَالْعُمْرَةَ لِلَّهِ
           </motion.p>

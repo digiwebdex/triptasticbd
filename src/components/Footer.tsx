@@ -41,8 +41,8 @@ const Footer = () => {
             backgroundPosition: 'center',
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[hsl(220,25%,10%)]" />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-[hsl(220,25%,10%)]" />
+        <div className="absolute inset-0 bg-black/20" />
         <div className="absolute inset-0 flex items-center justify-center text-center px-4">
           <div className="animate-fade-in">
             <p className="text-primary font-heading text-sm md:text-base uppercase tracking-[0.3em] mb-2">
