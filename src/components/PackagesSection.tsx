@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Clock, Star, Plane } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import BookingDialog from "@/components/BookingDialog";
 import { supabase } from "@/lib/api";
 import { useLanguage } from "@/i18n/LanguageContext";
 import heroImage from "@/assets/hero-kaaba-golden.jpg";
