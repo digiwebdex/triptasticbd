@@ -326,7 +326,7 @@ function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string): number
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(company.name || "RAHE KABA Tours & Travels", textX, 18);
+  doc.text(company.name || "MANASIK Travel Hub", textX, 18);
 
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
@@ -719,11 +719,11 @@ function addFooter(doc: jsPDF) {
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255);
-  doc.text("Thank you for choosing RAHE KABA Tours & Travels!", pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.text("Thank you for choosing MANASIK Travel Hub!", pageWidth / 2, pageHeight - 10, { align: "center" });
 
   doc.setFontSize(5.5);
   doc.setFont("helvetica", "normal");
-  doc.text("This is a computer-generated document. For queries: +880 1601-505050 | rahekaba.info@gmail.com", pageWidth / 2, pageHeight - 5, { align: "center" });
+  doc.text("This is a computer-generated document. For queries: +880 1711-993562 | manasiktravelhub@gmail.com", pageWidth / 2, pageHeight - 5, { align: "center" });
 
   doc.setTextColor(0);
 }
@@ -738,7 +738,7 @@ async function generateIndividualInvoice(
   qrDataUrl: string, moallemName: string | null
 ) {
   const pageWidth = doc.internal.pageSize.getWidth();
-  let y = addHeader(doc, { name: "RAHE KABA Tours & Travels", phone: "+880 1601-505050", email: "rahekaba.info@gmail.com", address: "Dailorbagh Palli Bidyut Adjacent, Sonargaon Thana Road, Narayanganj-Dhaka" } as CompanyInfo, logoBase64);
+  let y = addHeader(doc, { name: "MANASIK Travel Hub", phone: "+880 1711-993562", email: "manasiktravelhub@gmail.com", address: "595/1, Milk Vita Road, Dewla, Tangail Sadar, Tangail" } as CompanyInfo, logoBase64);
 
 
   // QR verification stamp (small, right side)
@@ -818,7 +818,7 @@ async function generateFamilyInvoice(
   logoBase64: string, sig: SignatureData, qrDataUrl: string, moallemName: string | null
 ) {
   const pageWidth = doc.internal.pageSize.getWidth();
-  let y = addHeader(doc, { name: "RAHE KABA Tours & Travels", phone: "+880 1601-505050", email: "rahekaba.info@gmail.com", address: "Dailorbagh Palli Bidyut Adjacent, Sonargaon Thana Road, Narayanganj-Dhaka" } as CompanyInfo, logoBase64);
+  let y = addHeader(doc, { name: "MANASIK Travel Hub", phone: "+880 1711-993562", email: "manasiktravelhub@gmail.com", address: "595/1, Milk Vita Road, Dewla, Tangail Sadar, Tangail" } as CompanyInfo, logoBase64);
 
 
   addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: booking.tracking_id, position: "top" });

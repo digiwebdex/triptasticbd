@@ -143,8 +143,8 @@ const Auth = () => {
           <a href="/" className="inline-flex items-center gap-3 mb-4">
             <img src={logo} alt="Logo" className="h-14 w-14 rounded-md object-cover" />
             <div className="text-left">
-              <span className="font-heading text-xl font-bold text-primary">RAHE KABA</span>
-              <span className="block text-xs tracking-[0.25em] text-muted-foreground uppercase">Tours & Travels</span>
+              <span className="font-heading text-xl font-bold text-primary">MANASIK</span>
+              <span className="block text-xs tracking-[0.25em] text-muted-foreground uppercase">Travel Hub</span>
             </div>
           </a>
           <h1 className="font-heading text-2xl font-bold mt-4">
