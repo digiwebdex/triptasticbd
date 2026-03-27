@@ -15,7 +15,7 @@ interface SEOHeadProps {
 const SITE_NAME = "Manasik Travel Hub";
 const DEFAULT_DESCRIPTION =
   "মানাসিক ট্রাভেল হাব - হজ্জ, উমরাহ ও ভিসা সেবায় বাংলাদেশের বিশ্বস্ত প্রতিষ্ঠান। Trusted Hajj, Umrah, Visa & Tour services from Bangladesh.";
-const DEFAULT_OG_IMAGE = "/assets/logo.png";
+const DEFAULT_OG_IMAGE = "/og-image.jpg";
 const BASE_URL = "https://manasiktravelhub.com";
 
 export default function SEOHead({
