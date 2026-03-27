@@ -507,14 +507,19 @@ const Booking = () => {
                               )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-foreground">{method.name}</span>
+                                  <span className="font-semibold text-foreground">{method.name_bn || method.name}</span>
                                   {categoryLabel && (
                                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${categoryColor}`}>{categoryLabel}</span>
                                   )}
                                 </div>
-                                <p className="text-sm text-muted-foreground truncate">
-                                  {method.instructions_bn || method.instructions || `Pay with ${method.name}`}
-                                </p>
+                                {method.account_number && (
+                                  <p className="text-xs font-mono text-muted-foreground">{method.account_number}</p>
+                                )}
+                                {!method.account_number && (method.instructions_bn || method.instructions) && (
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {method.instructions_bn || method.instructions}
+                                  </p>
+                                )}
                               </div>
                               {isSelected && (
                                 <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
