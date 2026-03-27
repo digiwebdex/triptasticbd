@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Phone, User, Globe } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.png";
@@ -7,6 +8,8 @@ import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const { data: content } = useSiteContent("navbar");
@@ -15,13 +18,13 @@ const Navbar = () => {
   const phone = content?.phone || "+880 1711-993562";
 
   const navLinks = [
-    { label: t("nav.home"), href: "/" },
-    { label: t("nav.services"), href: "/#services" },
-    { label: t("nav.packages"), href: "/packages" },
+    { label: t("nav.home"), href: "#hero" },
+    { label: t("nav.services"), href: "#services" },
+    { label: t("nav.packages"), href: "#packages" },
     { label: t("nav.hotels"), href: "/hotels" },
-    { label: t("nav.gallery"), href: "/#gallery" },
-    { label: t("nav.about"), href: "/about" },
-    { label: t("nav.contact"), href: "/contact" },
+    { label: t("nav.gallery"), href: "#gallery" },
+    { label: t("nav.about"), href: "#about" },
+    { label: t("nav.contact"), href: "#contact" },
     { label: t("nav.track"), href: "/track" },
   ];
 
@@ -33,13 +36,33 @@ const Navbar = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      const id = href.slice(1);
+      if (location.pathname !== "/") {
+        navigate("/");
+        setTimeout(() => {
+          document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        }, 300);
+      } else {
+        if (id === "hero") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+      setOpen(false);
+    }
+  };
+
   const toggleLang = () => setLanguage(language === "en" ? "bn" : "en");
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-soft">
       <div className="container mx-auto flex items-center justify-between h-20 px-4">
         <a href="/" className="flex items-center">
-          <img src={logo} alt="Manasik Travel Hub Logo" className="h-16 w-auto object-contain" />
+          <img src={logo} alt="Manasik Travel Hub Logo" className="h-20 w-auto object-contain" />
         </a>
 
         <div className="hidden lg:flex items-center gap-8">
@@ -47,6 +70,7 @@ const Navbar = () => {
             <a
               key={link.href}
               href={link.href}
+              onClick={(e) => handleNavClick(e, link.href)}
               className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors tracking-wide uppercase"
             >
               {link.label}
@@ -100,7 +124,7 @@ const Navbar = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => handleNavClick(e, link.href)}
                   className="text-sm font-medium text-foreground/80 hover:text-primary py-2 uppercase tracking-wide"
                 >
                   {link.label}
