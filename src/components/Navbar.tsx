@@ -15,13 +15,13 @@ const Navbar = () => {
   const phone = content?.phone || "+880 1711-993562";
 
   const navLinks = [
-    { label: t("nav.home"), href: "/" },
-    { label: t("nav.services"), href: "/#services" },
-    { label: t("nav.packages"), href: "/packages" },
+    { label: t("nav.home"), href: "#hero" },
+    { label: t("nav.services"), href: "#services" },
+    { label: t("nav.packages"), href: "#packages" },
     { label: t("nav.hotels"), href: "/hotels" },
-    { label: t("nav.gallery"), href: "/#gallery" },
-    { label: t("nav.about"), href: "/about" },
-    { label: t("nav.contact"), href: "/contact" },
+    { label: t("nav.gallery"), href: "#gallery" },
+    { label: t("nav.about"), href: "#about" },
+    { label: t("nav.contact"), href: "#contact" },
     { label: t("nav.track"), href: "/track" },
   ];
 
@@ -39,7 +39,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-soft">
       <div className="container mx-auto flex items-center justify-between h-20 px-4">
         <a href="/" className="flex items-center">
-          <img src={logo} alt="Manasik Travel Hub Logo" className="h-16 w-auto object-contain" />
+          <img src={logo} alt="Manasik Travel Hub Logo" className="h-20 w-auto object-contain" />
         </a>
 
         <div className="hidden lg:flex items-center gap-8">
