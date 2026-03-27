@@ -179,6 +179,8 @@ const PackagesSection = () => {
           </button>
         </div>
       </div>
+
+      <BookingDialog open={bookingOpen} onOpenChange={setBookingOpen} packageId={bookingPackageId} />
     </section>
   );
 };
