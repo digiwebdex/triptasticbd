@@ -439,12 +439,38 @@ class QueryBuilder {
         if (this.limitVal) params.push(`limit=${this.limitVal}`);
         if (params.length) path += '?' + params.join('&');
         
-        const res = await apiFetch(path);
-        if (!res.ok) {
-          const err = await res.json();
-          return { data: null, error: { message: err.error } };
+        let data: any = null;
+        let vpsOk = false;
+        
+        try {
+          const res = await apiFetch(path);
+          if (res.ok) {
+            data = await res.json();
+            vpsOk = true;
+          }
+        } catch {}
+        
+        // Fallback to Supabase client for public reads when VPS is unavailable
+        if (!vpsOk && supabaseClient) {
+          let query = supabaseClient.from(this.table).select(this.selectFields);
+          for (const f of this.filters) {
+            const eqMatch = f.match(/^([^_=]+)=(.+)$/);
+            if (eqMatch) {
+              query = query.eq(eqMatch[1], decodeURIComponent(eqMatch[2]));
+            }
+          }
+          if (this.orderByField) {
+            query = query.order(this.orderByField, { ascending: this.orderAsc });
+          }
+          if (this.limitVal) query = query.limit(this.limitVal);
+          if (this.singleRow) query = query.maybeSingle();
+          const result = await query;
+          return { data: result.data, error: result.error };
         }
-        let data = await res.json();
+        
+        if (!vpsOk) {
+          return { data: null, error: { message: 'API unavailable' } };
+        }
         
         // Handle ordering client-side for now
         if (this.orderByField && Array.isArray(data)) {
