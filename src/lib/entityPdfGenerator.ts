@@ -7,9 +7,9 @@ import { getSignatureData, SignatureData } from "./pdfSignature";
 import { generateTrackingQr, addQrToDoc, addPaymentWatermark, getWatermarkStatus } from "./pdfQrCode";
 import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from "./pdfFontLoader";
 
-const GOLD = { r: 198, g: 165, b: 92 };
-const DARK = { r: 40, g: 46, b: 56 };
-const COMPANY_URL = "https://rahe-kaba-journeys.lovable.app";
+const GOLD = { r: 245, g: 158, b: 11 };
+const DARK = { r: 35, g: 40, b: 48 };
+const COMPANY_URL = "https://manasiktravelhub.com";
 
 const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
 const fmtDate = (d: string | null) =>

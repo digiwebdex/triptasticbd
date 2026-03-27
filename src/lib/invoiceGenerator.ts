@@ -74,8 +74,8 @@ const fmt = (n: number) => `BDT ${formatAmount(n)}`;
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-const GOLD = { r: 198, g: 165, b: 92 };
-const DARK = { r: 40, g: 46, b: 56 };
+const GOLD = { r: 245, g: 158, b: 11 };
+const DARK = { r: 35, g: 40, b: 48 };
 const LIGHT_BG = { r: 250, g: 249, b: 247 };
 
 const FOOTER_HEIGHT = 16;

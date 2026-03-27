@@ -5,7 +5,7 @@ import { Plus, X, Shield, Trash2, Users, Eye, EyeOff, Pencil, Ban, CheckCircle, 
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 const ROLES = ["admin", "accountant", "booking", "cms", "viewer"];
-const PRIMARY_ADMIN_EMAIL = "admin@rahekaba.com";
+const PRIMARY_ADMIN_EMAIL = "admin@manasiktravelhub.com";
 
 const ROLE_DESCRIPTIONS: Record<string, string> = {
   admin: "Full access to all modules — including Profit, CMS, Settings, Role Management",
