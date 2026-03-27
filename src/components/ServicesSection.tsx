@@ -16,14 +16,11 @@ const ServicesSection = () => {
   const description = lc?.description || t("services.description");
 
   const defaultServices = [
-    { icon: "BookOpen", title: t("services.hajj"), desc: t("services.hajjDesc") },
-    { icon: "Globe", title: t("services.umrah"), desc: t("services.umrahDesc") },
-    { icon: "CreditCard", title: t("services.visa"), desc: t("services.visaDesc") },
-    { icon: "Plane", title: t("services.airTicket"), desc: t("services.airTicketDesc") },
-    { icon: "Building2", title: t("services.hotel"), desc: t("services.hotelDesc") },
-    { icon: "Bus", title: t("services.transport"), desc: t("services.transportDesc") },
-    { icon: "MapPin", title: t("services.ziyara"), desc: t("services.ziyaraDesc") },
-    { icon: "Users", title: t("services.guide"), desc: t("services.guideDesc") },
+    { icon: "BookOpen", title: "হজ্ব", desc: "পবিত্র হজ্ব পালনের জন্য সম্পূর্ণ প্যাকেজ ও গাইডেন্স সেবা" },
+    { icon: "Globe", title: "উমরাহ হজ্ব", desc: "সারা বছর উমরাহ পালনের জন্য বিশেষ প্যাকেজ ও ব্যবস্থাপনা" },
+    { icon: "Plane", title: "এয়ার টিকিট", desc: "দেশে-বিদেশে সকল এয়ারলাইন্সের টিকিট বুকিং সেবা" },
+    { icon: "Building2", title: "হোটেল বুকিং", desc: "মক্কা-মদিনাসহ বিশ্বের যেকোনো স্থানে হোটেল বুকিং" },
+    { icon: "CreditCard", title: "রিয়াল এক্সচেঞ্জ", desc: "সৌদি রিয়াল ক্রয়-বিক্রয় ও বৈদেশিক মুদ্রা বিনিময় সেবা" },
   ];
 
   const items = lc?.items || defaultServices;
