@@ -43,7 +43,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section id="home" className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden">
+    <section id="hero" className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden">
       {/* Background Images with Ken Burns effect */}
       <AnimatePresence mode="wait">
         <motion.div
