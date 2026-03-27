@@ -27,6 +27,8 @@ const PackagesSection = () => {
   const navigate = useNavigate();
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bookingPackageId, setBookingPackageId] = useState<string | null>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
