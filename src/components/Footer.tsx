@@ -1,6 +1,7 @@
 import { Phone, Mail, MapPin, Facebook, Youtube, Instagram, Star } from "lucide-react";
 import sslcommerzPayWith from "@/assets/payment/sslcommerz-pay-with.png";
 import logo from "@/assets/logo.png";
+import footerBg from "@/assets/footer-kaaba.jpg";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -29,6 +30,33 @@ const Footer = () => {
   ];
 
   return (
+    <>
+      {/* Animated Footer Banner */}
+      <div className="relative h-64 md:h-80 overflow-hidden">
+        <div 
+          className="absolute inset-0 w-[200%] h-full animate-[footerPan_30s_linear_infinite]"
+          style={{
+            backgroundImage: `url(${footerBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[hsl(220,25%,10%)]" />
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 flex items-center justify-center text-center px-4">
+          <div className="animate-fade-in">
+            <p className="text-primary font-heading text-sm md:text-base uppercase tracking-[0.3em] mb-2">
+              {language === "bn" ? "পবিত্র যাত্রার সঙ্গী" : "Your Sacred Journey Partner"}
+            </p>
+            <h3 className="text-white text-2xl md:text-4xl font-heading font-bold mb-3">
+              {language === "bn" ? "হজ্জ ও উমরাহ সেবা" : "Hajj & Umrah Services"}
+            </h3>
+            <p className="text-white/60 text-sm md:text-base max-w-xl mx-auto">
+              {language === "bn" ? "বিশ্বস্ততা ও নিষ্ঠার সাথে আপনার পবিত্র যাত্রা সম্পন্ন করি" : "Completing your sacred journey with trust and dedication"}
+            </p>
+          </div>
+        </div>
+      </div>
     <footer className="bg-[hsl(220,25%,10%)] text-white py-16 relative overflow-hidden">
       {/* Decorative top border */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-gold" />
@@ -110,6 +138,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+    </>
   );
 };
 
