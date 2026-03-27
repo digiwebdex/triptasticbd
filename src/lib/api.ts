@@ -452,7 +452,7 @@ class QueryBuilder {
         
         // Fallback to Supabase client for public reads when VPS is unavailable
         if (!vpsOk && supabaseClient) {
-          let query = supabaseClient.from(this.table).select(this.selectFields);
+          let query: any = supabaseClient.from(this.table).select(this.selectFields);
           for (const f of this.filters) {
             const eqMatch = f.match(/^([^_=]+)=(.+)$/);
             if (eqMatch) {
