@@ -73,23 +73,7 @@ const Navbar = () => {
             <Phone className="h-4 w-4" />
             {phone}
           </a>
-          {user ? (
-            <a href="/dashboard" className="flex items-center gap-2 text-sm text-primary border border-primary/40 px-4 py-2.5 rounded-md hover:bg-primary/10 transition-colors">
-              <User className="h-4 w-4" />
-              {t("nav.dashboard")}
-            </a>
-          ) : (
-            <a href="/auth" className="flex items-center gap-2 text-sm text-primary border border-primary/40 px-4 py-2.5 rounded-md hover:bg-primary/10 transition-colors">
-              <User className="h-4 w-4" />
-              {t("nav.signIn")}
-            </a>
-          )}
-          <a
-            href="/packages"
-            className="bg-gradient-gold text-primary-foreground font-semibold px-6 py-2.5 rounded-md text-sm hover:opacity-90 transition-opacity"
-          >
-            {t("nav.bookNow")}
-          </a>
+        
         </div>
 
         {/* Mobile: lang toggle + hamburger */}
