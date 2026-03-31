@@ -270,14 +270,14 @@ export async function exportPDF({ title, columns, rows, summary }: ReportData) {
 // ═══════════════════════════════════════════════════════════════
 
 export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
-  const [logoBase64, qrDataUrl, sig] = await Promise.all([
-    loadLogoBase64(), generateCompanyQr(), getSignatureData(),
+  const [logoBase64, qrDataUrl, sig, cfg] = await Promise.all([
+    loadLogoBase64(), generateCompanyQr(), getSignatureData(), ensureConfig(),
   ]);
   const doc = new jsPDF({ orientation: "landscape" });
   await registerBengaliFont(doc);
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  let y = addCompanyHeader(doc, logoBase64, qrDataUrl);
+  let y = addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
   y = addReportTitle(doc, y, title);
 
   const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
