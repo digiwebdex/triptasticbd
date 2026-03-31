@@ -513,13 +513,11 @@ export async function generateCustomerPdf(data: CustomerPdfData, company: Compan
 
 // ── Get company info from CMS ──
 export async function getCompanyInfoForPdf(): Promise<CompanyInfo> {
-  const { supabase } = await import("@/integrations/supabase/client");
-  const { data: cms } = await supabase.from("site_content" as any).select("content").eq("section_key", "contact").maybeSingle();
-  const c = (cms as any)?.content || {};
+  const cfg = await getPdfCompanyConfig();
   return {
-    name: "Manasik Travel Hub",
-    phone: c.phone || "+880 1711-993562",
-    email: c.email || "manasiktravelhub@gmail.com",
-    address: "595/1, Milk Vita Road, Three-way Intersection, Dewla, Tangail Sadar, Tangail",
+    name: cfg.company_name,
+    phone: cfg.phone,
+    email: cfg.email,
+    address: cfg.address,
   };
 }
