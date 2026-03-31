@@ -91,7 +91,7 @@ function getEmailTemplate(type: NotificationType, d: any) {
       };
     case "custom":
       return {
-        subject: d.customSubject || "Notification from Rahe Kaba",
+        subject: d.customSubject || "Notification from Manasik Travel Hub",
         html: `${header}<h2 style="color:#b8860b">${d.customSubject || "Message"}</h2><p>Dear <strong>${d.name}</strong>,</p><p>${d.customMessage || ""}</p>${footer}`,
       };
     default:
