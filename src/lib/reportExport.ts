@@ -370,8 +370,8 @@ export function exportHajjiExcel({ title, customers }: HajjiReportData) {
     rows.push([]);
   });
   rows.push([]);
-  rows.push(["Rahe Kaba Tours & Travels"]);
-  rows.push(["Phone: +880 1601-505050 | Email: rahekaba.info@gmail.com"]);
+  rows.push(["Manasik Travel Hub"]);
+  rows.push(["Phone: +880 1711-993562 | Email: manasiktravelhub@gmail.com"]);
   const ws = XLSX.utils.aoa_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, title.slice(0, 31));
