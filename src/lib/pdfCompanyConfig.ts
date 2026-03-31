@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/api";
 
+// PDF Company Configuration - v2
 export interface PdfCompanyConfig {
   company_name: string;
   tagline: string;
