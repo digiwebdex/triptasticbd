@@ -33,8 +33,9 @@ function loadLogoBase64(): Promise<string> {
 }
 
 async function generateCompanyQr(): Promise<string> {
+  const cfg = await getPdfCompanyConfig();
   try {
-    return await QRCode.toDataURL(COMPANY_URL, {
+    return await QRCode.toDataURL(cfg.website, {
       width: 200, margin: 1,
       color: { dark: "#282E38", light: "#FFFFFF" },
       errorCorrectionLevel: "M",
