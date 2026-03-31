@@ -62,7 +62,7 @@ function getEmailTemplate(type: NotificationType, d: any) {
     case "booking_completed":
       return {
         subject: `🎉 Booking Completed — ${d.trackingId}`,
-        html: `${header}<h2 style="color:#1a7f37">Payment Completed ✅</h2><p>Dear <strong>${d.name}</strong>,</p><p>Your booking <strong>${d.trackingId}</strong> is fully paid!</p>${table([["Tracking ID", d.trackingId], ["Total Paid", `৳${d.totalAmount.toLocaleString()}`], ["Status", "Completed"]])}<p>Thank you for choosing Rahe Kaba!</p>${footer}`,
+        html: `${header}<h2 style="color:#1a7f37">Payment Completed ✅</h2><p>Dear <strong>${d.name}</strong>,</p><p>Your booking <strong>${d.trackingId}</strong> is fully paid!</p>${table([["Tracking ID", d.trackingId], ["Total Paid", `৳${d.totalAmount.toLocaleString()}`], ["Status", "Completed"]])}<p>Thank you for choosing Manasik Travel Hub!</p>${footer}`,
       };
     case "booking_status_updated":
       return {
