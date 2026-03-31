@@ -1024,7 +1024,7 @@ app.post('/api/functions/send-notification', authenticate, requireRole('admin'),
           method: 'POST',
           headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: process.env.NOTIFICATION_FROM_EMAIL || 'RAHE KABA <noreply@rahekabatravels.com>',
+            from: process.env.NOTIFICATION_FROM_EMAIL || 'Manasik Travel Hub <noreply@manasiktravelhub.com>',
             to: [profile.email],
             subject,
             html,
