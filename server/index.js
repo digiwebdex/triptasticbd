@@ -1048,8 +1048,8 @@ app.post('/api/functions/send-notification', authenticate, requireRole('admin'),
       const BULKSMS_API_KEY = process.env.BULKSMS_API_KEY;
       if (BULKSMS_API_KEY) {
         try {
-          const smsMessage = custom_message || `RAHE KABA: Booking ${booking?.tracking_id || ''} - ${type}`;
-          const smsRes = await fetch(`https://bulksmsbd.net/api/smsapi?api_key=${BULKSMS_API_KEY}&type=text&number=${profile.phone}&senderid=${process.env.BULKSMS_SENDER_ID || 'RAHEKABA'}&message=${encodeURIComponent(smsMessage)}`);
+          const smsMessage = custom_message || `Manasik Travel Hub: Booking ${booking?.tracking_id || ''} - ${type}`;
+          const smsRes = await fetch(`https://bulksmsbd.net/api/smsapi?api_key=${BULKSMS_API_KEY}&type=text&number=${profile.phone}&senderid=${process.env.BULKSMS_SENDER_ID || 'MANASIK'}&message=${encodeURIComponent(smsMessage)}`);
           const status = smsRes.ok ? 'sent' : 'failed';
           results.push({ channel: 'sms', status });
 
