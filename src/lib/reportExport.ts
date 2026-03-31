@@ -346,7 +346,7 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
   doc.text(`Grand Total — Customers: ${customers.length} | Bookings: ${totals.bookings} | Travelers: ${totals.travelers} | Revenue: ${fmt(totals.revenue)} | Due: ${fmt(totals.due)} | Profit: ${fmt(totals.profit)}`, 18, y + 8);
   doc.setTextColor(0, 0, 0);
 
-  addCompanyFooter(doc, sig);
+  addCompanyFooter(doc, sig, cfg);
   doc.save(buildSafeFileName(title, "pdf"));
 }
 
