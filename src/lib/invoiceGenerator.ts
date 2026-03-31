@@ -709,7 +709,7 @@ function addSignatureSection(doc: jsPDF, y: number, sig: SignatureData): number 
   return lineY + 14;
 }
 
-function addFooter(doc: jsPDF) {
+function addFooter(doc: jsPDF, cfg: PdfCompanyConfig) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
@@ -720,11 +720,11 @@ function addFooter(doc: jsPDF) {
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255);
-  doc.text("Thank you for choosing MANASIK Travel Hub!", pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.text(cfg.footer_text, pageWidth / 2, pageHeight - 10, { align: "center" });
 
   doc.setFontSize(5.5);
   doc.setFont("helvetica", "normal");
-  doc.text("This is a computer-generated document. For queries: +880 1711-993562 | manasiktravelhub@gmail.com", pageWidth / 2, pageHeight - 5, { align: "center" });
+  doc.text(cfg.footer_contact, pageWidth / 2, pageHeight - 5, { align: "center" });
 
   doc.setTextColor(0);
 }
