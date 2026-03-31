@@ -1121,7 +1121,7 @@ app.post('/api/contact', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: process.env.NOTIFICATION_FROM_EMAIL || 'RAHE KABA <noreply@rahekabatravels.com>',
+        from: process.env.NOTIFICATION_FROM_EMAIL || 'Manasik Travel Hub <noreply@manasiktravelhub.com>',
         to: [CONTACT_EMAIL],
         subject: `New Contact: ${name} - ${service || 'General Inquiry'}`,
         html: htmlBody,
