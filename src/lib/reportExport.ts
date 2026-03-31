@@ -5,18 +5,19 @@ import logoImg from "@/assets/logo-nobg.png";
 import QRCode from "qrcode";
 import { getSignatureData, SignatureData } from "./pdfSignature";
 import { registerBengaliFont, bengaliCellHook } from "./pdfFontLoader";
+import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
 
 // ── Brand Constants ──
 const GOLD = { r: 245, g: 158, b: 11 };
 const DARK = { r: 35, g: 40, b: 48 };
-const COMPANY_URL = "https://manasiktravelhub.com";
-const COMPANY = {
-  name: "Manasik Travel Hub",
-  tagline: "Hajj & Umrah Services",
-  phone: "+880 1711-993562",
-  email: "manasiktravelhub@gmail.com",
-  address: "595/1, Milk Vita Road, Three-way Intersection, Dewla, Tangail Sadar, Tangail",
-};
+
+// These will be populated dynamically
+let _cfg: PdfCompanyConfig | null = null;
+
+async function ensureConfig(): Promise<PdfCompanyConfig> {
+  if (!_cfg) _cfg = await getPdfCompanyConfig();
+  return _cfg;
+}
 
 // ── Interfaces ──
 interface ReportData {
@@ -83,8 +84,9 @@ async function loadLogoBase64(): Promise<string | null> {
 }
 
 async function generateCompanyQr(): Promise<string> {
+  const cfg = await ensureConfig();
   try {
-    return await QRCode.toDataURL(COMPANY_URL, {
+    return await QRCode.toDataURL(cfg.website, {
       width: 200, margin: 1,
       color: { dark: "#282E38", light: "#FFFFFF" },
       errorCorrectionLevel: "M",
@@ -93,7 +95,7 @@ async function generateCompanyQr(): Promise<string> {
 }
 
 // ── Company Pad Header (matches invoice format) ──
-function addCompanyHeader(doc: jsPDF, logoBase64: string | null, qrDataUrl: string): number {
+function addCompanyHeader(doc: jsPDF, logoBase64: string | null, qrDataUrl: string, cfg: PdfCompanyConfig): number {
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // Top gold accent bar
@@ -114,14 +116,14 @@ function addCompanyHeader(doc: jsPDF, logoBase64: string | null, qrDataUrl: stri
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(COMPANY.name, textX, 18);
+  doc.text(cfg.company_name, textX, 18);
 
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100);
-  doc.text(COMPANY.tagline, textX, 23);
-  doc.text(`Tel: ${COMPANY.phone}  |  Email: ${COMPANY.email}`, textX, 28);
-  doc.text(COMPANY.address, textX, 33);
+  doc.text(cfg.tagline, textX, 23);
+  doc.text(`Tel: ${cfg.phone}  |  Email: ${cfg.email}`, textX, 28);
+  doc.text(cfg.address, textX, 33);
 
   // Gold accent line
   doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
@@ -134,7 +136,7 @@ function addCompanyHeader(doc: jsPDF, logoBase64: string | null, qrDataUrl: stri
 }
 
 // ── Company Pad Footer (matches invoice format) ──
-function addCompanyFooter(doc: jsPDF, sig: SignatureData) {
+function addCompanyFooter(doc: jsPDF, sig: SignatureData, cfg: PdfCompanyConfig) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
@@ -179,11 +181,11 @@ function addCompanyFooter(doc: jsPDF, sig: SignatureData) {
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255);
-  doc.text("Manasik Travel Hub — Hajj & Umrah Services", pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.text(`${cfg.company_name} — ${cfg.tagline}`, pageWidth / 2, pageHeight - 10, { align: "center" });
 
   doc.setFontSize(5.5);
   doc.setFont("helvetica", "normal");
-  doc.text(`Tel: ${COMPANY.phone}  |  Email: ${COMPANY.email}  |  ${COMPANY.address}`, pageWidth / 2, pageHeight - 5, { align: "center" });
+  doc.text(`Tel: ${cfg.phone}  |  Email: ${cfg.email}  |  ${cfg.address}`, pageWidth / 2, pageHeight - 5, { align: "center" });
   doc.setTextColor(0);
 }
 
@@ -216,13 +218,13 @@ function addReportTitle(doc: jsPDF, y: number, title: string): number {
 // ═══════════════════════════════════════════════════════════════
 
 export async function exportPDF({ title, columns, rows, summary }: ReportData) {
-  const [logoBase64, qrDataUrl, sig] = await Promise.all([
-    loadLogoBase64(), generateCompanyQr(), getSignatureData(),
+  const [logoBase64, qrDataUrl, sig, cfg] = await Promise.all([
+    loadLogoBase64(), generateCompanyQr(), getSignatureData(), ensureConfig(),
   ]);
   const doc = new jsPDF();
   await registerBengaliFont(doc);
 
-  let y = addCompanyHeader(doc, logoBase64, qrDataUrl);
+  let y = addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
   y = addReportTitle(doc, y, title);
 
   const fmtCell = (val: string | number) =>
@@ -259,7 +261,7 @@ export async function exportPDF({ title, columns, rows, summary }: ReportData) {
     doc.setFont("helvetica", "normal");
   }
 
-  addCompanyFooter(doc, sig);
+  addCompanyFooter(doc, sig, cfg);
   doc.save(buildSafeFileName(title, "pdf"));
 }
 
@@ -268,14 +270,14 @@ export async function exportPDF({ title, columns, rows, summary }: ReportData) {
 // ═══════════════════════════════════════════════════════════════
 
 export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
-  const [logoBase64, qrDataUrl, sig] = await Promise.all([
-    loadLogoBase64(), generateCompanyQr(), getSignatureData(),
+  const [logoBase64, qrDataUrl, sig, cfg] = await Promise.all([
+    loadLogoBase64(), generateCompanyQr(), getSignatureData(), ensureConfig(),
   ]);
   const doc = new jsPDF({ orientation: "landscape" });
   await registerBengaliFont(doc);
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  let y = addCompanyHeader(doc, logoBase64, qrDataUrl);
+  let y = addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
   y = addReportTitle(doc, y, title);
 
   const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
@@ -344,7 +346,7 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
   doc.text(`Grand Total — Customers: ${customers.length} | Bookings: ${totals.bookings} | Travelers: ${totals.travelers} | Revenue: ${fmt(totals.revenue)} | Due: ${fmt(totals.due)} | Profit: ${fmt(totals.profit)}`, 18, y + 8);
   doc.setTextColor(0, 0, 0);
 
-  addCompanyFooter(doc, sig);
+  addCompanyFooter(doc, sig, cfg);
   doc.save(buildSafeFileName(title, "pdf"));
 }
 

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, X, Bell, PenTool, Database, Lock, LayoutGrid } from "lucide-react";
+import { Plus, X, Bell, PenTool, Database, Lock, LayoutGrid, FileText } from "lucide-react";
 import AdminDocumentViewer from "@/components/AdminDocumentViewer";
 import { useAdminRole } from "@/components/admin/AdminLayout";
 import NotificationSettingsManager from "@/components/admin/NotificationSettingsManager";
 import SignatureSettingsManager from "@/components/admin/SignatureSettingsManager";
+import PdfSettingsManager from "@/components/admin/PdfSettingsManager";
 import AdminUserManager from "@/components/admin/AdminUserManager";
 import BackupRestoreManager from "@/components/admin/BackupRestoreManager";
 import AdminPasswordChange from "@/components/admin/AdminPasswordChange";
@@ -50,6 +51,7 @@ export default function AdminSettingsPage() {
           <div className="flex flex-wrap gap-2">
             <a href="#password-settings" className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium">Change Password</a>
             <a href="#section-visibility" className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium">Website Sections</a>
+            <a href="#pdf-settings" className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium">PDF Settings</a>
             <a href="#notification-settings" className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium">SMS/Email Config</a>
             <a href="#backup-restore" className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium">Backup & Restore</a>
           </div>
@@ -124,6 +126,18 @@ export default function AdminSettingsPage() {
           </h2>
           <div className="bg-card border border-border rounded-lg p-5">
             <NotificationSettingsManager />
+          </div>
+        </section>
+      )}
+
+      {/* PDF Company Settings (Admin only) */}
+      {currentRole === "admin" && (
+        <section id="pdf-settings">
+          <h2 className="font-heading text-xl font-bold flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-primary" /> PDF Company Settings
+          </h2>
+          <div className="bg-card border border-border rounded-lg p-5">
+            <PdfSettingsManager />
           </div>
         </section>
       )}

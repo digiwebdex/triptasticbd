@@ -6,10 +6,10 @@ import { CompanyInfo } from "./invoiceGenerator";
 import { getSignatureData, SignatureData } from "./pdfSignature";
 import { generateTrackingQr, addQrToDoc, addPaymentWatermark, getWatermarkStatus } from "./pdfQrCode";
 import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from "./pdfFontLoader";
+import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
 
 const GOLD = { r: 245, g: 158, b: 11 };
 const DARK = { r: 35, g: 40, b: 48 };
-const COMPANY_URL = "https://manasiktravelhub.com";
 
 const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
 const fmtDate = (d: string | null) =>
@@ -33,8 +33,9 @@ function loadLogoBase64(): Promise<string> {
 }
 
 async function generateCompanyQr(): Promise<string> {
+  const cfg = await getPdfCompanyConfig();
   try {
-    return await QRCode.toDataURL(COMPANY_URL, {
+    return await QRCode.toDataURL(cfg.website, {
       width: 200, margin: 1,
       color: { dark: "#282E38", light: "#FFFFFF" },
       errorCorrectionLevel: "M",
@@ -42,7 +43,7 @@ async function generateCompanyQr(): Promise<string> {
   } catch { return ""; }
 }
 
-function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string, qrDataUrl: string): number {
+function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string, qrDataUrl: string, cfg: PdfCompanyConfig): number {
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // Top gold accent bar
@@ -63,11 +64,11 @@ function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string, qrDataU
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(company.name || "Manasik Travel Hub", textX, 18);
+  doc.text(company.name || cfg.company_name, textX, 18);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100);
-  doc.text("Hajj & Umrah Services", textX, 23);
+  doc.text(cfg.tagline, textX, 23);
   const contactParts: string[] = [];
   if (company.phone) contactParts.push(`Tel: ${company.phone}`);
   if (company.email) contactParts.push(`Email: ${company.email}`);
@@ -84,7 +85,7 @@ function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string, qrDataU
   return 44;
 }
 
-function addSignatureAndFooter(doc: jsPDF, sig: SignatureData) {
+function addSignatureAndFooter(doc: jsPDF, sig: SignatureData, cfg: PdfCompanyConfig) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   let y = pageHeight - 40;
@@ -124,7 +125,7 @@ function addSignatureAndFooter(doc: jsPDF, sig: SignatureData) {
   }
 
   doc.setTextColor(150);
-  doc.text("This is a computer-generated document. For queries: +880 1711-993562 | manasiktravelhub@gmail.com", pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.text(cfg.footer_contact, pageWidth / 2, pageHeight - 10, { align: "center" });
   doc.setTextColor(0);
 }
 
@@ -146,12 +147,13 @@ export interface MoallemPdfData {
 export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyInfo) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
-  const [logoBase64, sig, companyQr] = await Promise.all([
+  const [logoBase64, sig, companyQr, cfg] = await Promise.all([
     loadLogoBase64(),
     getSignatureData(),
     generateCompanyQr(),
+    getPdfCompanyConfig(),
   ]);
-  let y = addHeader(doc, company, logoBase64, companyQr);
+  let y = addHeader(doc, company, logoBase64, companyQr, cfg);
   const pw = doc.internal.pageSize.getWidth();
 
   // Watermark based on moallem summary
@@ -242,7 +244,7 @@ export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyI
     });
   }
 
-  addSignatureAndFooter(doc, sig);
+  addSignatureAndFooter(doc, sig, cfg);
   doc.save(`Moallem-${data.name.replace(/\s+/g, "_")}.pdf`);
 }
 
@@ -265,12 +267,13 @@ export interface SupplierPdfData {
 export async function generateSupplierPdf(data: SupplierPdfData, company: CompanyInfo) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
-  const [logoBase64, sig, companyQr] = await Promise.all([
+  const [logoBase64, sig, companyQr, cfg] = await Promise.all([
     loadLogoBase64(),
     getSignatureData(),
     generateCompanyQr(),
+    getPdfCompanyConfig(),
   ]);
-  let y = addHeader(doc, company, logoBase64, companyQr);
+  let y = addHeader(doc, company, logoBase64, companyQr, cfg);
   const pw = doc.internal.pageSize.getWidth();
 
   // Watermark based on supplier summary
@@ -409,7 +412,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
     });
   }
 
-  addSignatureAndFooter(doc, sig);
+  addSignatureAndFooter(doc, sig, cfg);
   doc.save(`Supplier-${data.agent_name.replace(/\s+/g, "_")}.pdf`);
 }
 
@@ -431,12 +434,13 @@ export interface CustomerPdfData {
 export async function generateCustomerPdf(data: CustomerPdfData, company: CompanyInfo) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
-  const [logoBase64, sig, companyQr] = await Promise.all([
+  const [logoBase64, sig, companyQr, cfg] = await Promise.all([
     loadLogoBase64(),
     getSignatureData(),
     generateCompanyQr(),
+    getPdfCompanyConfig(),
   ]);
-  let y = addHeader(doc, company, logoBase64, companyQr);
+  let y = addHeader(doc, company, logoBase64, companyQr, cfg);
   const pw = doc.internal.pageSize.getWidth();
 
   // Watermark based on customer summary
@@ -503,19 +507,17 @@ export async function generateCustomerPdf(data: CustomerPdfData, company: Compan
     });
   }
 
-  addSignatureAndFooter(doc, sig);
+  addSignatureAndFooter(doc, sig, cfg);
   doc.save(`Customer-${(data.full_name || "Unknown").replace(/\s+/g, "_")}.pdf`);
 }
 
 // ── Get company info from CMS ──
 export async function getCompanyInfoForPdf(): Promise<CompanyInfo> {
-  const { supabase } = await import("@/integrations/supabase/client");
-  const { data: cms } = await supabase.from("site_content" as any).select("content").eq("section_key", "contact").maybeSingle();
-  const c = (cms as any)?.content || {};
+  const cfg = await getPdfCompanyConfig();
   return {
-    name: "Manasik Travel Hub",
-    phone: c.phone || "+880 1711-993562",
-    email: c.email || "manasiktravelhub@gmail.com",
-    address: "595/1, Milk Vita Road, Three-way Intersection, Dewla, Tangail Sadar, Tangail",
+    name: cfg.company_name,
+    phone: cfg.phone,
+    email: cfg.email,
+    address: cfg.address,
   };
 }

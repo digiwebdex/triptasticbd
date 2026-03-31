@@ -5,6 +5,7 @@ import { getSignatureData, SignatureData } from "./pdfSignature";
 import { generateTrackingQr, addQrToDoc, addPaymentWatermark, getWatermarkStatus } from "./pdfQrCode";
 import { supabase } from "@/lib/api";
 import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from "./pdfFontLoader";
+import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
 
 export interface CompanyInfo {
   name?: string;
@@ -708,7 +709,7 @@ function addSignatureSection(doc: jsPDF, y: number, sig: SignatureData): number 
   return lineY + 14;
 }
 
-function addFooter(doc: jsPDF) {
+function addFooter(doc: jsPDF, cfg: PdfCompanyConfig) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
@@ -719,11 +720,11 @@ function addFooter(doc: jsPDF) {
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255);
-  doc.text("Thank you for choosing MANASIK Travel Hub!", pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.text(cfg.footer_text, pageWidth / 2, pageHeight - 10, { align: "center" });
 
   doc.setFontSize(5.5);
   doc.setFont("helvetica", "normal");
-  doc.text("This is a computer-generated document. For queries: +880 1711-993562 | manasiktravelhub@gmail.com", pageWidth / 2, pageHeight - 5, { align: "center" });
+  doc.text(cfg.footer_contact, pageWidth / 2, pageHeight - 5, { align: "center" });
 
   doc.setTextColor(0);
 }
@@ -735,10 +736,10 @@ function addFooter(doc: jsPDF) {
 async function generateIndividualInvoice(
   doc: jsPDF, booking: InvoiceBooking, customer: InvoiceCustomer,
   payments: InvoicePayment[], logoBase64: string, sig: SignatureData,
-  qrDataUrl: string, moallemName: string | null
+  qrDataUrl: string, moallemName: string | null, cfg: PdfCompanyConfig
 ) {
   const pageWidth = doc.internal.pageSize.getWidth();
-  let y = addHeader(doc, { name: "MANASIK Travel Hub", phone: "+880 1711-993562", email: "manasiktravelhub@gmail.com", address: "595/1, Milk Vita Road, Dewla, Tangail Sadar, Tangail" } as CompanyInfo, logoBase64);
+  let y = addHeader(doc, { name: cfg.company_name, phone: cfg.phone, email: cfg.email, address: cfg.address } as CompanyInfo, logoBase64);
 
 
   // QR verification stamp (small, right side)
@@ -805,7 +806,7 @@ async function generateIndividualInvoice(
   // Signature
   y = addSignatureSection(doc, y, sig);
 
-  addFooter(doc);
+  addFooter(doc, cfg);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -815,10 +816,10 @@ async function generateIndividualInvoice(
 async function generateFamilyInvoice(
   doc: jsPDF, booking: InvoiceBooking, customer: InvoiceCustomer,
   payments: InvoicePayment[], members: BookingMember[],
-  logoBase64: string, sig: SignatureData, qrDataUrl: string, moallemName: string | null
+  logoBase64: string, sig: SignatureData, qrDataUrl: string, moallemName: string | null, cfg: PdfCompanyConfig
 ) {
   const pageWidth = doc.internal.pageSize.getWidth();
-  let y = addHeader(doc, { name: "MANASIK Travel Hub", phone: "+880 1711-993562", email: "manasiktravelhub@gmail.com", address: "595/1, Milk Vita Road, Dewla, Tangail Sadar, Tangail" } as CompanyInfo, logoBase64);
+  let y = addHeader(doc, { name: cfg.company_name, phone: cfg.phone, email: cfg.email, address: cfg.address } as CompanyInfo, logoBase64);
 
 
   addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: booking.tracking_id, position: "top" });
@@ -899,7 +900,7 @@ async function generateFamilyInvoice(
   // Signature
   y = addSignatureSection(doc, y, sig);
 
-  addFooter(doc);
+  addFooter(doc, cfg);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -920,10 +921,11 @@ export async function generateInvoice(
 ) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
-  const [logoBase64, sig, qrDataUrl] = await Promise.all([
+  const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
     loadLogoBase64(),
     getSignatureData(),
     generateTrackingQr(booking.tracking_id),
+    getPdfCompanyConfig(),
   ]);
 
   // Fetch moallem name if linked
@@ -1049,9 +1051,9 @@ export async function generateInvoice(
   });
 
   if (hasFamilySignal && invoiceMembers.length > 0) {
-    await generateFamilyInvoice(doc, normalizedBooking, customer, payments, invoiceMembers, logoBase64, sig, qrDataUrl, moallemName);
+    await generateFamilyInvoice(doc, normalizedBooking, customer, payments, invoiceMembers, logoBase64, sig, qrDataUrl, moallemName, cfg);
   } else {
-    await generateIndividualInvoice(doc, normalizedBooking, customer, payments, logoBase64, sig, qrDataUrl, moallemName);
+    await generateIndividualInvoice(doc, normalizedBooking, customer, payments, logoBase64, sig, qrDataUrl, moallemName, cfg);
   }
 
   doc.save(`Invoice-${normalizedBooking.tracking_id}.pdf`);
@@ -1070,10 +1072,11 @@ export async function generateReceipt(
 ) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
-  const [logoBase64, sig, qrDataUrl] = await Promise.all([
+  const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
     loadLogoBase64(),
     getSignatureData(),
     generateTrackingQr(booking.tracking_id),
+    getPdfCompanyConfig(),
   ]);
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = addHeader(doc, company, logoBase64);
@@ -1142,7 +1145,7 @@ export async function generateReceipt(
   y += 22;
 
   y = addSignatureSection(doc, y, sig);
-  addFooter(doc);
+  addFooter(doc, cfg);
 
   doc.save(`Receipt-${receiptNum}.pdf`);
 }
@@ -1170,10 +1173,11 @@ export async function generateCommissionReceipt(
 ) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
-  const [logoBase64, sig, qrDataUrl] = await Promise.all([
+  const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
     loadLogoBase64(),
     getSignatureData(),
     generateTrackingQr(data.bookingTrackingId),
+    getPdfCompanyConfig(),
   ]);
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = addHeader(doc, company, logoBase64);
@@ -1250,7 +1254,7 @@ export async function generateCommissionReceipt(
   y += 22;
 
   y = addSignatureSection(doc, y, sig);
-  addFooter(doc);
+  addFooter(doc, cfg);
 
   doc.save(`Commission_Receipt_${data.bookingTrackingId}.pdf`);
 }
