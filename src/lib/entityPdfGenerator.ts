@@ -147,12 +147,13 @@ export interface MoallemPdfData {
 export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyInfo) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
-  const [logoBase64, sig, companyQr] = await Promise.all([
+  const [logoBase64, sig, companyQr, cfg] = await Promise.all([
     loadLogoBase64(),
     getSignatureData(),
     generateCompanyQr(),
+    getPdfCompanyConfig(),
   ]);
-  let y = addHeader(doc, company, logoBase64, companyQr);
+  let y = addHeader(doc, company, logoBase64, companyQr, cfg);
   const pw = doc.internal.pageSize.getWidth();
 
   // Watermark based on moallem summary
