@@ -60,7 +60,7 @@ function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string, qrDataU
     try { doc.addImage(qrDataUrl, "PNG", pageWidth - 30, 10, 16, 16); } catch { /* skip */ }
   }
 
-  const textX = logoBase64 ? 38 : 14;
+  const textX = logoBase64 ? 46 : 14;
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);

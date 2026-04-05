@@ -112,7 +112,7 @@ function addCompanyHeader(doc: jsPDF, logoBase64: string | null, qrDataUrl: stri
     try { doc.addImage(qrDataUrl, "PNG", pageWidth - 30, 10, 16, 16); } catch { /* skip */ }
   }
 
-  const textX = logoBase64 ? 40 : 14;
+  const textX = logoBase64 ? 46 : 14;
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);

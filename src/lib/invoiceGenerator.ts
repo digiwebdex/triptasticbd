@@ -323,7 +323,7 @@ function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string): number
     try { doc.addImage(logoBase64, "PNG", 14, 8, 28, 14); } catch { /* skip */ }
   }
 
-  const textX = logoBase64 ? 40 : 14;
+  const textX = logoBase64 ? 46 : 14;
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
