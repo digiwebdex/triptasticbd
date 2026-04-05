@@ -6,7 +6,7 @@ import { useSiteContent } from "@/hooks/useSiteContent";
 const iconMap: Record<string, any> = { Shield, Headphones, Hotel, Car, BookOpen, Users, Plane, CreditCard, Heart };
 
 const defaultFacilitiesBn = [
-  { icon: "Shield", title: "ভিসা প্রসেসিং", desc: "সৌদি আরবের ভিসা প্রসেসিং সম্পূর্ণ সহায়তা" },
+  { icon: "Shield", title: "ভিসা প্রসেসিং", desc: "উমরাহ ভিসা সহ প্রবাসী ভাইদের জিয়ারা ভিসা প্রসেসিং করণে সর্বাত্মক সহায়তা।" },
   { icon: "Plane", title: "ফ্লাইট বুকিং", desc: "সেরা এয়ারলাইন্সে ফ্লাইট বুকিং" },
   { icon: "Hotel", title: "হোটেল ব্যবস্থা", desc: "হারাম শরীফের কাছে মানসম্মত হোটেল" },
   { icon: "Car", title: "পরিবহন সেবা", desc: "এয়ারপোর্ট ট্রান্সফার ও স্থানীয় পরিবহন" },
