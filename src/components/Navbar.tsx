@@ -3,7 +3,8 @@ import { Menu, X, Phone, User, Globe } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import logo from "@/assets/logo-nobg.png";
+import logoEn from "@/assets/logo-nobg.png";
+import logoBn from "@/assets/logo-bangla.png";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useMenuVisibility } from "@/components/admin/MenuVisibilityManager";
@@ -66,7 +67,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-soft">
       <div className="container mx-auto flex items-center justify-between h-24 px-4">
         <button onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center cursor-pointer py-2">
-          <img src={logo} alt="Manasik Travel Hub Logo" className="block h-12 w-auto max-w-[180px] object-contain lg:h-14" />
+          <img src={language === "bn" ? logoBn : logoEn} alt="Manasik Travel Hub Logo" className="block h-12 w-auto max-w-[180px] object-contain lg:h-14" />
         </button>
 
         <div className="hidden lg:flex items-center gap-8">
