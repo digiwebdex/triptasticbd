@@ -114,60 +114,6 @@ const HeroSection = () => {
 
       <div className="relative z-10 container mx-auto px-4 pt-28 sm:pt-32 pb-16 sm:pb-20 text-center">
 
-        {/* Quranic Verse */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="max-w-3xl mx-auto mb-14"
-        >
-          {/* Decorative divider */}
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <div className="h-px w-20 sm:w-28 bg-gradient-to-r from-transparent to-primary/40" />
-            <div className="w-8 h-8 rounded-full border border-primary/40 flex items-center justify-center">
-              <Star className="h-3 w-3 text-primary fill-primary/40" />
-            </div>
-            <div className="h-px w-20 sm:w-28 bg-gradient-to-l from-transparent to-primary/40" />
-          </div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.8] mb-6 drop-shadow-lg"
-            dir="rtl"
-            style={{ fontFamily: "'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', serif" }}
-          >
-            {quranArabic}
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-xl sm:text-2xl md:text-3xl font-semibold italic text-gradient-gold leading-relaxed"
-          >
-            "{quranTranslation}"
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="text-sm text-white/50 mt-4 tracking-widest"
-          >
-            — {quranReference}
-          </motion.p>
-
-          {/* Decorative divider bottom */}
-          <div className="flex items-center justify-center gap-4 mt-8">
-            <div className="h-px w-20 sm:w-28 bg-gradient-to-r from-transparent to-primary/40" />
-            <div className="w-8 h-8 rounded-full border border-primary/40 flex items-center justify-center">
-              <Star className="h-3 w-3 text-primary fill-primary/40" />
-            </div>
-            <div className="h-px w-20 sm:w-28 bg-gradient-to-l from-transparent to-primary/40" />
-          </div>
-        </motion.div>
 
         {/* CTA */}
         <motion.div
