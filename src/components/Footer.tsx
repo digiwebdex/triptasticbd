@@ -14,6 +14,7 @@ const Footer = () => {
   const tagline = lc?.company_tagline || (language === "bn" ? "ট্রাভেল হাব" : content?.company_tagline || "Travel Hub");
   const description = lc?.description || (language === "bn" ? "হজ্ব ও উমরাহ সেবায় আমাদের চলার পথ দের যুগ ছাড়িয়ে এবং এক ধাপ এগিয়ে" : content?.description || "Your trusted companion for Hajj & Umrah. Making sacred journeys easy and comfortable.");
   const phone = content?.phone || "+880 1711-999910";
+  const phone2 = content?.phone2 || "+880 1711-999920";
   const email = content?.email || "manasiktravelhub@gmail.com";
   const address = lc?.address || (language === "bn" ? "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল" : content?.address || "595/1, Milk Vita Road, Three-way Intersection\nDewla, Tangail Sadar, Tangail");
   const servicesList = lc?.services_list || (language === "bn" ? ["হজ প্যাকেজ", "উমরাহ প্যাকেজ", "ভিসা প্রসেসিং", "এয়ার টিকেট", "হোটেল বুকিং", "জিয়ারা ট্যুর"] : content?.services_list || ["Hajj Packages", "Umrah Packages", "Visa Processing", "Air Tickets", "Hotel Booking", "Ziyara Tours"]);

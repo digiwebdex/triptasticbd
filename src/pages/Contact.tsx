@@ -16,6 +16,7 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
 
   const phone = content?.phone || "+880 1711-999910";
+  const phone2 = content?.phone2 || "+880 1711-999920";
   const email = content?.email || "manasiktravelhub@gmail.com";
   const location = content?.location || (bn ? "৫৯৫/১, মিল্কভিটা রোড, তিন রাস্তার মোড়, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল" : "595/1, Milk Vita Road, Three-way Intersection, Dewla, Tangail Sadar, Tangail");
   const hours = content?.hours || (bn ? "শনি - বৃহঃ: সকাল ৯টা - রাত ৯টা" : "Sat - Thu: 9AM - 9PM");
