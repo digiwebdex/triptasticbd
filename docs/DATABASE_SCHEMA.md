@@ -24,7 +24,7 @@
 ## Connection
 
 ```bash
-psql -U digiwebdex -d rahekaba -p 5433 -h 127.0.0.1
+psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1
 ```
 
 ---

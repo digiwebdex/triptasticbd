@@ -1,13 +1,13 @@
 -- =============================================
--- RAHE KABA ERP - Complete PostgreSQL Schema
+-- MANASIK TRAVEL HUB ERP - Complete PostgreSQL Schema
 -- Run this on your VPS PostgreSQL instance
 -- =============================================
 
 -- Create database (run as superuser)
--- CREATE DATABASE rahekaba;
+-- CREATE DATABASE manasik;
 
 -- Connect to the database before running the rest
--- \c rahekaba
+-- \c manasik
 
 -- =============================================
 -- EXTENSIONS
@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   moallem_id UUID REFERENCES moallems(id),
   supplier_agent_id UUID REFERENCES supplier_agents(id),
   installment_plan_id UUID REFERENCES installment_plans(id),
-  tracking_id TEXT NOT NULL DEFAULT ('RK-' || upper(substr(gen_random_uuid()::text, 1, 8))),
+  tracking_id TEXT NOT NULL DEFAULT ('MTH-' || upper(substr(gen_random_uuid()::text, 1, 8))),
   booking_type TEXT NOT NULL DEFAULT 'individual',
   num_travelers INTEGER NOT NULL DEFAULT 1,
   total_amount NUMERIC NOT NULL,

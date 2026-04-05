@@ -1,7 +1,7 @@
-# Change History — RAHE KABA Tours & Travels
+# Change History — Manasik Travel Hub
 
 > Complete log of all major changes, features, and fixes
-> **Last Updated:** March 26, 2026
+> **Last Updated:** April 2026
 
 ---
 

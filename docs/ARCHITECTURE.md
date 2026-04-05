@@ -1,7 +1,7 @@
-# Project Architecture — RAHE KABA Tours & Travels
+# Project Architecture — Manasik Travel Hub
 
 > Visual architecture guide, component relationships, and data flows
-> **Last Updated:** March 26, 2026
+> **Last Updated:** April 2026
 
 ---
 
@@ -20,8 +20,7 @@
                     └──┬───────┬───┘
                        │       │
             Static     │       │  /api/*
-            Files      │       │
-            (dist/)    │       │  /uploads/*
+            Files      │       │  /uploads/*
                        │       │
                ┌───────▼──┐  ┌─▼──────────┐
                │  React   │  │  Express   │

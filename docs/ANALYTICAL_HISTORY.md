@@ -1,7 +1,7 @@
-# Analytical History — RAHE KABA Tours & Travels
+# Analytical History — Manasik Travel Hub
 
 > Complete system analytics, performance metrics, data insights, and feature coverage
-> **Last Updated:** March 26, 2026
+> **Last Updated:** April 2026
 
 ---
 

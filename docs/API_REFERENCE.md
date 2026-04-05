@@ -1,15 +1,15 @@
-# API Reference — RAHE KABA Tours & Travels
+# API Reference — Manasik Travel Hub
 
 > Complete API endpoint documentation for the Express backend
-> **Last Updated:** March 26, 2026
+> **Last Updated:** April 2026
 
 ---
 
 ## Base URL
 
 ```
-Production: https://rahekabatravels.com/api
-Local:      http://localhost:3001/api
+Production: https://manasiktravelhub.com/api
+Local:      http://localhost:3004/api
 ```
 
 ## Authentication
@@ -253,7 +253,7 @@ These are database views accessible via the standard GET pattern:
 ### Create a Package
 
 ```bash
-curl -X POST https://rahekabatravels.com/api/packages \
+curl -X POST https://manasiktravelhub.com/api/packages \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -270,14 +270,14 @@ curl -X POST https://rahekabatravels.com/api/packages \
 ### List Bookings (with filters)
 
 ```bash
-curl "https://rahekabatravels.com/api/bookings?status=confirmed&limit=10&order=created_at&ascending=false" \
+curl "https://manasiktravelhub.com/api/bookings?status=confirmed&limit=10&order=created_at&ascending=false" \
   -H "Authorization: Bearer <token>"
 ```
 
 ### Upload a File
 
 ```bash
-curl -X POST https://rahekabatravels.com/api/upload \
+curl -X POST https://manasiktravelhub.com/api/upload \
   -H "Authorization: Bearer <token>" \
   -F "file=@receipt.jpg"
 ```

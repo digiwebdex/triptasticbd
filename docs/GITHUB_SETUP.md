@@ -1,7 +1,7 @@
-# GitHub Setup & Project Transfer — RAHE KABA Tours & Travels
+# GitHub Setup & Project Transfer — Manasik Travel Hub
 
 > GitHub connection, project transfer, and workspace management
-> **Last Updated:** March 26, 2026
+> **Last Updated:** April 2026
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Repository** | https://github.com/digiwebdex/rahe-kaba-journeys-35ffd43e |
+| **Repository** | https://github.com/digiwebdex/sakinah-journey-ec91ec18 |
 | **Branch** | `main` |
 | **Owner** | digiwebdex |
 | **Sync** | Bidirectional (Lovable ↔ GitHub) |
@@ -32,7 +32,7 @@
 ### VPS Deployment
 1. Run `git pull origin main` on VPS
 2. Changes pulled from the same GitHub repository
-3. Build and restart: `npm run build && pm2 restart rahekaba-api`
+3. Build and restart: `npm run build && pm2 restart manasik-api`
 
 ---
 
@@ -74,13 +74,13 @@
 
 ### Development (Lovable)
 - Auto-builds on every change
-- Preview at: `https://id-preview--018dbdbc-7a6f-4e33-9b50-1dab207818d7.lovable.app`
-- Published at: `https://rahe-kaba-journeys.lovable.app`
+- Preview at Lovable preview URL
+- Published at: `https://sakinah-journey.lovable.app`
 
 ### Production (VPS)
 - Manual deploy via `git pull`
-- Live at: `https://rahekabatravels.com`
-- API at: `https://rahekabatravels.com/api`
+- Live at: `https://manasiktravelhub.com`
+- API at: `https://manasiktravelhub.com/api`
 
 ### Code Flow
 
@@ -154,4 +154,4 @@ server/backups/
 2. **Only one GitHub account** can be connected to a Lovable account at a time.
 3. **VPS is independent** — VPS deployment is completely separate from Lovable. It just pulls from the same GitHub repo.
 4. **server/.env is never in Git** — VPS environment variables are managed independently on the server.
-5. **Lovable Cloud backend** — If using Lovable Cloud (Supabase), it transfers with the project automatically.
+5. **Lovable Cloud backend** — If using Lovable Cloud, it transfers with the project automatically.

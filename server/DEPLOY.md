@@ -1,4 +1,4 @@
-// VPS Deployment Guide - Rahe Kaba ERP
+// VPS Deployment Guide - Manasik Travel Hub ERP
 // ======================================
 
 ## Quick Start
@@ -11,20 +11,20 @@ sudo apt install postgresql postgresql-contrib -y
 
 # Create database and user
 sudo -u postgres psql << 'SQL'
-CREATE USER rahekaba WITH PASSWORD 'your_strong_password';
-CREATE DATABASE rahekaba OWNER rahekaba;
-GRANT ALL PRIVILEGES ON DATABASE rahekaba TO rahekaba;
+CREATE USER digiwebdex WITH PASSWORD 'your_strong_password';
+CREATE DATABASE manasik OWNER digiwebdex;
+GRANT ALL PRIVILEGES ON DATABASE manasik TO digiwebdex;
 SQL
 
 # Run schema
-cd /var/www/rahe-kaba-journeys-72ccca69/server
-sudo -u postgres psql -d rahekaba -f schema.sql
+cd /var/www/manasik-travel-hub/server
+sudo -u postgres psql -d manasik -f schema.sql
 ```
 
 ### 2. Setup Node.js Backend
 
 ```bash
-cd /var/www/rahe-kaba-journeys-72ccca69/server
+cd /var/www/manasik-travel-hub/server
 
 # Create .env from example
 cp .env.example .env
@@ -43,7 +43,7 @@ node index.js
 ### 3. Update Frontend Build
 
 ```bash
-cd /var/www/rahe-kaba-journeys-72ccca69
+cd /var/www/manasik-travel-hub
 
 # Add API URL to .env
 echo 'VITE_API_URL=/api' >> .env
@@ -55,25 +55,25 @@ npm run build
 ### 4. Update Nginx Config
 
 ```bash
-sudo tee /etc/nginx/sites-available/rahekaba << 'NGINX'
+sudo tee /etc/nginx/sites-available/manasik << 'NGINX'
 server {
     listen 80;
-    server_name rahekabatravels.com www.rahekabatravels.com;
+    server_name manasiktravelhub.com www.manasiktravelhub.com;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name rahekabatravels.com www.rahekabatravels.com;
+    server_name manasiktravelhub.com www.manasiktravelhub.com;
 
-    ssl_certificate /etc/letsencrypt/live/rahekabatravels.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/rahekabatravels.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/manasiktravelhub.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/manasiktravelhub.com/privkey.pem;
 
     client_max_body_size 10M;
 
     # API proxy to Node.js
     location /api/ {
-        proxy_pass http://127.0.0.1:3001;
+        proxy_pass http://127.0.0.1:3004;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -84,12 +84,12 @@ server {
 
     # Uploaded files
     location /uploads/ {
-        alias /var/www/rahe-kaba-journeys-72ccca69/server/uploads/;
+        alias /var/www/manasik-travel-hub/server/uploads/;
     }
 
     # Frontend (static files)
     location / {
-        root /var/www/rahe-kaba-journeys-72ccca69/dist;
+        root /var/www/manasik-travel-hub/dist;
         index index.html;
         try_files $uri $uri/ /index.html;
     }
@@ -104,8 +104,8 @@ sudo nginx -t && sudo systemctl restart nginx
 ```bash
 sudo npm install -g pm2
 
-cd /var/www/rahe-kaba-journeys-72ccca69/server
-pm2 start index.js --name "rahekaba-api"
+cd /var/www/manasik-travel-hub/server
+pm2 start index.js --name "manasik-api"
 pm2 save
 pm2 startup  # Follow the instructions to auto-start on reboot
 ```
@@ -117,14 +117,14 @@ Export data from Lovable Cloud and import to your PostgreSQL:
 - Then write import scripts or use pg_dump/pg_restore
 
 ### Default Login
-- Email: admin@rahekaba.com
+- Email: admin@manasiktravelhub.com
 - Password: Admin@123456 (CHANGE THIS IMMEDIATELY)
 
 ## Architecture
 
 ```
 Browser → Nginx (443)
-            ├── /api/* → Node.js (3001) → PostgreSQL
+            ├── /api/* → Node.js (3004) → PostgreSQL
             ├── /uploads/* → Static files
             └── /* → dist/index.html (React SPA)
 ```
