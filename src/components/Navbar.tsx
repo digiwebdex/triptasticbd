@@ -66,7 +66,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-soft">
       <div className="container mx-auto flex items-center justify-between h-24 px-4">
         <button onClick={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="flex items-center cursor-pointer">
-          <img src={logo} alt="Manasik Travel Hub Logo" className="h-28 w-auto object-contain" />
+          <img src={logo} alt="Manasik Travel Hub Logo" className="h-20 w-auto object-contain" />
         </button>
 
         <div className="hidden lg:flex items-center gap-8">

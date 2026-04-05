@@ -186,14 +186,16 @@ export const auth = {
     if (!token && !localUser) return { data: { user: null } };
 
     try {
-      const res = await apiFetch('/auth/me');
+      const res = await apiFetch('/auth/me', { skipRedirect: true });
       if (res.ok) {
         const resData = await res.json();
         const freshUser = { ...(resData?.user || {}), roles: resData?.roles || [] };
         TokenManager.setUser(freshUser);
         return { data: { user: freshUser } };
       }
-    } catch {}
+    } catch {
+      // Auth check failed silently - fall through to local user
+    }
 
     if (!localUser) return { data: { user: null } };
     return { data: { user: { id: localUser.id, email: localUser.email, ...localUser } } };
