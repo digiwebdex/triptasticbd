@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Star, MapPin, Shield, Plane, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import heroBanner1 from "@/assets/hero-banner-1.jpg";
 import { useSiteContent } from "@/hooks/useSiteContent";
@@ -11,35 +11,21 @@ const defaultSlides = [
 
 const HeroSection = () => {
   const { data: content } = useSiteContent("hero");
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const lc = content?.[language];
-  const badge = lc?.badge || t("hero.badge");
-  const ctaPrimary = lc?.cta_primary || t("hero.ctaPrimary");
-  const ctaSecondary = lc?.cta_secondary || t("hero.ctaSecondary");
-  
-  // CMS-managed Quranic verse
-  const quranArabic = content?.quran_arabic || "وَأَتِمُّوا الْحَجَّ وَالْعُمْرَةَ لِلَّهِ";
-  const quranTranslation = lc?.quran_translation || (language === "bn" ? "আর তোমরা আল্লাহর সন্তুষ্টির জন্য হজ্জ ও ওমরাহ পূর্ণ কর" : "And complete the Hajj and Umrah for Allah");
-  const quranReference = lc?.quran_reference || (language === "bn" ? "সূরা আল-বাকারা: ১৯৬" : "Surah Al-Baqarah: 196");
 
   // CMS-managed hero slides
   const cmsSlides = content?.hero_slides;
   const activeSlides = cmsSlides && cmsSlides.length > 0
-    ? cmsSlides.map((s: any) => ({ image: s.src || s.image, alt: s.alt || "Hero slide" }))
-    : defaultSlides;
-
-  const stats = lc?.stats || [
-    { value: "15+", label: t("hero.stat.years") },
-    { value: "10K+", label: t("hero.stat.pilgrims") },
-    { value: "50+", label: t("hero.stat.packages") },
-    { value: "4.9★", label: t("hero.stat.rating") },
-  ];
-
-  const defaultIcons = [Shield, Star, Plane, MapPin];
+    ? cmsSlides.map((s: any) => ({
+        image: s.src || s.image,
+        mobileImage: s.mobile_src || s.mobile_image || s.src || s.image,
+        alt: s.alt || "Hero slide",
+      }))
+    : defaultSlides.map(s => ({ ...s, mobileImage: s.image }));
 
   useEffect(() => {
+    if (activeSlides.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
     }, 6000);
@@ -48,24 +34,42 @@ const HeroSection = () => {
 
   const goTo = useCallback((dir: number) => {
     setCurrentSlide((prev) => (prev + dir + activeSlides.length) % activeSlides.length);
-  }, []);
+  }, [activeSlides.length]);
 
   return (
-    <section id="hero" className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden">
+    <section
+      id="hero"
+      className="relative w-full overflow-hidden
+        h-[50vh] min-h-[280px] max-h-[420px]
+        sm:h-[55vh] sm:min-h-[340px] sm:max-h-[500px]
+        md:h-[60vh] md:min-h-[400px] md:max-h-[600px]
+        lg:h-[70vh] lg:min-h-[480px] lg:max-h-[750px]
+        xl:h-[75vh] xl:max-h-[850px]"
+    >
       {/* Background Images with Ken Burns effect */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
-          initial={{ opacity: 0, scale: 1.15 }}
-          animate={{ opacity: 1, scale: 1.05 }}
+          initial={{ opacity: 0, scale: 1.08 }}
+          animate={{ opacity: 1, scale: 1.02 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
           className="absolute inset-0"
         >
+          {/* Desktop image */}
           <img
-             src={activeSlides[currentSlide]?.image}
+            src={activeSlides[currentSlide]?.image}
             alt={activeSlides[currentSlide]?.alt}
-            className="w-full h-full object-cover"
+            className="hidden sm:block w-full h-full object-cover object-center"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
+          {/* Mobile image (uses mobile_image if available from CMS) */}
+          <img
+            src={activeSlides[currentSlide]?.mobileImage}
+            alt={activeSlides[currentSlide]?.alt}
+            className="block sm:hidden w-full h-full object-cover object-[center_30%]"
             loading="eager"
             fetchPriority="high"
             decoding="async"
@@ -73,49 +77,47 @@ const HeroSection = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Lighter overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
-
-      {/* Decorative Islamic geometric corner patterns */}
-      <div className="absolute top-0 left-0 w-40 h-40 opacity-10">
-        <svg viewBox="0 0 200 200" className="w-full h-full text-primary">
-          <path d="M0 0 L200 0 L100 100 Z" fill="currentColor" opacity="0.3" />
-          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="1" />
-        </svg>
-      </div>
-      <div className="absolute top-0 right-0 w-40 h-40 opacity-10 rotate-90">
-        <svg viewBox="0 0 200 200" className="w-full h-full text-primary">
-          <path d="M0 0 L200 0 L100 100 Z" fill="currentColor" opacity="0.3" />
-          <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="1" />
-        </svg>
-      </div>
-
-      {/* Slide Navigation */}
-      <button onClick={() => goTo(-1)} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 flex items-center justify-center text-white hover:bg-primary/40 transition-all">
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-      <button onClick={() => goTo(1)} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 flex items-center justify-center text-white hover:bg-primary/40 transition-all">
-        <ChevronRight className="h-5 w-5" />
-      </button>
-
-      {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {activeSlides.map((_: any, i: number) => (
-          <button
-            key={i}
-            onClick={() => setCurrentSlide(i)}
-            className={`h-1.5 rounded-full transition-all duration-500 ${i === currentSlide ? "bg-primary w-10" : "bg-white/40 w-4 hover:bg-white/60"}`}
-          />
-        ))}
-      </div>
+      {/* Subtle gradient overlay for any future text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
 
       {/* Top accent line */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-gold z-10" />
 
-      <div className="relative z-10 container mx-auto px-4 pt-28 sm:pt-32 pb-16 sm:pb-20 text-center">
+      {/* Slide Navigation - only show if multiple slides */}
+      {activeSlides.length > 1 && (
+        <>
+          <button
+            onClick={() => goTo(-1)}
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/20 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/40 transition-all"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          </button>
+          <button
+            onClick={() => goTo(1)}
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/20 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/40 transition-all"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+          </button>
 
-
-      </div>
+          {/* Slide Indicators */}
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 sm:gap-2">
+            {activeSlides.map((_: any, i: number) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSlide(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`h-1 sm:h-1.5 rounded-full transition-all duration-500 ${
+                  i === currentSlide
+                    ? "bg-primary w-7 sm:w-10"
+                    : "bg-white/40 w-3 sm:w-4 hover:bg-white/60"
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </section>
   );
 };
