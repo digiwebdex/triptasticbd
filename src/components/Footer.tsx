@@ -70,12 +70,12 @@ const Footer = () => {
         {/* Location labels */}
         <div className="absolute bottom-16 left-6 md:left-12">
           <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
-            <p className="text-xs font-bold text-foreground">{language === "bn" ? "🇧🇩 বাংলাদেশ" : "🇧🇩 Bangladesh"}</p>
+            <p className="text-xs font-bold text-foreground">{lc?.journey_from || (language === "bn" ? "🇧🇩 বাংলাদেশ" : "🇧🇩 Bangladesh")}</p>
           </div>
         </div>
         <div className="absolute bottom-16 right-6 md:right-12">
           <div className="bg-primary/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
-            <p className="text-xs font-bold text-primary-foreground">{language === "bn" ? "🕋 মক্কা শরীফ" : "🕋 Makkah Sharif"}</p>
+            <p className="text-xs font-bold text-primary-foreground">{lc?.journey_to || (language === "bn" ? "🕋 মক্কা শরীফ" : "🕋 Makkah Sharif")}</p>
           </div>
         </div>
 
