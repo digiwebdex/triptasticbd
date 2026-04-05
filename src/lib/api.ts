@@ -46,38 +46,43 @@ class TokenManager {
 }
 
 // Fetch wrapper with auto-refresh
-async function apiFetch(path: string, options: RequestInit = {}): Promise<any> {
+async function apiFetch(path: string, options: RequestInit & { skipRedirect?: boolean } = {}): Promise<any> {
+  const { skipRedirect, ...fetchOptions } = options;
   const token = TokenManager.getAccessToken();
   const refreshToken = TokenManager.getRefreshToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string> || {}),
+    ...(fetchOptions.headers as Record<string, string> || {}),
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  let res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  let res = await fetch(`${API_URL}${path}`, { ...fetchOptions, headers });
 
   // Auto-refresh on 401 when we had an authenticated session
   if (res.status === 401 && token) {
     if (refreshToken) {
-      const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-      });
+      try {
+        const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
 
-      if (refreshRes.ok) {
-        const data = await refreshRes.json();
-        TokenManager.setTokens(data.access_token, data.refresh_token);
-        headers['Authorization'] = `Bearer ${data.access_token}`;
-        res = await fetch(`${API_URL}${path}`, { ...options, headers });
+        if (refreshRes.ok) {
+          const data = await refreshRes.json();
+          TokenManager.setTokens(data.access_token, data.refresh_token);
+          headers['Authorization'] = `Bearer ${data.access_token}`;
+          res = await fetch(`${API_URL}${path}`, { ...fetchOptions, headers });
+        }
+      } catch {
+        // Refresh endpoint unreachable, fall through
       }
     }
 
-    // If still unauthorized (invalid/expired/stale token), force clean re-login
+    // If still unauthorized, clear tokens but only redirect for non-auth-check paths
     if (res.status === 401) {
       TokenManager.clear();
-      if (!path.startsWith('/auth/')) {
+      if (!skipRedirect && !path.startsWith('/auth/')) {
         window.location.href = '/auth';
       }
       throw new Error('Session expired');
