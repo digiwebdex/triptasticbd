@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { Plane, Building2, Bus, MapPin, BookOpen, CreditCard, Globe, Users } from "lucide-react";
+import { Plane, Building2, Bus, MapPin, BookOpen, CreditCard, Globe, Users, SendHorizonal, FileText, Wallet, Hotel } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
-const iconMap: Record<string, any> = { BookOpen, Globe, CreditCard, Plane, Building2, Bus, MapPin, Users };
+const iconMap: Record<string, any> = { BookOpen, Globe, CreditCard, Plane, Building2, Bus, MapPin, Users, SendHorizonal, FileText, Wallet, Hotel };
 
 const ServicesSection = () => {
   const { data: content } = useSiteContent("services");
@@ -18,9 +18,9 @@ const ServicesSection = () => {
   const defaultServices = [
     { icon: "BookOpen", title: "হজ্ব", desc: "পবিত্র হজ্ব পালনের জন্য সম্পূর্ণ প্যাকেজ ও গাইডেন্স সেবা" },
     { icon: "Globe", title: "উমরাহ হজ্ব", desc: "সারা বছর উমরাহ পালনের জন্য বিশেষ প্যাকেজ ও ব্যবস্থাপনা" },
-    { icon: "Plane", title: "এয়ার টিকিট", desc: "দেশে-বিদেশে সকল এয়ারলাইন্সের টিকিট বুকিং সেবা" },
-    { icon: "Building2", title: "হোটেল বুকিং", desc: "মক্কা-মদিনাসহ বিশ্বের যেকোনো স্থানে হোটেল বুকিং" },
-    { icon: "CreditCard", title: "রিয়াল এক্সচেঞ্জ", desc: "সৌদি রিয়াল ক্রয়-বিক্রয় ও বৈদেশিক মুদ্রা বিনিময় সেবা" },
+    { icon: "SendHorizonal", title: "এয়ার টিকিট", desc: "দেশে-বিদেশে সকল এয়ারলাইন্সের টিকিট বুকিং ব্যবস্থাপনা" },
+    { icon: "Hotel", title: "হোটেল বুকিং", desc: "মক্কা-মদিনাসহ বিশ্বের যেকোনো স্থানে হোটেল বুকিং সেবা" },
+    { icon: "Wallet", title: "রিয়াল এক্সচেঞ্জ", desc: "সৌদি রিয়াল ক্রয়-বিক্রয় ও বৈদেশিক মুদ্রা বিনিময় সেবা" },
   ];
 
   const items = lc?.items || defaultServices;
