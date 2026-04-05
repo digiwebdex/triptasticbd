@@ -108,7 +108,7 @@ const Footer = () => {
           <div className="md:col-span-1">
             <div className="flex items-center gap-3 mb-5">
               <div className="bg-white/95 rounded-xl p-1.5">
-                <img src={logo} alt={`${companyName} Logo`} className="h-12 w-auto object-contain" />
+                <img src={language === "bn" ? logoBn : logoEn} alt={`${companyName} Logo`} className="h-12 w-auto object-contain" />
               </div>
               <div>
                 <span className="font-heading text-lg font-bold text-white">{companyName}</span>
