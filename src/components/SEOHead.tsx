@@ -88,7 +88,7 @@ export function organizationJsonLd() {
     description: DEFAULT_DESCRIPTION,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "595/1, Milk Vita Road, Three-way Intersection, Dewla",
+      streetAddress: "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড় সংলগ্ন, দেওলা",
       addressLocality: "Tangail Sadar, Tangail",
       addressCountry: "BD",
     },
