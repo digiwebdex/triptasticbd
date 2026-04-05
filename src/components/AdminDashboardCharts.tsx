@@ -41,8 +41,11 @@ const AdminDashboardCharts = ({
   const [showDueCustomers, setShowDueCustomers] = useState(false);
 
   const financials = useMemo(() => {
-    const totalSales = bookings.reduce((s, b) => s + Number(b.total_amount || 0), 0);
-    const totalHajji = bookings.reduce((s, b) => s + Number(b.num_travelers || 0), 0);
+    // CRITICAL: Exclude cancelled bookings from all financial calculations
+    const activeBookings = bookings.filter(b => b.status !== "cancelled");
+    
+    const totalSales = activeBookings.reduce((s, b) => s + Number(b.total_amount || 0), 0);
+    const totalHajji = activeBookings.reduce((s, b) => s + Number(b.num_travelers || 0), 0);
 
     const customerPaymentsIn = payments
       .filter(p => p.status === "completed")
@@ -53,7 +56,7 @@ const AdminDashboardCharts = ({
       .reduce((s, e) => s + Number(e.amount || 0), 0);
     const totalIncomeReceived = customerPaymentsIn + moallemDepositsIn + cashbookIncome;
 
-    const bookingProfit = bookings.reduce((s, b) => {
+    const bookingProfit = activeBookings.reduce((s, b) => {
       const selling = Number(b.total_amount || 0);
       const cost = Number(b.total_cost || 0);
       const commission = Number(b.total_commission || 0);
@@ -63,19 +66,22 @@ const AdminDashboardCharts = ({
     const generalExpenses = expenses
       .filter(e => !e.booking_id)
       .reduce((s, e) => s + Number(e.amount || 0), 0);
-    const netProfit = bookingProfit - generalExpenses;
+    const cashbookExpense = dailyCashbook
+      .filter(e => e.type === "expense")
+      .reduce((s, e) => s + Number(e.amount || 0), 0);
+    const netProfit = bookingProfit - generalExpenses - cashbookExpense;
 
     const walletAccounts = accounts.filter(a => a.type === "asset");
     const cashBalance = walletAccounts.reduce((s, a) => s + Number(a.balance || 0), 0);
 
     const moallemDue = moallems.reduce((s, m) => s + Number(m.total_due || 0), 0);
-    const customerDue = bookings.reduce((s, b) => s + Number(b.due_amount || 0), 0);
+    const customerDue = activeBookings.reduce((s, b) => s + Number(b.due_amount || 0), 0);
     const totalReceivable = moallemDue + customerDue;
 
-    const bookingSupplierDue = bookings.reduce((s, b) => s + Number(b.supplier_due || 0), 0);
+    const bookingSupplierDue = activeBookings.reduce((s, b) => s + Number(b.supplier_due || 0), 0);
     const contractSupplierDue = supplierContracts.reduce((s, c) => s + Number(c.total_due || 0), 0);
     const supplierDue = bookingSupplierDue + contractSupplierDue;
-    const commissionDue = bookings.reduce((s, b) => s + Number(b.commission_due || 0), 0);
+    const commissionDue = activeBookings.reduce((s, b) => s + Number(b.commission_due || 0), 0);
     const totalPayable = supplierDue + commissionDue;
 
     return {
@@ -86,7 +92,7 @@ const AdminDashboardCharts = ({
 
   const dueCustomers = useMemo(() => {
     const map: Record<string, { name: string; phone: string; totalDue: number; totalAmount: number; bookingCount: number; bookings: any[] }> = {};
-    bookings.filter(b => Number(b.due_amount || 0) > 0).forEach(b => {
+    bookings.filter(b => b.status !== "cancelled" && Number(b.due_amount || 0) > 0).forEach(b => {
       const key = b.guest_phone || b.guest_name || b.tracking_id;
       if (!map[key]) {
         map[key] = { name: b.guest_name || "N/A", phone: b.guest_phone || "", totalDue: 0, totalAmount: 0, bookingCount: 0, bookings: [] };
@@ -109,7 +115,7 @@ const AdminDashboardCharts = ({
     }
     cards.push(
       { label: "Cash Balance", value: fmt(financials.cashBalance), icon: Wallet, color: financials.cashBalance >= 0 ? "text-primary" : "text-destructive", onClick: () => navigate("/admin/accounting") },
-      { label: "Total Bookings", value: bookings.length, icon: Package, color: "text-foreground", onClick: () => navigate("/admin/bookings") },
+      { label: "Total Bookings", value: bookings.filter(b => b.status !== "cancelled").length, icon: Package, color: "text-foreground", onClick: () => navigate("/admin/bookings") },
       { label: "Total Hajji", value: financials.totalHajji, icon: Users, color: "text-foreground", onClick: () => navigate("/admin/customers") },
       { label: "Customer Due", value: fmt(financials.customerDue), icon: UserCheck, color: financials.customerDue > 0 ? "text-yellow-500" : "text-emerald-500", onClick: () => setShowDueCustomers(true) },
     );

@@ -61,7 +61,7 @@ export default function AdminAnalyticsPage() {
       revenue: 0, expenses: 0, profit: 0, bookings: 0,
     }));
     const yr = Number(selectedYear);
-    bookings.filter(b => getYear(new Date(b.created_at)) === yr).forEach(b => {
+    bookings.filter(b => b.status !== "cancelled" && getYear(new Date(b.created_at)) === yr).forEach(b => {
       const m = getMonth(new Date(b.created_at));
       data[m].bookings += 1;
     });

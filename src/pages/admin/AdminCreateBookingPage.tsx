@@ -518,8 +518,8 @@ export default function AdminCreateBookingPage() {
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Status</label>
             <select className={inputClass} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-              {["pending", "confirmed", "completed", "cancelled"].map(s => (
-                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              {["pending", "confirmed", "visa_processing", "ticket_issued", "completed", "cancelled"].map(s => (
+                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1).replace("_", " ")}</option>
               ))}
             </select>
           </div>
