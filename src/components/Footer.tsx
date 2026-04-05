@@ -1,6 +1,6 @@
 import { Phone, Mail, MapPin, Facebook, Youtube, Instagram, Star, Plane } from "lucide-react";
 import sslcommerzPayWith from "@/assets/payment/sslcommerz-pay-with.png";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-nobg.png";
 import footerJourney from "@/assets/footer-journey.jpg";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
