@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
-import logoImg from "@/assets/logo-nobg.png";
+import logoImg from "@/assets/logo-pdf.png";
 import QRCode from "qrcode";
 import { getSignatureData, SignatureData } from "./pdfSignature";
 import { registerBengaliFont, bengaliCellHook } from "./pdfFontLoader";
