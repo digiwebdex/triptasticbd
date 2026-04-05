@@ -39,8 +39,8 @@ const HeroSection = () => {
   return (
     <section
       id="hero"
-      className="relative w-full overflow-hidden
-        min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[90vh]"
+      className="relative w-full overflow-hidden"
+    >
     >
       {/* Background Images with Ken Burns effect */}
       <AnimatePresence mode="wait">
