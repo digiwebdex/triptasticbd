@@ -3,7 +3,7 @@ import { Plane, Building2, Bus, MapPin, BookOpen, CreditCard, Globe, Users, Send
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
-const iconMap: Record<string, any> = { BookOpen, Globe, CreditCard, Plane, Building2, Bus, MapPin, Users };
+const iconMap: Record<string, any> = { BookOpen, Globe, CreditCard, Plane, Building2, Bus, MapPin, Users, SendHorizonal, FileText, Wallet, Hotel };
 
 const ServicesSection = () => {
   const { data: content } = useSiteContent("services");
