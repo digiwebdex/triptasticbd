@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Plane, Building2, Bus, MapPin, BookOpen, CreditCard, Globe, Users } from "lucide-react";
+import { Plane, Building2, Bus, MapPin, BookOpen, CreditCard, Globe, Users, SendHorizonal, FileText, Wallet, Hotel } from "lucide-react";
 import { useSiteContent } from "@/hooks/useSiteContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
