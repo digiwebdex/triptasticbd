@@ -67,8 +67,8 @@ const HeroSection = () => {
           className="absolute inset-0"
         >
           <img
-            src={heroSlides[currentSlide].image}
-            alt={heroSlides[currentSlide].alt}
+             src={activeSlides[currentSlide]?.image}
+            alt={activeSlides[currentSlide]?.alt}
             className="w-full h-full object-cover"
             loading="eager"
             fetchPriority="high"
