@@ -159,11 +159,11 @@ const Footer = () => {
 
         <div className="mt-14 pt-8 border-t border-white/8">
           <div className="flex flex-wrap justify-center gap-4 mb-6 text-sm text-white/40">
-            <a href="/privacy-policy" className="hover:text-primary transition-colors">{language === "bn" ? "গোপনীয়তা নীতি" : "Privacy Policy"}</a>
+            <a href="/privacy-policy" className="hover:text-primary transition-colors">{t("footer.privacyPolicy")}</a>
             <span className="text-white/15">|</span>
-            <a href="/terms-conditions" className="hover:text-primary transition-colors">{language === "bn" ? "শর্তাবলী" : "Terms & Conditions"}</a>
+            <a href="/terms-conditions" className="hover:text-primary transition-colors">{t("footer.termsConditions")}</a>
             <span className="text-white/15">|</span>
-            <a href="/refund-policy" className="hover:text-primary transition-colors">{language === "bn" ? "রিফান্ড নীতি" : "Refund Policy"}</a>
+            <a href="/refund-policy" className="hover:text-primary transition-colors">{t("footer.refundPolicy")}</a>
           </div>
           <div className="flex justify-center mb-5">
             <img src={sslcommerzPayWith} alt="Payment Methods - Pay With SSLCommerz" className="h-10 md:h-12 object-contain opacity-60" />
