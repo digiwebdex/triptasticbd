@@ -17,7 +17,7 @@ const DEFAULT_CONFIG: PdfCompanyConfig = {
   tagline: "Hajj & Umrah Services",
   phone: "+880 1711-999910",
   email: "manasiktravelhub.info@gmail.com",
-  address: "595/1, Milk Vita Road, Three-way Intersection, Dewla, Tangail Sadar, Tangail",
+  address: "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড় সংলগ্ন, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল",
   website: "https://manasiktravelhub.com",
   footer_text: "Thank you for choosing Manasik Travel Hub!",
   footer_contact: "This is a computer-generated document. For queries: +880 1711-999910 | manasiktravelhub.info@gmail.com",
