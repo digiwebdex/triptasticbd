@@ -336,10 +336,10 @@ function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string): number
   const contactParts: string[] = [];
   if (company.phone) contactParts.push(`Tel: ${company.phone}`);
   if (company.email) contactParts.push(`Email: ${company.email}`);
-  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 28);
+  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 23);
   if (company.address) {
     const addr = company.address.length > 70 ? company.address.substring(0, 70) + "..." : company.address;
-    doc.text(addr, textX, 33);
+    doc.text(addr, textX, 28);
   }
 
   // Gold accent line

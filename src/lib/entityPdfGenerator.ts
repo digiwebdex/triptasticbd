@@ -68,12 +68,11 @@ function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string, qrDataU
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100);
-  doc.text(cfg.tagline, textX, 23);
   const contactParts: string[] = [];
   if (company.phone) contactParts.push(`Tel: ${company.phone}`);
   if (company.email) contactParts.push(`Email: ${company.email}`);
-  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 28);
-  if (company.address) doc.text(company.address, textX, 33);
+  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 23);
+  if (company.address) doc.text(company.address, textX, 28);
 
   // Gold accent line
   doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
