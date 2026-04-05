@@ -12,7 +12,7 @@ const Footer = () => {
   const lc = content?.[language];
   const companyName = content?.company_name || "MANASIK";
   const tagline = lc?.company_tagline || (language === "bn" ? "ট্রাভেল হাব" : content?.company_tagline || "Travel Hub");
-  const description = lc?.description || (language === "bn" ? "হজ্জ ও উমরাহের বিশ্বস্ত সঙ্গী। পবিত্র যাত্রা সহজ করে আসছি।" : content?.description || "Your trusted companion for Hajj & Umrah. Making sacred journeys easy and comfortable.");
+  const description = lc?.description || (language === "bn" ? "হজ্ব ও উমরাহ সেবায় আমাদের চলার পথ দের যুগ ছাড়িয়ে এবং এক ধাপ এগিয়ে" : content?.description || "Your trusted companion for Hajj & Umrah. Making sacred journeys easy and comfortable.");
   const phone = content?.phone || "+880 1711-993562";
   const email = content?.email || "manasiktravelhub@gmail.com";
   const address = lc?.address || (language === "bn" ? "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল" : content?.address || "595/1, Milk Vita Road, Three-way Intersection\nDewla, Tangail Sadar, Tangail");
