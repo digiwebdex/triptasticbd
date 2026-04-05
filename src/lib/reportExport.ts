@@ -104,7 +104,7 @@ function addCompanyHeader(doc: jsPDF, logoBase64: string | null, qrDataUrl: stri
 
   // Logo
   if (logoBase64) {
-    try { doc.addImage(logoBase64, "PNG", 14, 10, 16, 16); } catch { /* skip */ }
+    try { doc.addImage(logoBase64, "PNG", 14, 8, 28, 14); } catch { /* skip */ }
   }
 
   // QR code top-right
