@@ -39,8 +39,7 @@ const HeroSection = () => {
   return (
     <section
       id="hero"
-      className="relative w-full overflow-hidden
-        min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-[90vh]"
+      className="relative w-full overflow-hidden"
     >
       {/* Background Images with Ken Burns effect */}
       <AnimatePresence mode="wait">
@@ -50,22 +49,21 @@ const HeroSection = () => {
           animate={{ opacity: 1, scale: 1.02 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className="absolute inset-0"
         >
           {/* Desktop image */}
           <img
             src={activeSlides[currentSlide]?.image}
             alt={activeSlides[currentSlide]?.alt}
-            className="hidden sm:block w-full h-full object-cover object-center"
+            className="hidden sm:block w-full h-auto"
             loading="eager"
             fetchPriority="high"
             decoding="async"
           />
-          {/* Mobile image (uses mobile_image if available from CMS) */}
+          {/* Mobile image */}
           <img
             src={activeSlides[currentSlide]?.mobileImage}
             alt={activeSlides[currentSlide]?.alt}
-            className="block sm:hidden w-full h-full object-cover object-[center_30%]"
+            className="block sm:hidden w-full h-auto"
             loading="eager"
             fetchPriority="high"
             decoding="async"
