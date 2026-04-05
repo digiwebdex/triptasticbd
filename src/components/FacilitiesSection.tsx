@@ -8,7 +8,7 @@ const iconMap: Record<string, any> = { Shield, Headphones, Hotel, Car, BookOpen,
 const defaultFacilitiesBn = [
   { icon: "Shield", title: "ভিসা প্রসেসিং", desc: "উমরাহ ভিসা সহ প্রবাসী ভাইদের জিয়ারা ভিসা প্রসেসিং করণে সর্বাত্মক সহায়তা।" },
   { icon: "Plane", title: "ফ্লাইট বুকিং", desc: "আন্তর্জাতিক ও অভ্যন্তরীণ টিকিট বুকিং ও ইস্যু করণ" },
-  { icon: "Hotel", title: "হোটেল ব্যবস্থা", desc: "হারাম শরীফের কাছে মানসম্মত হোটেল" },
+  { icon: "Hotel", title: "হোটেল ব্যবস্থা", desc: "পবিত্র হারাম শরীফের সন্নিকটে যে কোনো মানের হোটেল বুকিং সেবা" },
   { icon: "Car", title: "পরিবহন সেবা", desc: "এয়ারপোর্ট ট্রান্সফার ও স্থানীয় পরিবহন" },
   { icon: "BookOpen", title: "প্রশিক্ষণ", desc: "হজ্জ ও ওমরাহ প্রশিক্ষণ কার্যক্রম" },
   { icon: "Users", title: "গাইড সেবা", desc: "অভিজ্ঞ বাংলাভাষী গাইড" },
