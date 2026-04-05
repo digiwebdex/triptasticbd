@@ -5,14 +5,7 @@ import { motion } from "framer-motion";
 import { Search, Package, CheckCircle2, Clock, Plane, FileCheck, Loader2, History, X, User, ShieldCheck, LogIn } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const STATUS_STEPS = [
-  { key: "pending", label: "Pending", icon: Clock },
-  { key: "confirmed", label: "Confirmed", icon: ShieldCheck },
-  { key: "visa_processing", label: "Visa Processing", icon: FileCheck },
-  { key: "ticket_issued", label: "Ticket Issued", icon: Plane },
-  { key: "completed", label: "Completed", icon: CheckCircle2 },
-];
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const HISTORY_KEY = "rk_tracking_history";
 
@@ -38,6 +31,7 @@ const removeFromHistory = (id: string) => {
 const TrackBooking = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [trackingId, setTrackingId] = useState(searchParams.get("id") || "");
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -47,13 +41,20 @@ const TrackBooking = () => {
   const [userBookings, setUserBookings] = useState<any[]>([]);
   const [loadingUser, setLoadingUser] = useState(false);
 
+  const STATUS_STEPS = [
+    { key: "pending", label: t("track.statusPending"), icon: Clock },
+    { key: "confirmed", label: t("track.statusConfirmed"), icon: ShieldCheck },
+    { key: "visa_processing", label: t("track.statusVisaProcessing"), icon: FileCheck },
+    { key: "ticket_issued", label: t("track.statusTicketIssued"), icon: Plane },
+    { key: "completed", label: t("track.statusCompleted"), icon: CheckCircle2 },
+  ];
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user || null));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setUser(s?.user || null));
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch user's bookings when logged in
   useEffect(() => {
     if (!user) { setUserBookings([]); return; }
     setLoadingUser(true);
@@ -142,9 +143,7 @@ const TrackBooking = () => {
     }
   };
 
-  // Determine if user owns this booking (can see full details)
   const isOwner = user && booking && booking.user_id === user.id;
-
   const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
   return (
@@ -153,18 +152,17 @@ const TrackBooking = () => {
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-            <span className="text-primary text-sm font-medium tracking-[0.3em] uppercase">Track</span>
+            <span className="text-primary text-sm font-medium tracking-[0.3em] uppercase">{t("track.label")}</span>
             <h1 className="font-heading text-3xl md:text-4xl font-bold mt-3 mb-3">
-              Track Your <span className="text-gradient-gold">Booking</span>
+              {t("track.heading")} <span className="text-gradient-gold">{t("track.headingHighlight")}</span>
             </h1>
-            <p className="text-muted-foreground text-sm">Enter your Tracking ID or Phone Number to view your booking status</p>
+            <p className="text-muted-foreground text-sm">{t("track.description")}</p>
           </motion.div>
 
-          {/* Search Bar */}
           <div className="flex gap-3 mb-6">
             <input
               type="text"
-              placeholder="Enter Tracking ID or Phone Number"
+              placeholder={t("track.placeholder")}
               className="flex-1 bg-secondary border border-border rounded-md px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 uppercase"
               value={trackingId}
               onChange={(e) => setTrackingId(e.target.value)}
@@ -176,17 +174,16 @@ const TrackBooking = () => {
               className="bg-gradient-gold text-primary-foreground font-semibold px-6 py-3 rounded-md text-sm hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-              Track
+              {t("track.button")}
             </button>
           </div>
 
-          {/* Recent History + User Bookings (shown when no result displayed) */}
           {!booking && !loading && (
             <div className="space-y-6 mb-10">
               {history.length > 0 && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card border border-border rounded-xl p-5">
                   <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
-                    <History className="h-4 w-4 text-primary" /> Recent Searches
+                    <History className="h-4 w-4 text-primary" /> {t("track.recentSearches")}
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {history.map((id) => (
@@ -209,12 +206,12 @@ const TrackBooking = () => {
               {user && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-card border border-border rounded-xl p-5">
                   <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
-                    <User className="h-4 w-4 text-primary" /> Your Bookings
+                    <User className="h-4 w-4 text-primary" /> {t("track.yourBookings")}
                   </h3>
                   {loadingUser ? (
-                    <p className="text-xs text-muted-foreground">Loading...</p>
+                    <p className="text-xs text-muted-foreground">{t("common.loading")}</p>
                   ) : userBookings.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No bookings found.</p>
+                    <p className="text-xs text-muted-foreground">{t("track.noBookings")}</p>
                   ) : (
                     <div className="space-y-2">
                       {userBookings.map((b: any) => (
@@ -226,7 +223,7 @@ const TrackBooking = () => {
                           <div>
                             <p className="font-mono text-sm font-bold text-primary">{b.tracking_id}</p>
                             <p className="text-xs text-muted-foreground">
-                              {b.packages?.name || "Package"} • {new Date(b.created_at).toLocaleDateString()}
+                              {b.packages?.name || t("track.package")} • {new Date(b.created_at).toLocaleDateString()}
                             </p>
                           </div>
                           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${statusColor(b.status)}`}>
@@ -241,35 +238,32 @@ const TrackBooking = () => {
             </div>
           )}
 
-          {/* Results */}
           {loading && (
             <div className="text-center py-12 text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-3" />
-              Searching...
+              {t("track.searching")}
             </div>
           )}
 
           {!loading && searched && !booking && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
               <Package className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-              <p className="text-muted-foreground mb-2">No booking found with this Tracking ID</p>
-              <p className="text-xs text-muted-foreground">Please check your ID and try again, or <a href="/auth" className="text-primary hover:underline">sign in</a> to view your bookings.</p>
+              <p className="text-muted-foreground mb-2">{t("track.notFound")}</p>
+              <p className="text-xs text-muted-foreground">{t("track.notFoundHint")} <a href="/auth" className="text-primary hover:underline">{t("track.signInLink")}</a> {t("track.notFoundHintEnd")}</p>
             </motion.div>
           )}
 
           {!loading && booking && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-              {/* Back to search */}
               <button
                 onClick={() => { setBooking(null); setSearched(false); setTrackingId(""); }}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
-                ← Search another booking
+                {t("track.searchAnother")}
               </button>
 
-              {/* Status Timeline */}
               <div className="bg-card border border-border rounded-xl p-6">
-                <h2 className="font-heading text-lg font-bold mb-6">Booking Status</h2>
+                <h2 className="font-heading text-lg font-bold mb-6">{t("track.bookingStatus")}</h2>
                 <div className="flex items-center justify-between relative">
                   <div className="absolute top-5 left-0 right-0 h-0.5 bg-border" />
                   <div
@@ -301,87 +295,82 @@ const TrackBooking = () => {
                 </div>
               </div>
 
-              {/* Booking Details — PUBLIC (limited info) */}
               <div className="bg-card border border-border rounded-xl p-6">
-                <h2 className="font-heading text-lg font-bold mb-4">Booking Details</h2>
+                <h2 className="font-heading text-lg font-bold mb-4">{t("track.bookingDetails")}</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                   <div>
-                    <p className="text-muted-foreground">Tracking ID</p>
+                    <p className="text-muted-foreground">{t("track.trackingId")}</p>
                     <p className="font-mono font-bold text-primary">{booking.tracking_id}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Customer</p>
+                    <p className="text-muted-foreground">{t("track.customer")}</p>
                     <p className="font-medium">{booking.guest_name || "N/A"}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Package</p>
+                    <p className="text-muted-foreground">{t("track.package")}</p>
                     <p className="font-medium">{booking.packages?.name || "N/A"}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Travelers</p>
+                    <p className="text-muted-foreground">{t("track.travelers")}</p>
                     <p className="font-medium">{booking.num_travelers}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Status</p>
+                    <p className="text-muted-foreground">{t("track.status")}</p>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${statusColor(booking.status)}`}>
                       {statusLabel(booking.status)}
                     </span>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Payment Status</p>
+                    <p className="text-muted-foreground">{t("track.paymentStatus")}</p>
                     <p className="font-medium">
                       {Number(booking.due_amount || 0) <= 0 ? (
-                        <span className="text-emerald font-semibold">Fully Paid ✅</span>
+                        <span className="text-emerald font-semibold">{t("track.fullyPaid")}</span>
                       ) : (
-                        <span className="text-destructive font-semibold">Due: {fmt(booking.due_amount || 0)}</span>
+                        <span className="text-destructive font-semibold">{t("track.due")}: {fmt(booking.due_amount || 0)}</span>
                       )}
                     </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Booked On</p>
+                    <p className="text-muted-foreground">{t("track.bookedOn")}</p>
                     <p className="font-medium">{new Date(booking.created_at).toLocaleDateString()}</p>
                   </div>
                   {booking.notes && (
                     <div className="col-span-2 sm:col-span-3">
-                      <p className="text-muted-foreground">Notes</p>
+                      <p className="text-muted-foreground">{t("track.notes")}</p>
                       <p className="font-medium text-sm">{booking.notes}</p>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Login prompt for full details (non-authenticated users) */}
               {!user && (
                 <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 text-center">
                   <LogIn className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm font-semibold mb-1">Want to see full details?</p>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Login to your dashboard to view payment history, documents, installment schedule and more.
-                  </p>
+                  <p className="text-sm font-semibold mb-1">{t("track.wantFullDetails")}</p>
+                  <p className="text-xs text-muted-foreground mb-3">{t("track.loginPrompt")}</p>
                   <a
                     href="/auth"
                     className="inline-flex items-center gap-2 bg-gradient-gold text-primary-foreground font-semibold px-5 py-2 rounded-md text-sm hover:opacity-90 transition-opacity"
                   >
-                    <LogIn className="h-4 w-4" /> Login to Dashboard
+                    <LogIn className="h-4 w-4" /> {t("track.loginButton")}
                   </a>
                 </div>
               )}
 
-              {/* Full financial details — ONLY for authenticated owner */}
               {isOwner && (
                 <div className="bg-card border border-border rounded-xl p-6">
-                  <h2 className="font-heading text-lg font-bold mb-4">Financial Summary</h2>
+                  <h2 className="font-heading text-lg font-bold mb-4">{t("track.financialSummary")}</h2>
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
-                      <p className="text-muted-foreground">Total Amount</p>
+                      <p className="text-muted-foreground">{t("track.totalAmount")}</p>
                       <p className="font-medium">{fmt(booking.total_amount)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Paid</p>
+                      <p className="text-muted-foreground">{t("track.paid")}</p>
                       <p className="font-medium text-emerald">{fmt(booking.paid_amount)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Due</p>
+                      <p className="text-muted-foreground">{t("track.due")}</p>
                       <p className="font-medium text-destructive">{fmt(booking.due_amount || 0)}</p>
                     </div>
                   </div>
@@ -389,7 +378,7 @@ const TrackBooking = () => {
               )}
 
               <p className="text-center text-xs text-muted-foreground">
-                For any questions, <a href="/#contact" className="text-primary hover:underline">contact us</a> or call +880 1711-999910 / +880 1711-999920
+                {t("track.contactUs")} <a href="/#contact" className="text-primary hover:underline">{t("track.contactLink")}</a> {t("track.orCall")} +880 1711-999910 / +880 1711-999920
               </p>
             </motion.div>
           )}

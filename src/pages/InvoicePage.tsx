@@ -4,12 +4,14 @@ import { supabase } from "@/lib/api";
 import { generateInvoice, generateReceipt, CompanyInfo, InvoicePayment } from "@/lib/invoiceGenerator";
 import { Printer, Download, Search } from "lucide-react";
 import { generateVerificationId } from "@/lib/pdfQrCode";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
 export default function InvoicePage() {
   const [searchParams] = useSearchParams();
+  const { t } = useLanguage();
   const [trackingId, setTrackingId] = useState(searchParams.get("id") || "");
   const [booking, setBooking] = useState<any>(null);
   const [payments, setPayments] = useState<any[]>([]);
@@ -39,14 +41,13 @@ export default function InvoicePage() {
       .eq("tracking_id", trackingId.trim().toUpperCase())
       .single();
 
-    // Fetch package separately since VPS API doesn't support nested selects
     if (bk && bk.package_id) {
       const { data: pkgData } = await supabase.from("packages").select("name, type, duration_days, start_date, price").eq("id", bk.package_id).maybeSingle();
       if (pkgData) (bk as any).packages = pkgData;
     }
 
     if (bkErr || !bk) {
-      setError("Booking not found. Please check the tracking ID.");
+      setError(t("invoice.notFound"));
       setLoading(false);
       return;
     }
@@ -83,14 +84,12 @@ export default function InvoicePage() {
   const handleDownloadInvoice = async () => {
     if (!booking || !customer) return;
 
-    // Fetch members and package separately since VPS API doesn't support nested selects
     const [membersRes] = await Promise.all([
       supabase.from("booking_members").select("*").eq("booking_id", booking.id).order("created_at", { ascending: true }),
     ]);
 
     const invoiceBooking = { ...booking };
 
-    // Ensure package info is present
     if (!invoiceBooking.packages && invoiceBooking.package_id) {
       const { data: pkgData } = await supabase.from("packages").select("name, type, duration_days, start_date, price").eq("id", invoiceBooking.package_id).maybeSingle();
       if (pkgData) invoiceBooking.packages = pkgData;
@@ -98,7 +97,6 @@ export default function InvoicePage() {
 
     const memberRows = (membersRes.data || []) as any[];
 
-    // Resolve package names for members
     const memberPkgIds = memberRows.filter((m: any) => m.package_id && !m.packages).map((m: any) => m.package_id);
     if (memberPkgIds.length > 0) {
       const uniqueIds = Array.from(new Set(memberPkgIds));
@@ -138,29 +136,29 @@ export default function InvoicePage() {
         <div className="max-w-4xl mx-auto flex gap-3 items-center">
           <input
             className="flex-1 bg-secondary border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            placeholder="ট্র্যাকিং আইডি লিখুন (e.g. RK-XXXXXXXX)"
+            placeholder={t("invoice.searchPlaceholder")}
             value={trackingId}
             onChange={e => setTrackingId(e.target.value)}
             onKeyDown={e => e.key === "Enter" && search()}
           />
           <button onClick={search} className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90">
-            <Search className="h-4 w-4" /> খুঁজুন
+            <Search className="h-4 w-4" /> {t("invoice.searchButton")}
           </button>
         </div>
       </div>
 
       {error && <p className="text-center text-destructive py-8 print:hidden">{error}</p>}
-      {loading && <p className="text-center text-muted-foreground py-8 print:hidden">লোড হচ্ছে...</p>}
+      {loading && <p className="text-center text-muted-foreground py-8 print:hidden">{t("invoice.loading")}</p>}
 
       {booking && customer && (
         <>
           {/* Action buttons - hidden on print */}
           <div className="print:hidden max-w-4xl mx-auto p-4 flex gap-3">
             <button onClick={handlePrint} className="flex items-center gap-2 bg-secondary border border-border px-4 py-2 rounded-lg text-sm hover:bg-secondary/80">
-              <Printer className="h-4 w-4" /> প্রিন্ট
+              <Printer className="h-4 w-4" /> {t("invoice.print")}
             </button>
             <button onClick={handleDownloadInvoice} className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm hover:bg-primary/90">
-              <Download className="h-4 w-4" /> ইনভয়েস ডাউনলোড
+              <Download className="h-4 w-4" /> {t("invoice.download")}
             </button>
           </div>
 
@@ -184,19 +182,19 @@ export default function InvoicePage() {
             <div className="flex items-start justify-between border-b-2 border-gray-800 pb-4 mb-6 relative" style={{ zIndex: 1 }}>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{company.name}</h1>
-                <p className="text-sm text-gray-600">Hajj & Umrah Services</p>
+                <p className="text-sm text-gray-600">{t("invoice.hajjUmrahServices")}</p>
                 <p className="text-xs text-gray-500 mt-1">{company.phone} | {company.email}</p>
                 <p className="text-xs text-gray-500" style={{ fontFamily: "'Noto Sans Bengali', Arial, sans-serif" }}>{companyAddressBn}</p>
               </div>
               <div className="text-right flex flex-col items-end gap-1">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800">INVOICE</h2>
+                  <h2 className="text-xl font-bold text-gray-800">{t("invoice.invoiceTitle")}</h2>
                   <p className="text-sm text-gray-600">#{booking.tracking_id}</p>
                   <p className="text-sm text-gray-600">{fmtDate(new Date().toISOString())}</p>
                 </div>
                 {/* QR Verification Stamp */}
                 <div className="border border-gray-700 rounded p-1.5 mt-1 flex flex-col items-center">
-                  <p className="text-[7px] font-bold text-green-700 mb-0.5">✓ Verified Booking</p>
+                  <p className="text-[7px] font-bold text-green-700 mb-0.5">{t("invoice.verifiedBooking")}</p>
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://manasiktravelhub.com/verify/${generateVerificationId(booking.tracking_id)}`)}`}
                     alt="QR Code"
@@ -204,55 +202,55 @@ export default function InvoicePage() {
                     style={{ imageRendering: "pixelated" }}
                   />
                   <p className="text-[5.5px] font-bold text-gray-700 mt-0.5">{generateVerificationId(booking.tracking_id)}</p>
-                  <p className="text-[6px] text-gray-400 mt-0.5">Scan to verify booking authenticity</p>
+                  <p className="text-[6px] text-gray-400 mt-0.5">{t("invoice.scanToVerify")}</p>
                 </div>
               </div>
             </div>
 
             {/* Customer Info */}
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="font-bold text-sm text-gray-700 mb-2">Bill To:</h3>
+              <h3 className="font-bold text-sm text-gray-700 mb-2">{t("invoice.billTo")}</h3>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <p><span className="text-gray-500">Name:</span> {customer.full_name || booking.guest_name || "N/A"}</p>
-                <p><span className="text-gray-500">Phone:</span> {customer.phone || booking.guest_phone || "N/A"}</p>
-                <p><span className="text-gray-500">Passport:</span> {customer.passport_number || booking.guest_passport || "N/A"}</p>
-                <p><span className="text-gray-500">Address:</span> {customer.address || booking.guest_address || "N/A"}</p>
+                <p><span className="text-gray-500">{t("invoice.name")}</span> {customer.full_name || booking.guest_name || "N/A"}</p>
+                <p><span className="text-gray-500">{t("invoice.phone")}</span> {customer.phone || booking.guest_phone || "N/A"}</p>
+                <p><span className="text-gray-500">{t("invoice.passport")}</span> {customer.passport_number || booking.guest_passport || "N/A"}</p>
+                <p><span className="text-gray-500">{t("invoice.address")}</span> {customer.address || booking.guest_address || "N/A"}</p>
                 {(customer.email || booking.guest_email) && (
-                  <p><span className="text-gray-500">Email:</span> {customer.email || booking.guest_email}</p>
+                  <p><span className="text-gray-500">{t("invoice.email")}</span> {customer.email || booking.guest_email}</p>
                 )}
                 {customer.moallem_name && (
-                  <p><span className="text-gray-500">Moallem:</span> {customer.moallem_name}</p>
+                  <p><span className="text-gray-500">{t("invoice.moallem")}</span> {customer.moallem_name}</p>
                 )}
               </div>
               {booking.notes && (
-                <p className="text-sm mt-2"><span className="text-gray-500">Notes:</span> {booking.notes}</p>
+                <p className="text-sm mt-2"><span className="text-gray-500">{t("track.notes")}:</span> {booking.notes}</p>
               )}
             </div>
 
             {/* Package Info */}
             <div className="mb-6">
-              <h3 className="font-bold text-sm text-gray-700 mb-2">Package Details</h3>
+              <h3 className="font-bold text-sm text-gray-700 mb-2">{t("invoice.packageDetails")}</h3>
               <div className="grid grid-cols-4 gap-3 text-sm">
-                <div className="bg-gray-50 p-2 rounded"><span className="text-gray-500 block text-xs">Package</span>{booking.packages?.name || "N/A"}</div>
-                <div className="bg-gray-50 p-2 rounded"><span className="text-gray-500 block text-xs">Type</span>{booking.packages?.type || "N/A"}</div>
-                <div className="bg-gray-50 p-2 rounded"><span className="text-gray-500 block text-xs">Duration</span>{booking.packages?.duration_days ? `${booking.packages.duration_days} Days` : "N/A"}</div>
-                <div className="bg-gray-50 p-2 rounded"><span className="text-gray-500 block text-xs">Travelers</span>{booking.num_travelers}</div>
+                <div className="bg-gray-50 p-2 rounded"><span className="text-gray-500 block text-xs">{t("track.package")}</span>{booking.packages?.name || "N/A"}</div>
+                <div className="bg-gray-50 p-2 rounded"><span className="text-gray-500 block text-xs">{t("invoice.type")}</span>{booking.packages?.type || "N/A"}</div>
+                <div className="bg-gray-50 p-2 rounded"><span className="text-gray-500 block text-xs">{t("invoice.duration")}</span>{booking.packages?.duration_days ? `${booking.packages.duration_days} ${t("invoice.days")}` : "N/A"}</div>
+                <div className="bg-gray-50 p-2 rounded"><span className="text-gray-500 block text-xs">{t("invoice.travelers")}</span>{booking.num_travelers}</div>
               </div>
             </div>
 
             {/* Payment Schedule */}
             <div className="mb-6">
-              <h3 className="font-bold text-sm text-gray-700 mb-2">Payment Schedule</h3>
+              <h3 className="font-bold text-sm text-gray-700 mb-2">{t("invoice.paymentSchedule")}</h3>
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className="bg-gray-800 text-white">
                     <th className="p-2 text-left">#</th>
-                    <th className="p-2 text-right">Amount</th>
-                    <th className="p-2 text-center">Due Date</th>
-                    <th className="p-2 text-center">Status</th>
-                    <th className="p-2 text-center">Paid Date</th>
-                    <th className="p-2 text-center">Method</th>
-                    <th className="p-2 text-center print:hidden">Receipt</th>
+                    <th className="p-2 text-right">{t("invoice.amount")}</th>
+                    <th className="p-2 text-center">{t("invoice.dueDate")}</th>
+                    <th className="p-2 text-center">{t("track.status")}</th>
+                    <th className="p-2 text-center">{t("invoice.paidDate")}</th>
+                    <th className="p-2 text-center">{t("invoice.method")}</th>
+                    <th className="p-2 text-center print:hidden">{t("invoice.receipt")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -263,7 +261,7 @@ export default function InvoicePage() {
                       <td className="p-2 border-b border-gray-200 text-center">{fmtDate(p.due_date)}</td>
                       <td className="p-2 border-b border-gray-200 text-center">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.status === "completed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                          {p.status === "completed" ? "Paid" : "Pending"}
+                          {p.status === "completed" ? t("invoice.paid") : t("invoice.pending")}
                         </span>
                       </td>
                       <td className="p-2 border-b border-gray-200 text-center">{fmtDate(p.paid_at)}</td>
@@ -276,7 +274,7 @@ export default function InvoicePage() {
                     </tr>
                   ))}
                   {payments.length === 0 && (
-                    <tr><td colSpan={7} className="p-4 text-center text-gray-400">No payments recorded</td></tr>
+                    <tr><td colSpan={7} className="p-4 text-center text-gray-400">{t("invoice.noPayments")}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -284,16 +282,16 @@ export default function InvoicePage() {
 
             {/* Summary */}
             <div className="bg-gray-800 text-white rounded-lg p-4 flex justify-between items-center mb-8">
-              <div><span className="text-gray-300 text-xs">Total Amount</span><p className="text-lg font-bold">৳{Number(booking.total_amount).toLocaleString()}</p></div>
-              <div><span className="text-gray-300 text-xs">Total Paid</span><p className="text-lg font-bold text-green-400">৳{totalPaid.toLocaleString()}</p></div>
-              <div><span className="text-gray-300 text-xs">Balance Due</span><p className="text-lg font-bold text-red-400">৳{Math.max(0, totalDue).toLocaleString()}</p></div>
+              <div><span className="text-gray-300 text-xs">{t("invoice.totalAmount")}</span><p className="text-lg font-bold">৳{Number(booking.total_amount).toLocaleString()}</p></div>
+              <div><span className="text-gray-300 text-xs">{t("invoice.totalPaid")}</span><p className="text-lg font-bold text-green-400">৳{totalPaid.toLocaleString()}</p></div>
+              <div><span className="text-gray-300 text-xs">{t("invoice.balanceDue")}</span><p className="text-lg font-bold text-red-400">৳{Math.max(0, totalDue).toLocaleString()}</p></div>
             </div>
 
             {/* Signature Section */}
             <div className="flex justify-between items-end mt-16 pt-4">
               <div className="text-center">
                 <div className="border-t border-gray-400 w-48 mb-1"></div>
-                <p className="text-xs text-gray-500">Customer Signature</p>
+                <p className="text-xs text-gray-500">{t("invoice.customerSignature")}</p>
               </div>
               <div className="text-center">
                 {signatureData?.stamp_url && (
@@ -303,19 +301,19 @@ export default function InvoicePage() {
                   <img src={signatureData.signature_url} alt="Signature" className="max-h-12 object-contain mx-auto mb-1" />
                 )}
                 <div className="border-t border-gray-400 w-48 mb-1"></div>
-                <p className="text-xs text-gray-800 font-semibold">{signatureData?.authorized_name || "Authorized Signature"}</p>
+                <p className="text-xs text-gray-800 font-semibold">{signatureData?.authorized_name || t("invoice.authorizedSignature")}</p>
                 {signatureData?.designation && (
                   <p className="text-[10px] text-gray-400 mt-0.5">{signatureData.designation}</p>
                 )}
                 {!signatureData?.designation && (
-                  <p className="text-[10px] text-gray-400 mt-1">Company Seal</p>
+                  <p className="text-[10px] text-gray-400 mt-1">{t("invoice.companySeal")}</p>
                 )}
               </div>
             </div>
 
             {/* Footer */}
             <p className="text-center text-[10px] text-gray-400 mt-8 italic">
-              This is a computer-generated document. For queries: {company.phone} | {company.email}
+              {t("invoice.generatedNote")} {company.phone} | {company.email}
             </p>
           </div>
         </>
