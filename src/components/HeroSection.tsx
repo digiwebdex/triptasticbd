@@ -51,7 +51,7 @@ const HeroSection = () => {
   }, [activeSlides.length]);
 
   const goTo = useCallback((dir: number) => {
-    setCurrentSlide((prev) => (prev + dir + heroSlides.length) % heroSlides.length);
+    setCurrentSlide((prev) => (prev + dir + activeSlides.length) % activeSlides.length);
   }, []);
 
   return (
