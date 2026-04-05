@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import logoImg from "@/assets/logo-nobg.png";
+import logoImg from "@/assets/logo-pdf.png";
 import { getSignatureData, SignatureData } from "./pdfSignature";
 import { generateTrackingQr, addQrToDoc, addPaymentWatermark, getWatermarkStatus } from "./pdfQrCode";
 import { supabase } from "@/lib/api";
