@@ -92,13 +92,22 @@ export function organizationJsonLd() {
       addressLocality: "Tangail Sadar, Tangail",
       addressCountry: "BD",
     },
-    telephone: "+8801711999910",
+    telephone: ["+8801711999910", "+8801711999920"],
     sameAs: ["https://www.facebook.com/profile.php?id=61585173125908"],
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: "+8801711999910",
-      contactType: "customer service",
-      availableLanguage: ["Bengali", "English"],
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        telephone: "+8801711999910",
+        contactType: "customer service",
+        availableLanguage: ["Bengali", "English"],
+      },
+      {
+        "@type": "ContactPoint",
+        telephone: "+8801711999920",
+        contactType: "customer service",
+        availableLanguage: ["Bengali", "English"],
+      },
+    ],
     },
   };
 }
