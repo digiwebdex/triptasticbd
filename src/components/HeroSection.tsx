@@ -104,7 +104,7 @@ const HeroSection = () => {
 
       {/* Slide Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {heroSlides.map((_, i) => (
+        {activeSlides.map((_: any, i: number) => (
           <button
             key={i}
             onClick={() => setCurrentSlide(i)}
