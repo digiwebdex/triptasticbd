@@ -61,13 +61,16 @@ export default function AdminMoallemsPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // Aggregate booking data per moallem
+  // Aggregate booking data per moallem — use trigger-maintained values for accuracy
   const moallemStats = useMemo(() => {
-    const map: Record<string, { hajji: number; received: number; due: number }> = {};
+    const map: Record<string, { hajji: number; received: number; due: number; contractDue: number }> = {};
     moallems.forEach(m => {
       const received = Number(m.total_deposit || 0);
-      const due = Number(m.contracted_amount || 0) - received;
-      map[m.id] = { hajji: m.contracted_hajji || 0, received, due: Math.max(0, due) };
+      // total_due is trigger-maintained from actual bookings (SUM booking amounts - SUM paid)
+      const bookingDue = Number(m.total_due || 0);
+      // contractDue = contracted_amount - deposits (for contract tracking)
+      const contractDue = Math.max(0, Number(m.contracted_amount || 0) - received);
+      map[m.id] = { hajji: m.contracted_hajji || 0, received, due: bookingDue, contractDue };
     });
     return map;
   }, [moallems]);
