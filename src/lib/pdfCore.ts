@@ -160,18 +160,21 @@ export async function addPdfHeader(
   doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
   doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 21);
 
-  // Contact
+  // Contact line with both phones
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100);
-  doc.text(`Tel: ${cfg.phone}  |  Email: ${cfg.email}`, textX, 26);
+  const phone2 = (cfg as any).phone2 || "+880 1711-999920";
+  doc.text(`Tel: ${cfg.phone}, ${phone2}  |  Email: ${cfg.email}`, textX, 26);
 
-  // Address (Bengali support)
+  // Address
   if (cfg.address) {
+    doc.setFontSize(7);
+    doc.setTextColor(100);
     if (hasBengali(cfg.address)) {
       await addBengaliText(doc, cfg.address, textX, 31, { fontSize: 7, color: "#646464" });
     } else {
-      const addr = cfg.address.length > 80 ? cfg.address.substring(0, 80) + "..." : cfg.address;
+      const addr = cfg.address.length > 100 ? cfg.address.substring(0, 100) + "..." : cfg.address;
       doc.text(addr, textX, 31);
     }
   }
