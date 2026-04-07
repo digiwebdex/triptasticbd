@@ -1,0 +1,1 @@
+ALTER TABLE public.bookings ALTER COLUMN tracking_id SET DEFAULT ('MTH-' || UPPER(SUBSTR(gen_random_uuid()::text, 1, 8)));
