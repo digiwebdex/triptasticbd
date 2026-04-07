@@ -191,11 +191,11 @@ function addCompanyFooter(doc: jsPDF, sig: SignatureData, cfg: PdfCompanyConfig)
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255);
-  doc.text(cfg.company_name, pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.text(cfg.footer_text, pageWidth / 2, pageHeight - 10, { align: "center" });
 
   doc.setFontSize(5.5);
   doc.setFont("helvetica", "normal");
-  doc.text(`Tel: ${cfg.phone}  |  Email: ${cfg.email}  |  ${cfg.address}`, pageWidth / 2, pageHeight - 5, { align: "center" });
+  doc.text(cfg.footer_contact, pageWidth / 2, pageHeight - 5, { align: "center" });
   doc.setTextColor(0);
 }
 
