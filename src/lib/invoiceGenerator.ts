@@ -327,7 +327,14 @@ async function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string): 
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(company.name || "MANASIK Travel Hub", textX, 18);
+  doc.text(company.name || "MANASIK Travel Hub", textX, 16);
+
+  // Tagline
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
+  const cfg = await getPdfCompanyConfig();
+  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 21);
 
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
@@ -336,13 +343,13 @@ async function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string): 
   const contactParts: string[] = [];
   if (company.phone) contactParts.push(`Tel: ${company.phone}`);
   if (company.email) contactParts.push(`Email: ${company.email}`);
-  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 23);
+  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 26);
   if (company.address) {
     if (hasBengali(company.address)) {
-      await addBengaliText(doc, company.address, textX, 28, { fontSize: 7, color: "#646464" });
+      await addBengaliText(doc, company.address, textX, 31, { fontSize: 7, color: "#646464" });
     } else {
       const addr = company.address.length > 80 ? company.address.substring(0, 80) + "..." : company.address;
-      doc.text(addr, textX, 28);
+      doc.text(addr, textX, 31);
     }
   }
 
