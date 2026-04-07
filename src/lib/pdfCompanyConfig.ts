@@ -45,6 +45,7 @@ export async function getPdfCompanyConfig(): Promise<PdfCompanyConfig> {
       company_name: val.company_name || DEFAULT_CONFIG.company_name,
       tagline: val.tagline || DEFAULT_CONFIG.tagline,
       phone: val.phone || DEFAULT_CONFIG.phone,
+      phone2: val.phone2 || DEFAULT_CONFIG.phone2,
       email: val.email || DEFAULT_CONFIG.email,
       address: val.address || DEFAULT_CONFIG.address,
       website: val.website || DEFAULT_CONFIG.website,
