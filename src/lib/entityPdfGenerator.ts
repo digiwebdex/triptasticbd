@@ -9,7 +9,7 @@ import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from
 import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
 import { formatBDT } from "@/lib/utils";
 
-const GOLD = { r: 245, g: 158, b: 11 };
+const GOLD = { r: 197, g: 165, b: 90 };
 const DARK = { r: 35, g: 40, b: 48 };
 
 const fmtDate = (d: string | null) =>
@@ -64,19 +64,26 @@ async function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string, q
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(company.name || cfg.company_name, textX, 18);
+  doc.text(company.name || cfg.company_name, textX, 16);
+
+  // Tagline
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
+  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 21);
+
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100);
   const contactParts: string[] = [];
   if (company.phone) contactParts.push(`Tel: ${company.phone}`);
   if (company.email) contactParts.push(`Email: ${company.email}`);
-  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 23);
+  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 26);
   if (company.address) {
     if (hasBengali(company.address)) {
-      await addBengaliText(doc, company.address, textX, 28, { fontSize: 7, color: "#646464" });
+      await addBengaliText(doc, company.address, textX, 31, { fontSize: 7, color: "#646464" });
     } else {
-      doc.text(company.address, textX, 28);
+      doc.text(company.address, textX, 31);
     }
   }
 

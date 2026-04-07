@@ -75,7 +75,7 @@ const formatAmount = (value: number) => {
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-const GOLD = { r: 245, g: 158, b: 11 };
+const GOLD = { r: 197, g: 165, b: 90 };
 const DARK = { r: 35, g: 40, b: 48 };
 const LIGHT_BG = { r: 250, g: 249, b: 247 };
 
@@ -327,7 +327,14 @@ async function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string): 
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(company.name || "MANASIK Travel Hub", textX, 18);
+  doc.text(company.name || "MANASIK Travel Hub", textX, 16);
+
+  // Tagline
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
+  const cfg = await getPdfCompanyConfig();
+  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 21);
 
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
@@ -336,13 +343,13 @@ async function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string): 
   const contactParts: string[] = [];
   if (company.phone) contactParts.push(`Tel: ${company.phone}`);
   if (company.email) contactParts.push(`Email: ${company.email}`);
-  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 23);
+  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 26);
   if (company.address) {
     if (hasBengali(company.address)) {
-      await addBengaliText(doc, company.address, textX, 28, { fontSize: 7, color: "#646464" });
+      await addBengaliText(doc, company.address, textX, 31, { fontSize: 7, color: "#646464" });
     } else {
       const addr = company.address.length > 80 ? company.address.substring(0, 80) + "..." : company.address;
-      doc.text(addr, textX, 28);
+      doc.text(addr, textX, 31);
     }
   }
 
@@ -373,7 +380,7 @@ function addInvoiceTitleBlock(
 
   // Status badge (right side)
   const statusColors: Record<string, { r: number; g: number; b: number }> = {
-    completed: { r: 34, g: 139, b: 34 },
+    completed: { r: GOLD.r, g: GOLD.g, b: GOLD.b },
     pending: { r: 210, g: 140, b: 20 },
     confirmed: { r: 30, g: 100, b: 200 },
   };
