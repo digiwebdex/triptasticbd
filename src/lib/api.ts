@@ -673,22 +673,54 @@ const storage = {
 // =============================================
 const functions = {
   async invoke(name: string, options?: { body?: any }) {
+    // Try VPS first
     try {
-      // Route auth/* paths to /api/auth/*, known direct routes to /api/*, else /api/functions/*
       const path = name.startsWith('auth/') ? `/${name}` : ['track-booking', 'verify-invoice'].includes(name) ? `/${name}` : `/functions/${name}`;
       const res = await apiFetch(path, {
         method: 'POST',
         body: options?.body ? JSON.stringify(options.body) : undefined,
       });
-      if (!res.ok) {
-        const err = await res.json();
-        return { data: null, error: { message: err.error } };
+      const contentType = res.headers?.get?.('content-type') || '';
+      if (contentType.includes('application/json')) {
+        if (!res.ok) {
+          const err = await res.json();
+          return { data: null, error: { message: err.error } };
+        }
+        const data = await res.json();
+        return { data, error: null };
       }
-      const data = await res.json();
-      return { data, error: null };
-    } catch (err: any) {
-      return { data: null, error: { message: err.message } };
+      // Non-JSON response (HTML 404 etc.) — fall through to Supabase edge function
+    } catch {
+      // VPS unreachable — fall through
     }
+
+    // Fallback: call Supabase Edge Function directly
+    if (supabaseClient) {
+      try {
+        const supabaseUrl = SUPABASE_URL;
+        const url = `${supabaseUrl}/functions/v1/${name}`;
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+        };
+        const res = await fetch(url, {
+          method: 'POST',
+          headers,
+          body: options?.body ? JSON.stringify(options.body) : undefined,
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Edge function error' }));
+          return { data: null, error: { message: err.error || 'Edge function error' } };
+        }
+        const data = await res.json();
+        return { data, error: null };
+      } catch (err: any) {
+        return { data: null, error: { message: err.message } };
+      }
+    }
+
+    return { data: null, error: { message: 'Function not available' } };
   },
 };
 
