@@ -1865,6 +1865,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      recalculate_wallet_balances: {
+        Args: never
+        Returns: {
+          account_name: string
+          new_balance: number
+          old_balance: number
+        }[]
+      }
     }
     Enums: {
       app_role:
