@@ -1,54 +1,69 @@
+## PDF System Redesign Plan
 
+### Current State (Audit Summary)
+The system already has a solid PDF foundation:
+- **invoiceGenerator.ts** (1270 lines) — Individual + Family invoices with QR, watermark, signature, Bengali support
+- **entityPdfGenerator.ts** (535 lines) — Moallem, Supplier, Customer profile PDFs
+- **reportExport.ts** (405 lines) — Standard + Hajji report PDFs and Excel exports
+- **pdfFontLoader.ts** — Bengali canvas bridge
+- **pdfQrCode.ts** — QR codes, watermarks, verification IDs
+- **pdfSignature.ts** — Dynamic signature/stamp
+- **pdfCompanyConfig.ts** — Centralized branding
 
-## Plan: Admin Banner Image Upload System
+### What Needs Improvement
+1. **Duplicated header/footer logic** across 3 files — needs unified core
+2. **Missing PDF types**: Payment Receipt, Expense Voucher, Statement PDFs, Daily Cashbook, Commission Report
+3. **Report PDFs lack summary cards** at top
+4. **No page numbers** on multi-page reports
+5. **No filter summary** shown on reports
+6. **Table headers don't repeat** on new pages (autoTable handles this but needs `showHead: 'everyPage'`)
 
-### Current State
-- Hero section reads slides from CMS (`site_content` table, `hero` section, `hero_slides` array)
-- Each slide has `src` (desktop image URL) and `mobile_src` (mobile image URL) fields
-- Currently admins type URLs manually in text inputs — no file upload capability
-- A `company-assets` storage bucket already exists (public)
-- `HotelImageUpload` component exists as a reference pattern for Supabase storage uploads
+### Implementation Plan (3 Phases)
 
-### What Will Be Built
+#### Phase 1: Unified PDF Core (`src/lib/pdfCore.ts`)
+Create a single reusable module with:
+- `addPdfHeader()` — branded header (logo, tagline, contact, gold bar)
+- `addPdfFooter()` — gold bar footer with page numbers
+- `addPdfTitle()` — document title badge + status badge
+- `addSummaryCards()` — executive summary boxes
+- `addFilterSummary()` — report filter display
+- `addSignatureBlock()` — signature section
+- Constants: GOLD, DARK, LIGHT_BG colors
+- Helpers: formatAmount, fmtDate, ensurePageSpace
 
-A dedicated **Banner Image Upload** system in the CMS editor that replaces the manual URL text fields for `hero_slides` with proper file upload fields showing recommended sizes.
+#### Phase 2: New PDF Document Types
+Create missing document generators:
+- **Payment Receipt PDF** — single payment receipt for customer
+- **Moallem Payment Receipt** — receipt for moallem deposit
+- **Supplier Payment Voucher** — voucher for supplier payment
+- **Expense Voucher** — company expense voucher
+- **Customer Statement** — all transactions for a customer
+- **Moallem Statement** — all transactions for a moallem  
+- **Supplier Statement** — all transactions for a supplier
+- **Daily Cashbook PDF** — daily income/expense log
+- **Commission Report PDF** — moallem commission summary
+- **Income/Expense/Profit Report PDFs** — financial reports with summary cards
 
-### Changes
+#### Phase 3: Enhance Existing PDFs
+- Add page numbers to all multi-page PDFs
+- Add `showHead: 'everyPage'` to all autoTable calls
+- Add summary cards to report PDFs
+- Improve filename generation with dates
+- Add filter summary to reports
+- Ensure BDT formatting consistency
 
-**1. Create `src/components/admin/BannerImageUpload.tsx`**
-- Reusable upload component (based on `HotelImageUpload` pattern)
-- Uploads to `company-assets` bucket under `banners/` folder
-- Shows image preview after upload
-- Displays recommended size info (Desktop: 1920×700px, Mobile: 800×800px)
-- Has clear/remove button
-
-**2. Modify `src/components/AdminCmsEditor.tsx`**
-- Update the `hero_slides` array field config to use a new field type `"image_upload"` for `src` and `mobile_src` fields
-- Add `mobile_src` field to the `hero_slides` arrayFields config (currently only `src` and `alt`)
-- In the render logic, when a field type is `"image_upload"`, render the `BannerImageUpload` component instead of a text input
-- Each slide item will show:
-  - Desktop banner upload (recommended: 1920×700px)
-  - Mobile banner upload (recommended: 800×800px)  
-  - Alt text field (text input)
-
-**3. Update hero_slides field config** in `SECTION_CONFIG`:
-```
-arrayFields: [
-  { key: "src", label: "Desktop Banner Image", type: "image_upload" },
-  { key: "mobile_src", label: "Mobile Banner Image", type: "image_upload" },
-  { key: "alt", label: "Alt Text", type: "text" },
-]
-```
-
-### Technical Details
-- Storage bucket: `company-assets` (already public)
-- Upload path: `banners/desktop-{timestamp}.{ext}` and `banners/mobile-{timestamp}.{ext}`
-- Max file size: 5MB
-- Accepted formats: JPG, PNG, WebP
-- The uploaded URL auto-populates the CMS field value, which saves to `site_content` table on "Save"
-- `HeroSection.tsx` already reads `src` and `mobile_src` from CMS data — no changes needed there
+### Design System
+- Primary accent: Gold (#C5A55A / RGB 197,165,90)
+- Dark: #232830 (headers, badges)
+- Light BG: #FAF9F7 (alternate rows)
+- Font: Helvetica + NotoSansBengali for Bengali
+- A4 portrait, 14mm margins
+- Gold top bar (3mm) + gold bottom bar (16mm)
 
 ### Files to Create/Modify
-1. **Create**: `src/components/admin/BannerImageUpload.tsx`
-2. **Modify**: `src/components/AdminCmsEditor.tsx` (add image_upload type + update hero_slides config)
+- **NEW**: `src/lib/pdfCore.ts` — unified PDF components
+- **MODIFY**: `src/lib/invoiceGenerator.ts` — use pdfCore, add receipt
+- **MODIFY**: `src/lib/entityPdfGenerator.ts` — use pdfCore, add statements
+- **MODIFY**: `src/lib/reportExport.ts` — use pdfCore, add summary cards, page numbers
 
+Shall I proceed with this plan?
