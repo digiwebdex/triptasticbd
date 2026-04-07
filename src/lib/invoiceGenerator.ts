@@ -1183,7 +1183,7 @@ export async function generateCommissionReceipt(
     getPdfCompanyConfig(),
   ]);
   const pageWidth = doc.internal.pageSize.getWidth();
-  let y = addHeader(doc, company, logoBase64);
+  let y = await addHeader(doc, company, logoBase64);
 
 
   addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: data.bookingTrackingId, position: "top" });

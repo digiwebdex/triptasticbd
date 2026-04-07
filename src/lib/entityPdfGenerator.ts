@@ -445,7 +445,7 @@ export async function generateCustomerPdf(data: CustomerPdfData, company: Compan
     generateCompanyQr(),
     getPdfCompanyConfig(),
   ]);
-  let y = addHeader(doc, company, logoBase64, companyQr, cfg);
+  let y = await addHeader(doc, company, logoBase64, companyQr, cfg);
   const pw = doc.internal.pageSize.getWidth();
 
   // Watermark based on customer summary

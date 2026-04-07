@@ -281,7 +281,7 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
   await registerBengaliFont(doc);
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  let y = addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
+  let y = await addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
   y = addReportTitle(doc, y, title);
 
   
