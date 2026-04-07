@@ -191,7 +191,7 @@ const AdminPanel = () => {
                     <p className="font-medium">{p.name}</p>
                     <p className="text-xs text-muted-foreground capitalize">{p.type} • {p.duration_days} days • {p.is_active ? "Active" : "Inactive"}</p>
                   </div>
-                  <p className="font-heading font-bold text-primary">৳{Number(p.price).toLocaleString()}</p>
+                  <p className="font-heading font-bold text-primary">৳{Number(p.price).toLocaleString("en-IN")}</p>
                 </div>
               ))}
             </div>
@@ -219,9 +219,9 @@ const AdminPanel = () => {
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div><p className="text-muted-foreground">Total</p><p className="font-medium">৳{Number(b.total_amount).toLocaleString()}</p></div>
-                  <div><p className="text-muted-foreground">Paid</p><p className="font-medium">৳{Number(b.paid_amount).toLocaleString()}</p></div>
-                  <div><p className="text-muted-foreground">Due</p><p className="font-medium text-destructive">৳{Number(b.due_amount || 0).toLocaleString()}</p></div>
+                  <div><p className="text-muted-foreground">Total</p><p className="font-medium">৳{Number(b.total_amount).toLocaleString("en-IN")}</p></div>
+                  <div><p className="text-muted-foreground">Paid</p><p className="font-medium">৳{Number(b.paid_amount).toLocaleString("en-IN")}</p></div>
+                  <div><p className="text-muted-foreground">Due</p><p className="font-medium text-destructive">৳{Number(b.due_amount || 0).toLocaleString("en-IN")}</p></div>
                 </div>
               </div>
             ))}
@@ -250,7 +250,7 @@ const AdminPanel = () => {
                     <tr key={p.id} className="border-b border-border/50">
                       <td className="py-3 pr-4 font-mono text-xs">{p.bookings?.tracking_id || p.booking_id.slice(0, 8)}</td>
                       <td className="py-3 pr-4">{p.installment_number || "—"}</td>
-                      <td className="py-3 pr-4 font-medium">৳{Number(p.amount).toLocaleString()}</td>
+                      <td className="py-3 pr-4 font-medium">৳{Number(p.amount).toLocaleString("en-IN")}</td>
                       <td className="py-3 pr-4">{p.due_date ? new Date(p.due_date).toLocaleDateString() : "—"}</td>
                       <td className="py-3 pr-4">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${p.status === "completed" ? "text-emerald bg-emerald/10" : p.status === "pending" ? "text-primary bg-primary/10" : "text-destructive bg-destructive/10"}`}>

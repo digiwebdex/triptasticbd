@@ -11,7 +11,7 @@ import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
 const GOLD = { r: 245, g: 158, b: 11 };
 const DARK = { r: 35, g: 40, b: 48 };
 
-const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
+const fmt = (n: number) => `BDT ${n.toLocaleString("en-IN")}`;
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 

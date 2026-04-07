@@ -304,7 +304,7 @@ export default function AdminPackagesPage() {
                 )}
               </div>
               <div className="flex items-center gap-3 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                <p className="font-heading font-bold text-primary">BDT {Number(p.price).toLocaleString()}</p>
+                <p className="font-heading font-bold text-primary">BDT {Number(p.price).toLocaleString("en-IN")}</p>
                 <AdminActionMenu
                   inlineCount={2}
                   actions={[
@@ -343,7 +343,7 @@ export default function AdminPackagesPage() {
               {viewPkg.image_url && <img src={viewPkg.image_url} alt={viewPkg.name} className="w-full h-48 rounded-lg object-cover" />}
               <div className="grid grid-cols-2 gap-3">
                 <div><span className="text-muted-foreground text-xs block">Type</span><span className="font-medium capitalize">{viewPkg.type}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Price</span><span className="font-medium text-primary">BDT {Number(viewPkg.price).toLocaleString()}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Price</span><span className="font-medium text-primary">BDT {Number(viewPkg.price).toLocaleString("en-IN")}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Duration</span><span className="font-medium">{viewPkg.duration_days ? `${viewPkg.duration_days} days` : "—"}</span></div>
                 <div><span className="text-muted-foreground text-xs block">End Date</span><span className="font-medium">{viewPkg.expiry_date || "—"}</span></div>
                 <div><span className="text-muted-foreground text-xs block">System Status</span><span className={`font-medium ${(viewPkg.status || (viewPkg.is_active ? 'active' : 'inactive')) === 'active' ? "text-emerald" : "text-destructive"}`}>{(viewPkg.status || (viewPkg.is_active ? 'active' : 'inactive')) === 'active' ? "Active" : "Inactive"}</span></div>

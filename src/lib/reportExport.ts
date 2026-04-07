@@ -279,7 +279,7 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
   let y = addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
   y = addReportTitle(doc, y, title);
 
-  const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
+  const fmt = (n: number) => `BDT ${n.toLocaleString("en-IN")}`;
 
   customers.forEach((c, idx) => {
     if (y > doc.internal.pageSize.getHeight() - 60) {

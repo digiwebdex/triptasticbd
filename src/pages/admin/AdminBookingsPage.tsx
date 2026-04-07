@@ -712,7 +712,7 @@ export default function AdminBookingsPage() {
                   </div>
                   <div>
                      <label className="text-xs text-muted-foreground block mb-1">Total Commission (BDT)</label>
-                    <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalCommission.toLocaleString()}</div>
+                    <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalCommission.toLocaleString("en-IN")}</div>
                   </div>
                 </div>
               )}
@@ -804,12 +804,12 @@ export default function AdminBookingsPage() {
                           </div>
                           <div>
                             <label className="text-[10px] text-muted-foreground block mb-0.5">Final Price</label>
-                            <div className={`${inputClass} bg-muted/50 font-bold text-xs`}>BDT {Number(m.final_price || 0).toLocaleString()}</div>
+                            <div className={`${inputClass} bg-muted/50 font-bold text-xs`}>BDT {Number(m.final_price || 0).toLocaleString("en-IN")}</div>
                           </div>
                         </div>
                       ))}
                       <div className="text-right text-xs font-bold text-primary">
-                        Members Total: BDT {editMembers.reduce((s: number, m: any) => s + Number(m.final_price || 0), 0).toLocaleString()}
+                        Members Total: BDT {editMembers.reduce((s: number, m: any) => s + Number(m.final_price || 0), 0).toLocaleString("en-IN")}
                       </div>
                     </>
                   )}
@@ -825,7 +825,7 @@ export default function AdminBookingsPage() {
                 </div>
                 <div>
                    <label className="text-xs text-muted-foreground block mb-1">Total Selling (BDT)</label>
-                  <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalSelling.toLocaleString()}</div>
+                  <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalSelling.toLocaleString("en-IN")}</div>
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">Paid (BDT)</label>
@@ -835,13 +835,13 @@ export default function AdminBookingsPage() {
                 <div>
                    <label className="text-xs text-muted-foreground block mb-1">Due (BDT)</label>
                   <div className={`${inputClass} bg-muted/50 font-bold ${editDue > 0 ? "text-destructive" : "text-emerald"}`}>
-                    BDT {editDue.toLocaleString()}
+                    BDT {editDue.toLocaleString("en-IN")}
                   </div>
                 </div>
                 <div>
                    <label className="text-xs text-muted-foreground block mb-1">Profit (BDT)</label>
                   <div className={`${inputClass} bg-muted/50 font-bold ${editProfit >= 0 ? "text-emerald" : "text-destructive"}`}>
-                    BDT {editProfit.toLocaleString()}
+                    BDT {editProfit.toLocaleString("en-IN")}
                   </div>
                 </div>
               </div>

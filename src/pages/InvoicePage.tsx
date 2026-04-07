@@ -257,7 +257,7 @@ export default function InvoicePage() {
                   {payments.map((p, i) => (
                     <tr key={p.id} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                       <td className="p-2 border-b border-gray-200">{p.installment_number || "—"}</td>
-                      <td className="p-2 border-b border-gray-200 text-right font-medium">৳{Number(p.amount).toLocaleString()}</td>
+                      <td className="p-2 border-b border-gray-200 text-right font-medium">৳{Number(p.amount).toLocaleString("en-IN")}</td>
                       <td className="p-2 border-b border-gray-200 text-center">{fmtDate(p.due_date)}</td>
                       <td className="p-2 border-b border-gray-200 text-center">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.status === "completed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
@@ -282,9 +282,9 @@ export default function InvoicePage() {
 
             {/* Summary */}
             <div className="bg-gray-800 text-white rounded-lg p-4 flex justify-between items-center mb-8">
-              <div><span className="text-gray-300 text-xs">{t("invoice.totalAmount")}</span><p className="text-lg font-bold">৳{Number(booking.total_amount).toLocaleString()}</p></div>
-              <div><span className="text-gray-300 text-xs">{t("invoice.totalPaid")}</span><p className="text-lg font-bold text-green-400">৳{totalPaid.toLocaleString()}</p></div>
-              <div><span className="text-gray-300 text-xs">{t("invoice.balanceDue")}</span><p className="text-lg font-bold text-red-400">৳{Math.max(0, totalDue).toLocaleString()}</p></div>
+              <div><span className="text-gray-300 text-xs">{t("invoice.totalAmount")}</span><p className="text-lg font-bold">৳{Number(booking.total_amount).toLocaleString("en-IN")}</p></div>
+              <div><span className="text-gray-300 text-xs">{t("invoice.totalPaid")}</span><p className="text-lg font-bold text-green-400">৳{totalPaid.toLocaleString("en-IN")}</p></div>
+              <div><span className="text-gray-300 text-xs">{t("invoice.balanceDue")}</span><p className="text-lg font-bold text-red-400">৳{Math.max(0, totalDue).toLocaleString("en-IN")}</p></div>
             </div>
 
             {/* Signature Section */}

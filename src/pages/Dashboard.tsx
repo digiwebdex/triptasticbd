@@ -264,21 +264,21 @@ const Dashboard = () => {
               <CreditCard className="h-5 w-5 text-primary" />
               <span className="text-xs text-muted-foreground">{t("dashboard.totalAmount")}</span>
             </div>
-            <p className="text-2xl font-heading font-bold">৳{totalAmount.toLocaleString()}</p>
+            <p className="text-2xl font-heading font-bold">৳{totalAmount.toLocaleString("en-IN")}</p>
           </div>
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center gap-3 mb-2">
               <CreditCard className="h-5 w-5 text-emerald" />
               <span className="text-xs text-muted-foreground">{t("dashboard.paid")}</span>
             </div>
-            <p className="text-2xl font-heading font-bold text-emerald">৳{totalPaid.toLocaleString()}</p>
+            <p className="text-2xl font-heading font-bold text-emerald">৳{totalPaid.toLocaleString("en-IN")}</p>
           </div>
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center gap-3 mb-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
               <span className="text-xs text-muted-foreground">{t("dashboard.due")}</span>
             </div>
-            <p className="text-2xl font-heading font-bold text-destructive">৳{totalDue.toLocaleString()}</p>
+            <p className="text-2xl font-heading font-bold text-destructive">৳{totalDue.toLocaleString("en-IN")}</p>
           </div>
         </div>
 
@@ -355,9 +355,9 @@ const Dashboard = () => {
                     {/* Financial bar */}
                     <div className="px-5 pb-3">
                       <div className="flex gap-6 text-sm mb-2">
-                        <span className="text-muted-foreground">{t("dashboard.total")}: <strong className="text-foreground">৳{Number(b.total_amount).toLocaleString()}</strong></span>
-                        <span className="text-muted-foreground">{t("dashboard.paid")}: <strong className="text-emerald">৳{Number(b.paid_amount).toLocaleString()}</strong></span>
-                        <span className="text-muted-foreground">{t("dashboard.due")}: <strong className="text-destructive">৳{Number(b.due_amount || 0).toLocaleString()}</strong></span>
+                        <span className="text-muted-foreground">{t("dashboard.total")}: <strong className="text-foreground">৳{Number(b.total_amount).toLocaleString("en-IN")}</strong></span>
+                        <span className="text-muted-foreground">{t("dashboard.paid")}: <strong className="text-emerald">৳{Number(b.paid_amount).toLocaleString("en-IN")}</strong></span>
+                        <span className="text-muted-foreground">{t("dashboard.due")}: <strong className="text-destructive">৳{Number(b.due_amount || 0).toLocaleString("en-IN")}</strong></span>
                       </div>
                       {Number(b.total_amount) > 0 && (
                         <div className="w-full bg-secondary rounded-full h-2">
@@ -383,7 +383,7 @@ const Dashboard = () => {
                                 <div key={p.id} className={`flex items-center justify-between text-sm py-1.5 px-3 rounded-md ${isOverdue ? "bg-destructive/5" : ""}`}>
                                   <div className="flex items-center gap-3">
                                     <span className="text-muted-foreground w-6">#{p.installment_number || "—"}</span>
-                                    <span className="font-medium">৳{Number(p.amount).toLocaleString()}</span>
+                                    <span className="font-medium">৳{Number(p.amount).toLocaleString("en-IN")}</span>
                                     <span className="text-xs text-muted-foreground">
                                       {p.due_date ? `Due: ${new Date(p.due_date).toLocaleDateString()}` : ""}
                                     </span>
@@ -504,15 +504,15 @@ const Dashboard = () => {
                       </div>
                       <div>
                         <p className="text-muted-foreground">{t("dashboard.total")}</p>
-                        <p className="font-medium">৳{Number(b.total_amount).toLocaleString()}</p>
+                        <p className="font-medium">৳{Number(b.total_amount).toLocaleString("en-IN")}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">{t("dashboard.paid")}</p>
-                        <p className="font-medium text-emerald">৳{Number(b.paid_amount).toLocaleString()}</p>
+                        <p className="font-medium text-emerald">৳{Number(b.paid_amount).toLocaleString("en-IN")}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">{t("dashboard.due")}</p>
-                        <p className="font-medium text-destructive">৳{Number(b.due_amount || 0).toLocaleString()}</p>
+                        <p className="font-medium text-destructive">৳{Number(b.due_amount || 0).toLocaleString("en-IN")}</p>
                       </div>
                     </div>
 
@@ -545,7 +545,7 @@ const Dashboard = () => {
                                   return (
                                     <tr key={p.id} className={`border-b border-border/30 ${isOverdue ? "bg-destructive/5" : ""}`}>
                                       <td className="py-2 pr-4">{p.installment_number || "—"}</td>
-                                      <td className="py-2 pr-4 font-medium">৳{Number(p.amount).toLocaleString()}</td>
+                                      <td className="py-2 pr-4 font-medium">৳{Number(p.amount).toLocaleString("en-IN")}</td>
                                       <td className="py-2 pr-4">{p.due_date ? new Date(p.due_date).toLocaleDateString() : "—"}</td>
                                       <td className="py-2 pr-4">
                                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${statusColor(p.status)}`}>
@@ -625,7 +625,7 @@ const Dashboard = () => {
                     {payments.map((p) => (
                       <tr key={p.id} className="border-b border-border/50">
                         <td className="py-3 pr-4">{p.installment_number || "—"}</td>
-                        <td className="py-3 pr-4 font-medium">৳{Number(p.amount).toLocaleString()}</td>
+                        <td className="py-3 pr-4 font-medium">৳{Number(p.amount).toLocaleString("en-IN")}</td>
                         <td className="py-3 pr-4">{p.due_date ? new Date(p.due_date).toLocaleDateString() : "—"}</td>
                         <td className="py-3 pr-4">{p.paid_at ? new Date(p.paid_at).toLocaleDateString() : "—"}</td>
                         <td className="py-3 pr-4">
@@ -679,7 +679,7 @@ const Dashboard = () => {
                         </Link>
                       )}
                     </div>
-                    <p className="text-xl font-heading font-bold text-destructive">৳{Number(p.amount).toLocaleString()}</p>
+                    <p className="text-xl font-heading font-bold text-destructive">৳{Number(p.amount).toLocaleString("en-IN")}</p>
                   </div>
                 );
               })

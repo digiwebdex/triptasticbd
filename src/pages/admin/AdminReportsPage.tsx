@@ -579,7 +579,7 @@ export default function AdminReportsPage() {
   // ══════════════════════════════════════════════
   const handleExport = (type: "pdf" | "excel") => {
     let data: any;
-    const makeSummary = (paid: number, due: number) => [`Total Paid: BDT ${paid.toLocaleString()}`, `Total Due: BDT ${due.toLocaleString()}`];
+    const makeSummary = (paid: number, due: number) => [`Total Paid: BDT ${paid.toLocaleString("en-IN")}`, `Total Due: BDT ${due.toLocaleString("en-IN")}`];
     switch (activeTab) {
       case "financial": {
         const cols = canSeeProfit ? ["Month","Income","Expenses","Profit","Bookings"] : ["Month","Income","Expenses","Bookings"];
@@ -627,20 +627,20 @@ export default function AdminReportsPage() {
         const totalPaid = dailyBookingRows.reduce((s: number, r: any) => s + r.totalPaid, 0);
         const totalDue = dailyBookingRows.reduce((s: number, r: any) => s + r.totalDue, 0);
         const totalAmount = dailyBookingRows.reduce((s: number, r: any) => s + r.totalAmount, 0);
-        data = { title: "Daily Booking Report", columns: ["Date", "Bookings", "Travelers", "Total Amount", "Total Paid", "Total Due"], rows: dailyBookingRows.map((r: any) => [r.dateFormatted, r.count, r.travelers, r.totalAmount, r.totalPaid, r.totalDue]), summary: [`Total Amount: BDT ${totalAmount.toLocaleString()}`, ...makeSummary(totalPaid, totalDue)] };
+        data = { title: "Daily Booking Report", columns: ["Date", "Bookings", "Travelers", "Total Amount", "Total Paid", "Total Due"], rows: dailyBookingRows.map((r: any) => [r.dateFormatted, r.count, r.travelers, r.totalAmount, r.totalPaid, r.totalDue]), summary: [`Total Amount: BDT ${totalAmount.toLocaleString("en-IN")}`, ...makeSummary(totalPaid, totalDue)] };
         break;
       }
       case "payments": {
         const totalInc = paymentReportRows.filter(r => r.type === "income").reduce((s, r) => s + r.amount, 0);
         const totalExp = paymentReportRows.filter(r => r.type === "expense").reduce((s, r) => s + r.amount, 0);
-        data = { title: "Payment Report", columns: ["Source", "Name", "Date", "Amount", "Method", "Type"], rows: paymentReportRows.map(r => [r.source, r.name, r.date, r.amount, r.method, r.type]), summary: [`Total Income: BDT ${totalInc.toLocaleString()}`, `Total Expense: BDT ${totalExp.toLocaleString()}`] };
+        data = { title: "Payment Report", columns: ["Source", "Name", "Date", "Amount", "Method", "Type"], rows: paymentReportRows.map(r => [r.source, r.name, r.date, r.amount, r.method, r.type]), summary: [`Total Income: BDT ${totalInc.toLocaleString("en-IN")}`, `Total Expense: BDT ${totalExp.toLocaleString("en-IN")}`] };
         break;
       }
       case "commission": {
         const totalComm = commissionRows.reduce((s: number, r: any) => s + r.totalCommission, 0);
         const totalPaid = commissionRows.reduce((s: number, r: any) => s + r.commissionPaid, 0);
         const totalDue = commissionRows.reduce((s: number, r: any) => s + r.commissionDue, 0);
-        data = { title: "Commission Report", columns: ["Moallem", "Phone", "Bookings", "Total Commission", "Paid", "Due"], rows: commissionRows.map((r: any) => [r.name, r.phone, r.bookingCount, r.totalCommission, r.commissionPaid, r.commissionDue]), summary: [`Total Commission: BDT ${totalComm.toLocaleString()}`, `Total Paid: BDT ${totalPaid.toLocaleString()}`, `Total Due: BDT ${totalDue.toLocaleString()}`] };
+        data = { title: "Commission Report", columns: ["Moallem", "Phone", "Bookings", "Total Commission", "Paid", "Due"], rows: commissionRows.map((r: any) => [r.name, r.phone, r.bookingCount, r.totalCommission, r.commissionPaid, r.commissionDue]), summary: [`Total Commission: BDT ${totalComm.toLocaleString("en-IN")}`, `Total Paid: BDT ${totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${totalDue.toLocaleString("en-IN")}`] };
         break;
       }
       default:
