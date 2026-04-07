@@ -278,7 +278,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
     generateCompanyQr(),
     getPdfCompanyConfig(),
   ]);
-  let y = addHeader(doc, company, logoBase64, companyQr, cfg);
+  let y = await addHeader(doc, company, logoBase64, companyQr, cfg);
   const pw = doc.internal.pageSize.getWidth();
 
   // Watermark based on supplier summary
