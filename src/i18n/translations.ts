@@ -440,7 +440,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "verify.companyFooter": "Manasik Travel Hub — Hajj & Umrah Services",
 
     // Invoice Page
-    "invoice.searchPlaceholder": "Enter Tracking ID (e.g. RK-XXXXXXXX)",
+    "invoice.searchPlaceholder": "Enter Tracking ID (e.g. MTH-XXXXXXXX)",
     "invoice.searchButton": "Search",
     "invoice.loading": "Loading...",
     "invoice.notFound": "Booking not found. Please check the tracking ID.",
