@@ -75,6 +75,8 @@ export default function AdminCustomersPage() {
     const map: Record<string, { totalAmount: number; totalPaid: number; totalDue: number; bookingCount: number; travelers: number }> = {};
     bookings.forEach(b => {
       if (!b.user_id) return;
+      // Exclude cancelled bookings from financial stats
+      if (b.status === "cancelled") return;
       if (!map[b.user_id]) map[b.user_id] = { totalAmount: 0, totalPaid: 0, totalDue: 0, bookingCount: 0, travelers: 0 };
       map[b.user_id].totalAmount += Number(b.total_amount || 0);
       map[b.user_id].totalPaid += Number(b.paid_amount || 0);
