@@ -31,6 +31,7 @@ const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBoo
 const toMoney = (value: any) => Math.max(0, Number(value || 0));
 
 function BookingDetail({ bookingId }: { bookingId: string }) {
+  const [booking, setBooking] = useState<any>(null);
   const [payments, setPayments] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
@@ -38,11 +39,13 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
 
   useEffect(() => {
     const load = async () => {
-      const [payRes, expRes, memRes] = await Promise.all([
+      const [bkRes, payRes, expRes, memRes] = await Promise.all([
+        supabase.from("bookings").select("total_amount, paid_amount, due_amount, total_cost, total_commission, extra_expense, profit_amount").eq("id", bookingId).single(),
         supabase.from("payments").select("*").eq("booking_id", bookingId).order("installment_number", { ascending: true }),
         supabase.from("expenses").select("*").eq("booking_id", bookingId).order("date", { ascending: false }),
         supabase.from("booking_members").select("*, packages(name)").eq("booking_id", bookingId).order("created_at", { ascending: true }),
       ]);
+      setBooking(bkRes.data || null);
       setPayments(payRes.data || []);
       setExpenses(expRes.data || []);
       setMembers(memRes.data || []);
@@ -53,10 +56,11 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
 
   if (loading) return <p className="text-xs text-muted-foreground py-3">Loading details...</p>;
 
-  const totalPaid = payments.filter(p => p.status === "completed").reduce((s, p) => s + Number(p.amount), 0);
+  // Use trigger-calculated values from booking record for consistency
+  const totalPaid = Number(booking?.paid_amount || 0);
   const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount), 0);
-  const profit = totalPaid - totalExpenses;
-  const totalDue = payments.filter(p => p.status === "pending").reduce((s, p) => s + Number(p.amount), 0);
+  const profit = Number(booking?.profit_amount || 0);
+  const totalDue = Number(booking?.due_amount || 0);
 
   const EXPENSE_LABELS: Record<string, string> = {
     visa: "Visa", ticket: "Ticket", hotel: "Hotel", transport: "Transport",

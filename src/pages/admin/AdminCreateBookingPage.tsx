@@ -35,6 +35,7 @@ export default function AdminCreateBookingPage() {
   const [loading, setLoading] = useState(false);
   const [packages, setPackages] = useState<any[]>([]);
   const [moallems, setMoallems] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [bookingType, setBookingType] = useState<"individual" | "family">("individual");
 
@@ -54,6 +55,8 @@ export default function AdminCreateBookingPage() {
     guest_passport: "",
     package_id: "",
     selling_price_per_person: "",
+    cost_price_per_person: "",
+    commission_per_person: "",
     discount: "",
     paid_amount: "",
     payment_method: "cash",
@@ -61,6 +64,7 @@ export default function AdminCreateBookingPage() {
     status: "pending",
     notes: "",
     moallem_id: "",
+    supplier_agent_id: "",
   });
 
   const [members, setMembers] = useState<FamilyMember[]>([]);
@@ -70,10 +74,12 @@ export default function AdminCreateBookingPage() {
       supabase.from("packages").select("id, name, type, price, duration_days").eq("is_active", true).order("name"),
       supabase.from("moallems").select("id, name, phone, status").eq("status", "active").order("name"),
       supabase.from("accounts" as any).select("*").eq("type", "asset"),
-    ]).then(([pkgRes, moaRes, walletRes]) => {
+      supabase.from("supplier_agents").select("id, agent_name, company_name, phone, status").eq("status", "active").order("agent_name"),
+    ]).then(([pkgRes, moaRes, walletRes, supRes]) => {
       setPackages(pkgRes.data || []);
       setMoallems(moaRes.data || []);
       setWalletAccounts((walletRes.data as any[]) || []);
+      setSuppliers(supRes.data || []);
     });
   }, []);
 
@@ -131,12 +137,17 @@ export default function AdminCreateBookingPage() {
 
   // Calculations
   const sellingPrice = num(form.selling_price_per_person);
+  const costPrice = num(form.cost_price_per_person);
+  const commissionPP = num(form.commission_per_person);
   const discountVal = num(form.discount);
   const paidAmount = num(form.paid_amount);
   const individualFinalPrice = Math.max(0, sellingPrice - discountVal);
   const familyTotal = members.reduce((s, m) => s + Math.max(0, num(m.selling_price) - num(m.discount)), 0);
   const totalSellingPrice = bookingType === "family" ? familyTotal : individualFinalPrice;
   const numTravelers = bookingType === "family" ? members.length : 1;
+  const totalCost = costPrice * numTravelers;
+  const totalCommission = commissionPP * numTravelers;
+  const estimatedProfit = totalSellingPrice - totalCost - totalCommission;
   const dueAmount = Math.max(0, totalSellingPrice - paidAmount);
 
   const handleDocSelect = (docType: string, file: File | null) => {
@@ -222,12 +233,15 @@ export default function AdminCreateBookingPage() {
       if (guestPassport) bookingData.guest_passport = guestPassport;
       if (form.notes.trim()) bookingData.notes = form.notes.trim();
       if (form.moallem_id) bookingData.moallem_id = form.moallem_id;
+      if (form.supplier_agent_id) bookingData.supplier_agent_id = form.supplier_agent_id;
 
       // Numeric fields - only include if non-zero
       if (bookingType === "individual") {
         bookingData.selling_price_per_person = sellingPrice;
         if (discountVal > 0) bookingData.discount = discountVal;
       }
+      if (costPrice > 0) bookingData.cost_price_per_person = costPrice;
+      if (commissionPP > 0) bookingData.commission_per_person = commissionPP;
       if (paidAmount > 0) bookingData.paid_amount = paidAmount;
       bookingData.due_amount = dueAmount;
 
@@ -359,6 +373,18 @@ export default function AdminCreateBookingPage() {
               <label className="text-xs text-muted-foreground block mb-1">Final Price (BDT)</label>
               <div className={`${inputClass} bg-muted/50 font-bold text-foreground`}>BDT {individualFinalPrice.toLocaleString()}</div>
             </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Cost Price / Person (BDT)</label>
+              <input className={inputClass} type="number" min={0} value={form.cost_price_per_person}
+                placeholder="0"
+                onChange={(e) => setForm(f => ({ ...f, cost_price_per_person: e.target.value }))} />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Commission / Person (BDT)</label>
+              <input className={inputClass} type="number" min={0} value={form.commission_per_person}
+                placeholder="0"
+                onChange={(e) => setForm(f => ({ ...f, commission_per_person: e.target.value }))} />
+            </div>
           </div>
         </div>
       )}
@@ -482,6 +508,15 @@ export default function AdminCreateBookingPage() {
       <div className="bg-card border border-border rounded-xl p-5 space-y-4">
         <h3 className="font-heading font-semibold text-sm">Additional Information</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Supplier Agent (Optional)</label>
+            <select className={inputClass} value={form.supplier_agent_id} onChange={(e) => setForm({ ...form, supplier_agent_id: e.target.value })}>
+              <option value="">-- Select Supplier --</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>{s.agent_name} {s.company_name ? `(${s.company_name})` : ""}</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Moallem (Optional)</label>
             <select className={inputClass} value={form.moallem_id} onChange={(e) => setForm({ ...form, moallem_id: e.target.value })}>
