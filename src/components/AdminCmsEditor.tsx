@@ -3,6 +3,7 @@ import { useAllSiteContent, useUpdateSiteContent } from "@/hooks/useSiteContent"
 import { Save, Plus, Trash2, ChevronDown, ChevronUp, Type, FileText, Globe, Phone, MapPin, Languages, Image, MessageCircle, Star, BookOpen, Video, Shield, Layout, Navigation } from "lucide-react";
 import { toast } from "sonner";
 import { Language } from "@/i18n/translations";
+import BannerImageUpload from "@/components/admin/BannerImageUpload";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 
@@ -30,8 +31,9 @@ const SECTION_CONFIG: Record<string, { label: string; labelBn: string; icon: any
       { key: "quran_reference", label: "Quran Reference", type: "text", bilingual: true },
       { key: "cta_primary", label: "Primary Button Text", type: "text", bilingual: true },
       { key: "cta_secondary", label: "Secondary Button Text", type: "text", bilingual: true },
-      { key: "hero_slides", label: "Hero Slider Images (src = image URL, alt = description)", type: "array", bilingual: false, arrayFields: [
-        { key: "src", label: "Image URL / Path", type: "text" },
+      { key: "hero_slides", label: "Hero Slider Images", type: "array", bilingual: false, arrayFields: [
+        { key: "src", label: "Desktop Banner (1920×700px)", type: "image_upload" },
+        { key: "mobile_src", label: "Mobile Banner (800×800px)", type: "image_upload" },
         { key: "alt", label: "Alt Text", type: "text" },
       ]},
       { key: "stats", label: "Stats", type: "array", bilingual: true, arrayFields: [
@@ -531,12 +533,21 @@ const AdminCmsEditor = () => {
                                 {field.arrayFields!.map((af) => (
                                   <div key={af.key}>
                                     <label className="text-[10px] text-muted-foreground">{af.label}</label>
-                                    <input
-                                      className={inputClass}
-                                      value={item[af.key] || ""}
-                                      onChange={(e) => handleArrayItemChange(sectionKey, field, idx, af.key, e.target.value)}
-                                      dir={editLang === "bn" ? "auto" : "ltr"}
-                                    />
+                                    {af.type === "image_upload" ? (
+                                      <BannerImageUpload
+                                        currentUrl={item[af.key] || ""}
+                                        label={af.label}
+                                        sizeHint={af.label}
+                                        onUpload={(url) => handleArrayItemChange(sectionKey, field, idx, af.key, url)}
+                                      />
+                                    ) : (
+                                      <input
+                                        className={inputClass}
+                                        value={item[af.key] || ""}
+                                        onChange={(e) => handleArrayItemChange(sectionKey, field, idx, af.key, e.target.value)}
+                                        dir={editLang === "bn" ? "auto" : "ltr"}
+                                      />
+                                    )}
                                   </div>
                                 ))}
                               </div>
