@@ -228,7 +228,7 @@ export async function exportPDF({ title, columns, rows, summary }: ReportData) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
 
-  let y = addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
+  let y = await addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
   y = addReportTitle(doc, y, title);
 
   const fmtCell = (val: string | number) =>
