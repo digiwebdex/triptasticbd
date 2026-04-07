@@ -49,12 +49,13 @@ const HeroSection = () => {
           animate={{ opacity: 1, scale: 1.02 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
+          className="w-full aspect-[16/7] sm:aspect-[16/6] lg:aspect-[16/5]"
         >
           {/* Desktop image */}
           <img
             src={activeSlides[currentSlide]?.image}
             alt={activeSlides[currentSlide]?.alt}
-            className="hidden sm:block w-full h-auto"
+            className="hidden sm:block w-full h-full object-cover object-center"
             loading="eager"
             fetchPriority="high"
             decoding="async"
@@ -63,7 +64,7 @@ const HeroSection = () => {
           <img
             src={activeSlides[currentSlide]?.mobileImage}
             alt={activeSlides[currentSlide]?.alt}
-            className="block sm:hidden w-full h-auto"
+            className="block sm:hidden w-full h-full object-cover object-center"
             loading="eager"
             fetchPriority="high"
             decoding="async"
