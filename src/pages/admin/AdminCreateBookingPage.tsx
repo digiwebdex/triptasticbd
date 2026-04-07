@@ -35,6 +35,7 @@ export default function AdminCreateBookingPage() {
   const [loading, setLoading] = useState(false);
   const [packages, setPackages] = useState<any[]>([]);
   const [moallems, setMoallems] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [bookingType, setBookingType] = useState<"individual" | "family">("individual");
 
@@ -54,6 +55,8 @@ export default function AdminCreateBookingPage() {
     guest_passport: "",
     package_id: "",
     selling_price_per_person: "",
+    cost_price_per_person: "",
+    commission_per_person: "",
     discount: "",
     paid_amount: "",
     payment_method: "cash",
@@ -61,6 +64,7 @@ export default function AdminCreateBookingPage() {
     status: "pending",
     notes: "",
     moallem_id: "",
+    supplier_agent_id: "",
   });
 
   const [members, setMembers] = useState<FamilyMember[]>([]);
