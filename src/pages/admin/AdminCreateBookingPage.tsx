@@ -373,6 +373,18 @@ export default function AdminCreateBookingPage() {
               <label className="text-xs text-muted-foreground block mb-1">Final Price (BDT)</label>
               <div className={`${inputClass} bg-muted/50 font-bold text-foreground`}>BDT {individualFinalPrice.toLocaleString()}</div>
             </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Cost Price / Person (BDT)</label>
+              <input className={inputClass} type="number" min={0} value={form.cost_price_per_person}
+                placeholder="0"
+                onChange={(e) => setForm(f => ({ ...f, cost_price_per_person: e.target.value }))} />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Commission / Person (BDT)</label>
+              <input className={inputClass} type="number" min={0} value={form.commission_per_person}
+                placeholder="0"
+                onChange={(e) => setForm(f => ({ ...f, commission_per_person: e.target.value }))} />
+            </div>
           </div>
         </div>
       )}
