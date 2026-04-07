@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import logoImg from "@/assets/logo-pdf.png";
 import QRCode from "qrcode";
 import { getSignatureData, SignatureData } from "./pdfSignature";
-import { registerBengaliFont, bengaliCellHook } from "./pdfFontLoader";
+import { registerBengaliFont, bengaliCellHook, hasBengali, addBengaliText } from "./pdfFontLoader";
 import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
 import { formatBDT } from "@/lib/utils";
 
