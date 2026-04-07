@@ -9,9 +9,9 @@ import { useIsViewer, useCanModifyFinancials } from "@/components/admin/AdminLay
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AdminActionMenu from "@/components/admin/AdminActionMenu";
 import CustomerSearchSelect from "@/components/admin/CustomerSearchSelect";
+import { formatBDT } from "@/lib/utils";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
 const PAYMENT_METHODS = [
   { value: "cash", label: "Cash" },
@@ -448,8 +448,8 @@ export default function AdminPaymentsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="font-heading text-xl font-bold">Payment Management</h2>
         <div className="flex items-center gap-2">
-          <button onClick={() => { const totalAmt = allCombined.reduce((s, p) => s + p._amount, 0); exportPDF({ title: "Payments Report", columns: ["Type", "Name", "Tracking ID", "Amount", "Method", "Date"], rows: allCombined.map(p => [p._type, p._displayName, p._trackingId, p._amount, p.payment_method || "—", p._sortDate ? new Date(p._sortDate).toLocaleDateString() : "—"]), summary: [`Total Paid: BDT ${totalAmt.toLocaleString()}`] }); }} className="inline-flex items-center gap-1 text-xs bg-secondary px-3 py-1.5 rounded-md hover:bg-muted transition-colors"><FileDown className="h-3.5 w-3.5" />PDF</button>
-          <button onClick={() => { const totalAmt = allCombined.reduce((s, p) => s + p._amount, 0); exportExcel({ title: "Payments Report", columns: ["Type", "Name", "Tracking ID", "Amount", "Method", "Date"], rows: allCombined.map(p => [p._type, p._displayName, p._trackingId, p._amount, p.payment_method || "—", p._sortDate ? new Date(p._sortDate).toLocaleDateString() : "—"]), summary: [`Total Paid: BDT ${totalAmt.toLocaleString()}`] }); }} className="inline-flex items-center gap-1 text-xs bg-secondary px-3 py-1.5 rounded-md hover:bg-muted transition-colors"><FileSpreadsheet className="h-3.5 w-3.5" />Excel</button>
+          <button onClick={() => { const totalAmt = allCombined.reduce((s, p) => s + p._amount, 0); exportPDF({ title: "Payments Report", columns: ["Type", "Name", "Tracking ID", "Amount", "Method", "Date"], rows: allCombined.map(p => [p._type, p._displayName, p._trackingId, p._amount, p.payment_method || "—", p._sortDate ? new Date(p._sortDate).toLocaleDateString() : "—"]), summary: [`Total Paid: BDT ${totalAmt.toLocaleString("en-IN")}`] }); }} className="inline-flex items-center gap-1 text-xs bg-secondary px-3 py-1.5 rounded-md hover:bg-muted transition-colors"><FileDown className="h-3.5 w-3.5" />PDF</button>
+          <button onClick={() => { const totalAmt = allCombined.reduce((s, p) => s + p._amount, 0); exportExcel({ title: "Payments Report", columns: ["Type", "Name", "Tracking ID", "Amount", "Method", "Date"], rows: allCombined.map(p => [p._type, p._displayName, p._trackingId, p._amount, p.payment_method || "—", p._sortDate ? new Date(p._sortDate).toLocaleDateString() : "—"]), summary: [`Total Paid: BDT ${totalAmt.toLocaleString("en-IN")}`] }); }} className="inline-flex items-center gap-1 text-xs bg-secondary px-3 py-1.5 rounded-md hover:bg-muted transition-colors"><FileSpreadsheet className="h-3.5 w-3.5" />Excel</button>
         </div>
       </div>
 
@@ -461,7 +461,7 @@ export default function AdminPaymentsPage() {
                 <Wallet className="h-3.5 w-3.5 text-primary" />
                 <p className="text-xs text-muted-foreground">{w.name}</p>
               </div>
-              <p className="text-lg font-heading font-bold text-primary">{fmt(w.balance)}</p>
+              <p className="text-lg font-heading font-bold text-primary">{formatBDT(w.balance)}</p>
             </div>
           ))}
         </div>
@@ -518,7 +518,7 @@ export default function AdminPaymentsPage() {
                   <span className="text-xs bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full">{group.payments.length} payments</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-heading font-bold text-primary">{fmt(group.totalPaid)}</span>
+                  <span className="font-heading font-bold text-primary">{formatBDT(group.totalPaid)}</span>
                   <button
                     onClick={(e) => { e.stopPropagation(); exportPDF({ title: `Moallem Payment History - ${group.name}`, columns: ["#", "Booking", "Amount", "Method", "Date", "Notes"], rows: group.payments.map((p: any, i: number) => [i + 1, p.bookings?.tracking_id || "—", Number(p.amount), p.payment_method || "—", p.date ? new Date(p.date).toLocaleDateString() : "—", p.notes || "—"]), summary: [`Total Paid: BDT ${group.totalPaid.toLocaleString("en-IN")}`] }); }}
                     className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors"
@@ -550,7 +550,7 @@ export default function AdminPaymentsPage() {
                         <tr key={p.id} className="border-b border-border/30 hover:bg-secondary/20">
                           <td className="py-2.5 px-4 text-xs text-muted-foreground">{i + 1}</td>
                           <td className="py-2.5 px-4 font-mono text-xs">{p.bookings?.tracking_id || "—"}</td>
-                          <td className="py-2.5 px-4 font-medium">{fmt(p.amount)}</td>
+                          <td className="py-2.5 px-4 font-medium">{formatBDT(p.amount)}</td>
                           <td className="py-2.5 px-4 capitalize text-xs">{p.payment_method || "—"}</td>
                           <td className="py-2.5 px-4 text-xs">{serviceLabel || "—"}</td>
                           <td className="py-2.5 px-4 text-xs">{p.date ? new Date(p.date).toLocaleDateString() : "—"}</td>
@@ -592,7 +592,7 @@ export default function AdminPaymentsPage() {
                   <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">{group.payments.length} payments</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-heading font-bold text-destructive">{fmt(group.totalPaid)}</span>
+                  <span className="font-heading font-bold text-destructive">{formatBDT(group.totalPaid)}</span>
                   <button
                     onClick={(e) => { e.stopPropagation(); exportPDF({ title: `Supplier Payment History - ${group.name}`, columns: ["#", "Amount", "Method", "Service Type", "Date", "Notes"], rows: group.payments.map((p: any, i: number) => { const { serviceLabel: sl } = extractServiceType(p.notes); return [i + 1, Number(p.amount), p.payment_method || "—", sl || "—", p.date ? new Date(p.date).toLocaleDateString() : "—", p.notes || "—"]; }), summary: [`Total Paid: BDT ${group.totalPaid.toLocaleString("en-IN")}`] }); }}
                     className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors"
@@ -621,7 +621,7 @@ export default function AdminPaymentsPage() {
                         return (
                         <tr key={p.id} className="border-b border-border/30 hover:bg-secondary/20">
                           <td className="py-2.5 px-4 text-xs text-muted-foreground">{i + 1}</td>
-                          <td className="py-2.5 px-4 font-medium">{fmt(p.amount)}</td>
+                          <td className="py-2.5 px-4 font-medium">{formatBDT(p.amount)}</td>
                           <td className="py-2.5 px-4 capitalize text-xs">{p.payment_method || "—"}</td>
                           <td className="py-2.5 px-4 text-xs">{sLabel || "—"}</td>
                           <td className="py-2.5 px-4 text-xs">{p.date ? new Date(p.date).toLocaleDateString() : "—"}</td>
@@ -709,7 +709,7 @@ export default function AdminPaymentsPage() {
                         <span className="block text-muted-foreground">{p.supplier_agents.company_name}</span>
                       )}
                     </td>
-                    <td className="py-3 pr-4 font-medium">{fmt(p._amount)}</td>
+                    <td className="py-3 pr-4 font-medium">{formatBDT(p._amount)}</td>
                     <td className="py-3 pr-4 capitalize text-xs">{p.payment_method || "—"}{p.transaction_id ? <span className="block text-muted-foreground">TxID: {p.transaction_id}</span> : ""}</td>
                     <td className="py-3 pr-4 text-xs">{pServiceLabel || "—"}</td>
                     <td className="py-3 pr-4 text-xs">
@@ -730,7 +730,7 @@ export default function AdminPaymentsPage() {
                     <td className="py-3" onClick={(e) => e.stopPropagation()}>
                       {(p._type === "moallem" || p._type === "supplier") ? (
                         <AdminActionMenu inlineCount={1} actions={[
-                          { label: "PDF", icon: <FileDown className="h-3.5 w-3.5" />, onClick: () => exportPDF({ title: `Payment - ${p._displayName}`, columns: ["Type", "Tracking ID", "Name", "Amount", "Method", "Date"], rows: [[badge.label, p._trackingId, p._displayName, p._amount, p.payment_method || "—", p.date ? new Date(p.date).toLocaleDateString() : "—"]], summary: [`Total Amount: BDT ${p._amount.toLocaleString()}`] }) },
+                          { label: "PDF", icon: <FileDown className="h-3.5 w-3.5" />, onClick: () => exportPDF({ title: `Payment - ${p._displayName}`, columns: ["Type", "Tracking ID", "Name", "Amount", "Method", "Date"], rows: [[badge.label, p._trackingId, p._displayName, p._amount, p.payment_method || "—", p.date ? new Date(p.date).toLocaleDateString() : "—"]], summary: [`Total Amount: BDT ${p._amount.toLocaleString("en-IN")}`] }) },
                           { label: "Edit", icon: <Edit2 className="h-3.5 w-3.5" />, onClick: () => startEdit(p), variant: "warning", hidden: !canModify },
                           { label: "Delete", icon: <Trash2 className="h-3.5 w-3.5" />, onClick: () => { setDeleteId(p.id); setDeleteType(p._type); }, variant: "destructive", hidden: !canModify },
                         ]} />
@@ -743,7 +743,7 @@ export default function AdminPaymentsPage() {
                         <AdminActionMenu
                           inlineCount={2}
                           actions={[
-                            { label: "PDF", icon: <FileDown className="h-3.5 w-3.5" />, onClick: () => exportPDF({ title: `Payment - ${p._displayName}`, columns: ["Type", "Tracking ID", "Name", "Amount", "Method", "Date", "Status"], rows: [[badge.label, p._trackingId, p._displayName, p._amount, p.payment_method || "—", p.paid_at ? new Date(p.paid_at).toLocaleDateString() : p.due_date ? new Date(p.due_date).toLocaleDateString() : "—", p.status]], summary: [`Total Amount: BDT ${p._amount.toLocaleString()}`] }) },
+                            { label: "PDF", icon: <FileDown className="h-3.5 w-3.5" />, onClick: () => exportPDF({ title: `Payment - ${p._displayName}`, columns: ["Type", "Tracking ID", "Name", "Amount", "Method", "Date", "Status"], rows: [[badge.label, p._trackingId, p._displayName, p._amount, p.payment_method || "—", p.paid_at ? new Date(p.paid_at).toLocaleDateString() : p.due_date ? new Date(p.due_date).toLocaleDateString() : "—", p.status]], summary: [`Total Amount: BDT ${p._amount.toLocaleString("en-IN")}`] }) },
                             { label: "Edit", icon: <Edit2 className="h-3.5 w-3.5" />, onClick: () => startEdit(p), variant: "warning", hidden: !canModify },
                             { label: "Delete", icon: <Trash2 className="h-3.5 w-3.5" />, onClick: () => { setDeleteId(p.id); setDeleteType("customer"); }, variant: "destructive", hidden: !canModify, separator: true },
                             { label: "Approve", icon: <CheckCircle className="h-3.5 w-3.5" />, onClick: () => { setMarkPaidId(p.id); setMarkPaidWallet(""); }, variant: "success", hidden: !canModify || p.status !== "pending" },
@@ -815,7 +815,7 @@ export default function AdminPaymentsPage() {
                 <select className={inputClass} value={addForm.moallem_id} onChange={(e) => handleMoallemChange(e.target.value)}>
                   <option value="">-- Select Moallem --</option>
                   {moallems.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}{m.phone ? ` (${m.phone})` : ""} — Due: {fmt(Number(m.total_due || 0))}</option>
+                    <option key={m.id} value={m.id}>{m.name}{m.phone ? ` (${m.phone})` : ""} — Due: {formatBDT(Number(m.total_due || 0))}</option>
                   ))}
                 </select>
               </div>
@@ -852,7 +852,7 @@ export default function AdminPaymentsPage() {
                 <option value="">-- Select Booking ({filteredBookings.length}) --</option>
                 {filteredBookings.map((b) => (
                   <option key={b.id} value={b.id}>
-                    {b.tracking_id} — {b.guest_name || "N/A"} ({paymentType === "supplier" ? `Supplier Due: ${fmt(Number(b.supplier_due || 0))}` : paymentType === "moallem" ? `Moallem Due: ${fmt(Number(b.moallem_due || 0))}` : `Due: ${fmt(Number(b.due_amount || 0))}`})
+                    {b.tracking_id} — {b.guest_name || "N/A"} ({paymentType === "supplier" ? `Supplier Due: ${formatBDT(Number(b.supplier_due || 0))}` : paymentType === "moallem" ? `Moallem Due: ${formatBDT(Number(b.moallem_due || 0))}` : `Due: ${formatBDT(Number(b.due_amount || 0))}`})
                   </option>
                 ))}
               </select>
@@ -865,21 +865,21 @@ export default function AdminPaymentsPage() {
               <div className="bg-secondary/50 rounded-lg p-3 grid grid-cols-3 gap-2 text-xs">
                 {paymentType === "customer" ? (
                   <>
-                    <div><span className="text-muted-foreground block">Total</span><span className="font-bold">{fmt(Number(selectedBookingInfo.total_amount))}</span></div>
-                    <div><span className="text-muted-foreground block">Paid</span><span className="font-bold text-emerald">{fmt(Number(selectedBookingInfo.paid_amount))}</span></div>
-                    <div><span className="text-muted-foreground block">Due</span><span className="font-bold text-destructive">{fmt(Number(selectedBookingInfo.due_amount || 0))}</span></div>
+                    <div><span className="text-muted-foreground block">Total</span><span className="font-bold">{formatBDT(Number(selectedBookingInfo.total_amount))}</span></div>
+                    <div><span className="text-muted-foreground block">Paid</span><span className="font-bold text-emerald">{formatBDT(Number(selectedBookingInfo.paid_amount))}</span></div>
+                    <div><span className="text-muted-foreground block">Due</span><span className="font-bold text-destructive">{formatBDT(Number(selectedBookingInfo.due_amount || 0))}</span></div>
                   </>
                 ) : paymentType === "moallem" ? (
                   <>
-                    <div><span className="text-muted-foreground block">Total</span><span className="font-bold">{fmt(Number(selectedBookingInfo.total_amount))}</span></div>
-                    <div><span className="text-muted-foreground block">Moallem Paid</span><span className="font-bold text-emerald">{fmt(Number(selectedBookingInfo.paid_by_moallem || 0))}</span></div>
-                    <div><span className="text-muted-foreground block">Moallem Due</span><span className="font-bold text-destructive">{fmt(Number(selectedBookingInfo.moallem_due || 0))}</span></div>
+                    <div><span className="text-muted-foreground block">Total</span><span className="font-bold">{formatBDT(Number(selectedBookingInfo.total_amount))}</span></div>
+                    <div><span className="text-muted-foreground block">Moallem Paid</span><span className="font-bold text-emerald">{formatBDT(Number(selectedBookingInfo.paid_by_moallem || 0))}</span></div>
+                    <div><span className="text-muted-foreground block">Moallem Due</span><span className="font-bold text-destructive">{formatBDT(Number(selectedBookingInfo.moallem_due || 0))}</span></div>
                   </>
                 ) : (
                   <>
-                    <div><span className="text-muted-foreground block">Total Cost</span><span className="font-bold">{fmt(Number(selectedBookingInfo.total_cost || 0))}</span></div>
-                    <div><span className="text-muted-foreground block">Supplier Paid</span><span className="font-bold text-emerald">{fmt(Number(selectedBookingInfo.paid_to_supplier || 0))}</span></div>
-                    <div><span className="text-muted-foreground block">Supplier Due</span><span className="font-bold text-destructive">{fmt(Number(selectedBookingInfo.supplier_due || 0))}</span></div>
+                    <div><span className="text-muted-foreground block">Total Cost</span><span className="font-bold">{formatBDT(Number(selectedBookingInfo.total_cost || 0))}</span></div>
+                    <div><span className="text-muted-foreground block">Supplier Paid</span><span className="font-bold text-emerald">{formatBDT(Number(selectedBookingInfo.paid_to_supplier || 0))}</span></div>
+                    <div><span className="text-muted-foreground block">Supplier Due</span><span className="font-bold text-destructive">{formatBDT(Number(selectedBookingInfo.supplier_due || 0))}</span></div>
                   </>
                 )}
               </div>
@@ -909,7 +909,7 @@ export default function AdminPaymentsPage() {
                 <select className={inputClass} value={addForm.wallet_account_id} onChange={(e) => setAddForm({ ...addForm, wallet_account_id: e.target.value })}>
                   <option value="">Auto (based on method)</option>
                   {walletAccounts.map((w: any) => (
-                    <option key={w.id} value={w.id}>{w.name} — {fmt(Number(w.balance || 0))}</option>
+                    <option key={w.id} value={w.id}>{w.name} — {formatBDT(Number(w.balance || 0))}</option>
                   ))}
                 </select>
               </div>
@@ -981,7 +981,7 @@ export default function AdminPaymentsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div><span className="text-muted-foreground text-xs block">Booking</span><span className="font-mono font-medium">{viewPayment._trackingId}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Name</span><span className="font-medium">{viewPayment._displayName}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Amount</span><span className="font-bold text-primary">{fmt(viewPayment._amount)}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Amount</span><span className="font-bold text-primary">{formatBDT(viewPayment._amount)}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Method</span><span className="font-medium capitalize">{viewPayment.payment_method || "—"}</span></div>
                 {viewPayment._type === "customer" && (
                   <>
@@ -1008,9 +1008,9 @@ export default function AdminPaymentsPage() {
                 <div className="border-t border-border/50 pt-3">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Booking Info</h4>
                   <div className="grid grid-cols-3 gap-3 bg-secondary/50 rounded-lg p-3">
-                    <div><span className="text-muted-foreground text-xs block">Total</span><span className="font-bold">{fmt(Number(viewPayment.bookings.total_amount))}</span></div>
-                    <div><span className="text-muted-foreground text-xs block">Paid</span><span className="font-bold text-emerald">{fmt(Number(viewPayment.bookings.paid_amount))}</span></div>
-                    <div><span className="text-muted-foreground text-xs block">Due</span><span className="font-bold text-destructive">{fmt(Number(viewPayment.bookings.due_amount || 0))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Total</span><span className="font-bold">{formatBDT(Number(viewPayment.bookings.total_amount))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Paid</span><span className="font-bold text-emerald">{formatBDT(Number(viewPayment.bookings.paid_amount))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Due</span><span className="font-bold text-destructive">{formatBDT(Number(viewPayment.bookings.due_amount || 0))}</span></div>
                   </div>
                 </div>
               )}
@@ -1018,9 +1018,9 @@ export default function AdminPaymentsPage() {
                 <div className="border-t border-border/50 pt-3">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Booking Info</h4>
                   <div className="grid grid-cols-3 gap-3 bg-secondary/50 rounded-lg p-3">
-                    <div><span className="text-muted-foreground text-xs block">Total</span><span className="font-bold">{fmt(Number(viewPayment.bookings.total_amount))}</span></div>
-                    <div><span className="text-muted-foreground text-xs block">Moallem Paid</span><span className="font-bold text-emerald">{fmt(Number(viewPayment.bookings.paid_by_moallem || 0))}</span></div>
-                    <div><span className="text-muted-foreground text-xs block">Moallem Due</span><span className="font-bold text-destructive">{fmt(Number(viewPayment.bookings.moallem_due || 0))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Total</span><span className="font-bold">{formatBDT(Number(viewPayment.bookings.total_amount))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Moallem Paid</span><span className="font-bold text-emerald">{formatBDT(Number(viewPayment.bookings.paid_by_moallem || 0))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Moallem Due</span><span className="font-bold text-destructive">{formatBDT(Number(viewPayment.bookings.moallem_due || 0))}</span></div>
                   </div>
                 </div>
               )}
@@ -1028,9 +1028,9 @@ export default function AdminPaymentsPage() {
                 <div className="border-t border-border/50 pt-3">
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Booking Info</h4>
                   <div className="grid grid-cols-3 gap-3 bg-secondary/50 rounded-lg p-3">
-                    <div><span className="text-muted-foreground text-xs block">Total Cost</span><span className="font-bold">{fmt(Number(viewPayment.bookings.total_cost || 0))}</span></div>
-                    <div><span className="text-muted-foreground text-xs block">Supplier Paid</span><span className="font-bold text-emerald">{fmt(Number(viewPayment.bookings.paid_to_supplier || 0))}</span></div>
-                    <div><span className="text-muted-foreground text-xs block">Supplier Due</span><span className="font-bold text-destructive">{fmt(Number(viewPayment.bookings.supplier_due || 0))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Total Cost</span><span className="font-bold">{formatBDT(Number(viewPayment.bookings.total_cost || 0))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Supplier Paid</span><span className="font-bold text-emerald">{formatBDT(Number(viewPayment.bookings.paid_to_supplier || 0))}</span></div>
+                    <div><span className="text-muted-foreground text-xs block">Supplier Due</span><span className="font-bold text-destructive">{formatBDT(Number(viewPayment.bookings.supplier_due || 0))}</span></div>
                   </div>
                 </div>
               )}

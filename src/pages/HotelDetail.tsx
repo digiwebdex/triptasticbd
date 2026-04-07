@@ -168,7 +168,7 @@ const HotelDetail = () => {
                         </div>
                         <div className="flex items-center justify-between mt-3">
                           <p className="text-xl font-heading font-bold text-primary">
-                            ৳{Number(room.price_per_night).toLocaleString()}<span className="text-xs font-body text-muted-foreground font-normal"> {t("hotels.perNight")}</span>
+                            ৳{Number(room.price_per_night).toLocaleString("en-IN")}<span className="text-xs font-body text-muted-foreground font-normal"> {t("hotels.perNight")}</span>
                           </p>
                           {selectedRoom?.id === room.id && (
                             <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-1 rounded-full">{t("hotelDetail.selected")}</span>
@@ -208,7 +208,7 @@ const HotelDetail = () => {
                     <div className="border-t border-border pt-4 space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">{selectedRoom.name}</span>
-                        <span>৳{Number(selectedRoom.price_per_night).toLocaleString()}{t("hotels.perNight")}</span>
+                        <span>৳{Number(selectedRoom.price_per_night).toLocaleString("en-IN")}{t("hotels.perNight")}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">{t("hotelDetail.nights")}</span>
@@ -216,7 +216,7 @@ const HotelDetail = () => {
                       </div>
                       <div className="flex justify-between font-heading font-bold text-lg border-t border-border pt-2 mt-2">
                         <span>{t("hotelDetail.total")}</span>
-                        <span className="text-primary">৳{totalPrice.toLocaleString()}</span>
+                        <span className="text-primary">৳{totalPrice.toLocaleString("en-IN")}</span>
                       </div>
                     </div>
                   )}

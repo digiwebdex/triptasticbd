@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCanSeeProfit } from "@/components/admin/AdminLayout";
 import { format } from "date-fns";
+import { formatBDT } from "@/lib/utils";
 
 interface Props {
   bookings: any[];
@@ -28,7 +29,6 @@ interface Props {
   onMarkPaid: (id: string) => void;
 }
 
-const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
 
 const AdminDashboardCharts = ({
   bookings, payments, expenses = [], accounts = [],
@@ -107,17 +107,17 @@ const AdminDashboardCharts = ({
 
   const kpiCards = useMemo(() => {
     const cards: { label: string; value: string | number; icon: any; color: string; onClick: () => void }[] = [
-      { label: "Total Sales", value: fmt(financials.totalSales), icon: DollarSign, color: "text-primary", onClick: () => navigate("/admin/bookings") },
-      { label: "Income Received", value: fmt(financials.totalIncomeReceived), icon: ArrowUpRight, color: "text-emerald-500", onClick: () => navigate("/admin/payments") },
+      { label: "Total Sales", value: formatBDT(financials.totalSales), icon: DollarSign, color: "text-primary", onClick: () => navigate("/admin/bookings") },
+      { label: "Income Received", value: formatBDT(financials.totalIncomeReceived), icon: ArrowUpRight, color: "text-emerald-500", onClick: () => navigate("/admin/payments") },
     ];
     if (canSeeProfit) {
-      cards.push({ label: "Net Profit", value: fmt(financials.netProfit), icon: TrendingUp, color: financials.netProfit >= 0 ? "text-emerald-500" : "text-destructive", onClick: () => navigate("/admin/accounting") });
+      cards.push({ label: "Net Profit", value: formatBDT(financials.netProfit), icon: TrendingUp, color: financials.netProfit >= 0 ? "text-emerald-500" : "text-destructive", onClick: () => navigate("/admin/accounting") });
     }
     cards.push(
-      { label: "Cash Balance", value: fmt(financials.cashBalance), icon: Wallet, color: financials.cashBalance >= 0 ? "text-primary" : "text-destructive", onClick: () => navigate("/admin/accounting") },
+      { label: "Cash Balance", value: formatBDT(financials.cashBalance), icon: Wallet, color: financials.cashBalance >= 0 ? "text-primary" : "text-destructive", onClick: () => navigate("/admin/accounting") },
       { label: "Total Bookings", value: bookings.filter(b => b.status !== "cancelled").length, icon: Package, color: "text-foreground", onClick: () => navigate("/admin/bookings") },
       { label: "Total Hajji", value: financials.totalHajji, icon: Users, color: "text-foreground", onClick: () => navigate("/admin/customers") },
-      { label: "Customer Due", value: fmt(financials.customerDue), icon: UserCheck, color: financials.customerDue > 0 ? "text-yellow-500" : "text-emerald-500", onClick: () => setShowDueCustomers(true) },
+      { label: "Customer Due", value: formatBDT(financials.customerDue), icon: UserCheck, color: financials.customerDue > 0 ? "text-yellow-500" : "text-emerald-500", onClick: () => setShowDueCustomers(true) },
     );
     return cards;
   }, [financials, bookings.length, canSeeProfit, navigate]);
@@ -152,12 +152,12 @@ const AdminDashboardCharts = ({
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between cursor-pointer hover:bg-secondary/30 rounded px-1 -mx-1 py-0.5 transition-colors" onClick={() => navigate("/admin/moallems")}>
-              <span className="text-muted-foreground">Moallem Due</span><span className="font-bold text-yellow-600">{fmt(financials.moallemDue)}</span>
+              <span className="text-muted-foreground">Moallem Due</span><span className="font-bold text-yellow-600">{formatBDT(financials.moallemDue)}</span>
             </div>
             <div className="flex justify-between cursor-pointer hover:bg-secondary/30 rounded px-1 -mx-1 py-0.5 transition-colors" onClick={() => setShowDueCustomers(true)}>
-              <span className="text-muted-foreground">Customer Due</span><span className="font-bold text-yellow-600">{fmt(financials.customerDue)}</span>
+              <span className="text-muted-foreground">Customer Due</span><span className="font-bold text-yellow-600">{formatBDT(financials.customerDue)}</span>
             </div>
-            <div className="border-t border-border pt-2 flex justify-between font-bold"><span>Total</span><span className="text-primary">{fmt(financials.totalReceivable)}</span></div>
+            <div className="border-t border-border pt-2 flex justify-between font-bold"><span>Total</span><span className="text-primary">{formatBDT(financials.totalReceivable)}</span></div>
           </div>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
@@ -166,16 +166,16 @@ const AdminDashboardCharts = ({
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between cursor-pointer hover:bg-secondary/30 rounded px-1 -mx-1 py-0.5 transition-colors" onClick={() => navigate("/admin/supplier-agents")}>
-              <span className="text-muted-foreground">Supplier Due</span><span className="font-bold text-destructive">{fmt(financials.supplierDue)}</span>
+              <span className="text-muted-foreground">Supplier Due</span><span className="font-bold text-destructive">{formatBDT(financials.supplierDue)}</span>
             </div>
             {canSeeProfit && (
               <div className="flex justify-between cursor-pointer hover:bg-secondary/30 rounded px-1 -mx-1 py-0.5 transition-colors" onClick={() => navigate("/admin/moallems")}>
-                <span className="text-muted-foreground">Commission Due</span><span className="font-bold text-destructive">{fmt(financials.commissionDue)}</span>
+                <span className="text-muted-foreground">Commission Due</span><span className="font-bold text-destructive">{formatBDT(financials.commissionDue)}</span>
               </div>
             )}
             <div className="border-t border-border pt-2 flex justify-between font-bold">
               <span>Total</span>
-              <span className="text-destructive">{fmt(financials.supplierDue + (canSeeProfit ? financials.commissionDue : 0))}</span>
+              <span className="text-destructive">{formatBDT(financials.supplierDue + (canSeeProfit ? financials.commissionDue : 0))}</span>
             </div>
           </div>
         </div>
@@ -204,7 +204,7 @@ const AdminDashboardCharts = ({
                     <p className="text-[11px] text-muted-foreground">{b.tracking_id} · {b.packages?.name || ""}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-primary">{fmt(Number(b.total_amount || 0))}</p>
+                    <p className="text-sm font-bold text-primary">{formatBDT(Number(b.total_amount || 0))}</p>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                       b.status === "confirmed" ? "bg-emerald-500/10 text-emerald-500" :
                       b.status === "cancelled" ? "bg-destructive/10 text-destructive" :
@@ -240,7 +240,7 @@ const AdminDashboardCharts = ({
                     <p className="text-[11px] text-muted-foreground">#{p.installment_number || 1} · {p.payment_method || "cash"}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-emerald-500">{fmt(Number(p.amount || 0))}</p>
+                    <p className="text-sm font-bold text-emerald-500">{formatBDT(Number(p.amount || 0))}</p>
                     <p className="text-[10px] text-muted-foreground">{p.paid_at ? format(new Date(p.paid_at), "dd MMM yy") : ""}</p>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ const AdminDashboardCharts = ({
             <div className="space-y-2 mt-2">
               <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 flex items-center justify-between">
                 <span className="text-sm font-medium">Total Due</span>
-                <span className="text-lg font-bold text-destructive">{fmt(financials.customerDue)}</span>
+                <span className="text-lg font-bold text-destructive">{formatBDT(financials.customerDue)}</span>
               </div>
               {dueCustomers.map((c, i) => (
                 <div key={i} className="bg-secondary/30 border border-border rounded-lg p-3">
@@ -276,7 +276,7 @@ const AdminDashboardCharts = ({
                       {c.phone && <p className="text-xs text-muted-foreground">{c.phone}</p>}
                     </div>
                     <div className="text-right">
-                      <p className="text-base font-bold text-destructive">{fmt(c.totalDue)}</p>
+                      <p className="text-base font-bold text-destructive">{formatBDT(c.totalDue)}</p>
                       <p className="text-[10px] text-muted-foreground">{c.bookingCount} bookings</p>
                     </div>
                   </div>
@@ -285,8 +285,8 @@ const AdminDashboardCharts = ({
                       <div key={b.id} className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">{b.tracking_id} · {b.packages?.name || ""}</span>
                         <div className="flex items-center gap-3">
-                          <span className="text-muted-foreground">Total: {fmt(Number(b.total_amount))}</span>
-                          <span className="font-semibold text-destructive">Due: {fmt(Number(b.due_amount))}</span>
+                          <span className="text-muted-foreground">Total: {formatBDT(Number(b.total_amount))}</span>
+                          <span className="font-semibold text-destructive">Due: {formatBDT(Number(b.due_amount))}</span>
                         </div>
                       </div>
                     ))}

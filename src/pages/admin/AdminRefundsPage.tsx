@@ -11,9 +11,9 @@ import {
   AlertTriangle, DollarSign, TrendingDown, FileText
 } from "lucide-react";
 import { format } from "date-fns";
+import { formatBDT } from "@/lib/utils";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
 const REFUND_METHODS = [
   { value: "cash", label: "Cash" },
@@ -213,7 +213,7 @@ export default function AdminRefundsPage() {
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <p className="text-xs text-muted-foreground">মোট রিফান্ডকৃত</p>
-          <p className="text-2xl font-bold text-destructive">{fmt(stats.totalRefunded)}</p>
+          <p className="text-2xl font-bold text-destructive">{formatBDT(stats.totalRefunded)}</p>
         </CardContent></Card>
       </div>
 
@@ -255,9 +255,9 @@ export default function AdminRefundsPage() {
               <tr key={r.id} className="border-t border-border hover:bg-muted/30">
                 <td className="px-4 py-3 font-mono text-xs">{r.bookings?.tracking_id || "—"}</td>
                 <td className="px-4 py-3">{r.bookings?.guest_name || "—"}</td>
-                <td className="px-4 py-3 text-right">{fmt(r.original_amount)}</td>
-                <td className="px-4 py-3 text-right text-destructive">{fmt(r.deduction_amount)}</td>
-                <td className="px-4 py-3 text-right font-semibold">{fmt(r.refund_amount)}</td>
+                <td className="px-4 py-3 text-right">{formatBDT(r.original_amount)}</td>
+                <td className="px-4 py-3 text-right text-destructive">{formatBDT(r.deduction_amount)}</td>
+                <td className="px-4 py-3 text-right font-semibold">{formatBDT(r.refund_amount)}</td>
                 <td className="px-4 py-3 text-center capitalize">{r.refund_method}</td>
                 <td className="px-4 py-3 text-center">
                   <Badge className={STATUS_COLORS[r.status] || ""}>{r.status}</Badge>
@@ -300,7 +300,7 @@ export default function AdminRefundsPage() {
               <select className={inputClass} value={selectedBookingId} onChange={e => setSelectedBookingId(e.target.value)}>
                 <option value="">-- বুকিং নির্বাচন --</option>
                 {bookings.map((b: any) => (
-                  <option key={b.id} value={b.id}>{b.tracking_id} — {b.guest_name} ({fmt(b.paid_amount)} paid)</option>
+                  <option key={b.id} value={b.id}>{b.tracking_id} — {b.guest_name} ({formatBDT(b.paid_amount)} paid)</option>
                 ))}
               </select>
             </div>
@@ -310,7 +310,7 @@ export default function AdminRefundsPage() {
               <select className={inputClass} value={selectedPolicyId} onChange={e => setSelectedPolicyId(e.target.value)}>
                 <option value="">-- কাস্টম রিফান্ড --</option>
                 {policies.map((p: any) => (
-                  <option key={p.id} value={p.id}>{p.name} ({p.refund_type === "percentage" ? `${p.refund_value}%` : fmt(p.refund_value)})</option>
+                  <option key={p.id} value={p.id}>{p.name} ({p.refund_type === "percentage" ? `${p.refund_value}%` : formatBDT(p.refund_value)})</option>
                 ))}
               </select>
             </div>
@@ -347,7 +347,7 @@ export default function AdminRefundsPage() {
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">ওয়ালেট একাউন্ট</label>
                 <select className={inputClass} value={refundForm.wallet_account_id} onChange={e => setRefundForm(prev => ({ ...prev, wallet_account_id: e.target.value }))}>
                   <option value="">-- নির্বাচন করুন --</option>
-                  {walletAccounts.map((w: any) => <option key={w.id} value={w.id}>{w.name} ({fmt(w.balance)})</option>)}
+                  {walletAccounts.map((w: any) => <option key={w.id} value={w.id}>{w.name} ({formatBDT(w.balance)})</option>)}
                 </select>
               </div>
             </div>
@@ -378,7 +378,7 @@ export default function AdminRefundsPage() {
                     <div>
                       <p className="font-medium text-sm">{p.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {p.refund_type === "percentage" ? `${p.refund_value}% রিফান্ড` : `${fmt(p.refund_value)} ফ্ল্যাট কর্তন`}
+                        {p.refund_type === "percentage" ? `${p.refund_value}% রিফান্ড` : `${formatBDT(p.refund_value)} ফ্ল্যাট কর্তন`}
                         {p.min_days_before_departure > 0 && ` • ন্যূনতম ${p.min_days_before_departure} দিন আগে`}
                       </p>
                     </div>

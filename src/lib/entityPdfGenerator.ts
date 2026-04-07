@@ -7,11 +7,11 @@ import { getSignatureData, SignatureData } from "./pdfSignature";
 import { generateTrackingQr, addQrToDoc, addPaymentWatermark, getWatermarkStatus } from "./pdfQrCode";
 import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from "./pdfFontLoader";
 import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
+import { formatBDT } from "@/lib/utils";
 
 const GOLD = { r: 245, g: 158, b: 11 };
 const DARK = { r: 35, g: 40, b: 48 };
 
-const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
@@ -182,12 +182,12 @@ export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyI
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   doc.text(`Bookings: ${data.summary.totalBookings}`, 18, y + 7);
-  doc.text(`Total: ${fmt(data.summary.totalAmount)}`, 60, y + 7);
-  doc.text(`Paid: ${fmt(data.summary.totalPaid)}`, 110, y + 7);
-  doc.text(`Due: ${fmt(data.summary.totalDue)}`, 155, y + 7);
-  doc.text(`Deposit: ${fmt(data.summary.totalDeposit)}`, 18, y + 14);
-  doc.text(`Commission: ${fmt(data.summary.totalCommission)}`, 70, y + 14);
-  doc.text(`Comm. Due: ${fmt(data.summary.commissionDue)}`, 130, y + 14);
+  doc.text(`Total: ${formatBDT(data.summary.totalAmount)}`, 60, y + 7);
+  doc.text(`Paid: ${formatBDT(data.summary.totalPaid)}`, 110, y + 7);
+  doc.text(`Due: ${formatBDT(data.summary.totalDue)}`, 155, y + 7);
+  doc.text(`Deposit: ${formatBDT(data.summary.totalDeposit)}`, 18, y + 14);
+  doc.text(`Commission: ${formatBDT(data.summary.totalCommission)}`, 70, y + 14);
+  doc.text(`Comm. Due: ${formatBDT(data.summary.commissionDue)}`, 130, y + 14);
   doc.setTextColor(0);
   y += 24;
 
@@ -199,7 +199,7 @@ export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyI
     autoTable(doc, {
       startY: y,
       head: [["Tracking ID", "Guest", "Package", "Total", "Paid", "Due", "Status"]],
-      body: data.bookings.map(b => [b.tracking_id, b.guest_name, b.package_name, fmt(b.total), fmt(b.paid), fmt(b.due), b.status]),
+      body: data.bookings.map(b => [b.tracking_id, b.guest_name, b.package_name, formatBDT(b.total), formatBDT(b.paid), formatBDT(b.due), b.status]),
       styles: { fontSize: 7, font: "helvetica" },
       headStyles: { fillColor: [40, 46, 56] },
       margin: { left: 14, right: 14 },
@@ -217,7 +217,7 @@ export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyI
     autoTable(doc, {
       startY: y,
       head: [["Amount", "Date", "Method", "Notes"]],
-      body: data.moallemPayments.map(p => [fmt(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
+      body: data.moallemPayments.map(p => [formatBDT(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
       styles: { fontSize: 7, font: "helvetica" },
       headStyles: { fillColor: [60, 70, 85] },
       margin: { left: 14, right: 14 },
@@ -235,7 +235,7 @@ export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyI
     autoTable(doc, {
       startY: y,
       head: [["Amount", "Date", "Method", "Notes"]],
-      body: data.commissionPayments.map(p => [fmt(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
+      body: data.commissionPayments.map(p => [formatBDT(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
       styles: { fontSize: 7, font: "helvetica" },
       headStyles: { fillColor: [60, 70, 85] },
       margin: { left: 14, right: 14 },
@@ -300,7 +300,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
   doc.setTextColor(255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.text(`Contracted Hajji: ${data.summary.contractedHajji} | Billed: ${fmt(data.summary.totalBilled)} | Paid: ${fmt(data.summary.totalPaid)} | Due: ${fmt(data.summary.totalDue)}`, 18, y + 8);
+  doc.text(`Contracted Hajji: ${data.summary.contractedHajji} | Billed: ${formatBDT(data.summary.totalBilled)} | Paid: ${formatBDT(data.summary.totalPaid)} | Due: ${formatBDT(data.summary.totalDue)}`, 18, y + 8);
   doc.setTextColor(0);
   y += 18;
 
@@ -315,8 +315,8 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
       startY: y,
       head: [["SL", "Description", "Qty", "Unit Price", "Total"]],
       body: [
-        ...data.items.map((item, i) => [String(i + 1), item.description, String(item.quantity), fmt(item.unit_price), fmt(item.total_amount)]),
-        ["", "", "", "Grand Total", fmt(itemsTotal)],
+        ...data.items.map((item, i) => [String(i + 1), item.description, String(item.quantity), formatBDT(item.unit_price), formatBDT(item.total_amount)]),
+        ["", "", "", "Grand Total", formatBDT(itemsTotal)],
       ],
       styles: { fontSize: 7, font: "helvetica" },
       headStyles: { fillColor: [40, 46, 56] },
@@ -340,7 +340,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
     autoTable(doc, {
       startY: y,
       head: [["Tracking ID", "Guest", "Package", "Total", "Cost", "Paid", "Due", "Status"]],
-      body: data.bookings.map(b => [b.tracking_id, b.guest_name, b.package_name, fmt(b.total), fmt(b.cost), fmt(b.paid_to_supplier), fmt(b.supplier_due), b.status]),
+      body: data.bookings.map(b => [b.tracking_id, b.guest_name, b.package_name, formatBDT(b.total), formatBDT(b.cost), formatBDT(b.paid_to_supplier), formatBDT(b.supplier_due), b.status]),
       styles: { fontSize: 7, font: "helvetica", cellPadding: 2, overflow: 'linebreak' },
       headStyles: { fillColor: [40, 46, 56] },
       margin: { left: 14, right: 14 },
@@ -358,7 +358,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
     autoTable(doc, {
       startY: y,
       head: [["Category", "Amount", "Date", "Method", "Notes"]],
-      body: data.agentPayments.map(p => [p.category || "—", fmt(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
+      body: data.agentPayments.map(p => [p.category || "—", formatBDT(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
       styles: { fontSize: 7, font: "helvetica", cellPadding: 2 },
       headStyles: { fillColor: [60, 70, 85] },
       margin: { left: 14, right: 14 },
@@ -384,7 +384,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
     autoTable(doc, {
       startY: y,
       head: [["Date", "Pilgrim Count", "Contract Amount", "Paid", "Due"]],
-      body: data.contracts.map(c => [fmtDate(c.created_at), String(c.pilgrim_count), fmt(c.contract_amount), fmt(c.total_paid), fmt(c.total_due)]),
+      body: data.contracts.map(c => [fmtDate(c.created_at), String(c.pilgrim_count), formatBDT(c.contract_amount), formatBDT(c.total_paid), formatBDT(c.total_due)]),
       styles: { fontSize: 7, font: "helvetica" },
       headStyles: { fillColor: [40, 46, 56] },
       margin: { left: 14, right: 14 },
@@ -403,7 +403,7 @@ export async function generateSupplierPdf(data: SupplierPdfData, company: Compan
     autoTable(doc, {
       startY: y,
       head: [["Amount", "Date", "Method", "Note"]],
-      body: data.contractPayments.map(p => [fmt(p.amount), fmtDate(p.payment_date), p.payment_method || "cash", p.note || "—"]),
+      body: data.contractPayments.map(p => [formatBDT(p.amount), fmtDate(p.payment_date), p.payment_method || "cash", p.note || "—"]),
       styles: { fontSize: 7, font: "helvetica" },
       headStyles: { fillColor: [60, 70, 85] },
       margin: { left: 14, right: 14 },
@@ -468,7 +468,7 @@ export async function generateCustomerPdf(data: CustomerPdfData, company: Compan
   doc.setTextColor(255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.text(`Bookings: ${data.summary.totalBookings} | Total: ${fmt(data.summary.totalAmount)} | Paid: ${fmt(data.summary.totalPaid)} | Due: ${fmt(data.summary.totalDue)} | Profit: ${fmt(data.summary.profit)}`, 18, y + 8);
+  doc.text(`Bookings: ${data.summary.totalBookings} | Total: ${formatBDT(data.summary.totalAmount)} | Paid: ${formatBDT(data.summary.totalPaid)} | Due: ${formatBDT(data.summary.totalDue)} | Profit: ${formatBDT(data.summary.profit)}`, 18, y + 8);
   doc.setTextColor(0);
   y += 18;
 
@@ -480,7 +480,7 @@ export async function generateCustomerPdf(data: CustomerPdfData, company: Compan
     autoTable(doc, {
       startY: y,
       head: [["Tracking ID", "Package", "Date", "Total", "Paid", "Due", "Status"]],
-      body: data.bookings.map(b => [b.tracking_id, b.package_name, fmtDate(b.date), fmt(b.total), fmt(b.paid), fmt(b.due), b.status]),
+      body: data.bookings.map(b => [b.tracking_id, b.package_name, fmtDate(b.date), formatBDT(b.total), formatBDT(b.paid), formatBDT(b.due), b.status]),
       styles: { fontSize: 7, font: "helvetica" },
       headStyles: { fillColor: [40, 46, 56] },
       margin: { left: 14, right: 14 },
@@ -498,7 +498,7 @@ export async function generateCustomerPdf(data: CustomerPdfData, company: Compan
     autoTable(doc, {
       startY: y,
       head: [["#", "Booking", "Amount", "Date", "Method", "Status"]],
-      body: data.payments.map(p => [p.installment || "—", p.tracking_id, fmt(p.amount), fmtDate(p.date), p.method || "—", p.status]),
+      body: data.payments.map(p => [p.installment || "—", p.tracking_id, formatBDT(p.amount), fmtDate(p.date), p.method || "—", p.status]),
       styles: { fontSize: 7, font: "helvetica" },
       headStyles: { fillColor: [60, 70, 85] },
       margin: { left: 14, right: 14 },

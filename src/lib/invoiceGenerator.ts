@@ -6,6 +6,7 @@ import { generateTrackingQr, addQrToDoc, addPaymentWatermark, getWatermarkStatus
 import { supabase } from "@/lib/api";
 import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from "./pdfFontLoader";
 import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
+import { formatBDT } from "@/lib/utils";
 
 export interface CompanyInfo {
   name?: string;
@@ -71,7 +72,6 @@ const formatAmount = (value: number) => {
     maximumFractionDigits: 2,
   });
 };
-const fmt = (n: number) => `BDT ${formatAmount(n)}`;
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
@@ -539,11 +539,11 @@ function addFinancialSummary(
 
   doc.setFontSize(8);
   const items = [
-    { label: "Gross Amount:", value: fmt(grossAmount), bold: false },
-    { label: "Discount:", value: `- ${fmt(discount)}`, bold: false },
-    { label: "Net Total:", value: fmt(netTotal), bold: true },
-    { label: "Paid Amount:", value: fmt(paidAmount), bold: false },
-    { label: "Due Amount:", value: fmt(dueAmount), bold: true },
+    { label: "Gross Amount:", value: formatBDT(grossAmount), bold: false },
+    { label: "Discount:", value: `- ${formatBDT(discount)}`, bold: false },
+    { label: "Net Total:", value: formatBDT(netTotal), bold: true },
+    { label: "Paid Amount:", value: formatBDT(paidAmount), bold: false },
+    { label: "Due Amount:", value: formatBDT(dueAmount), bold: true },
   ];
 
   let iy = y + 6;
@@ -571,7 +571,7 @@ function addFinancialSummary(
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(180, 80, 0);
-    doc.text(`Outstanding Balance: ${fmt(dueAmount)}`, boxX + boxW / 2, y + 45, { align: "center" });
+    doc.text(`Outstanding Balance: ${formatBDT(dueAmount)}`, boxX + boxW / 2, y + 45, { align: "center" });
   }
 
   doc.setTextColor(0);
@@ -1114,7 +1114,7 @@ export async function generateReceipt(
       ["Booking ID", booking.tracking_id],
       ["Package", booking.packages?.name || "N/A"],
       ["Installment #", String(payment.installment_number || "—")],
-      ["Amount Paid", fmt(Number(payment.amount))],
+      ["Amount Paid", formatBDT(Number(payment.amount))],
       ["Payment Date", fmtDate(payment.paid_at)],
       ["Payment Method", (payment.payment_method || "Manual").charAt(0).toUpperCase() + (payment.payment_method || "manual").slice(1)],
     ],
@@ -1138,8 +1138,8 @@ export async function generateReceipt(
   doc.setTextColor(255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.text(`Total Paid: ${fmt(totalPaidSoFar)}`, 20, y + 9);
-  doc.text(`Remaining Due: ${fmt(remaining)}`, pageWidth - 20, y + 9, { align: "right" });
+  doc.text(`Total Paid: ${formatBDT(totalPaidSoFar)}`, 20, y + 9);
+  doc.text(`Remaining Due: ${formatBDT(remaining)}`, pageWidth - 20, y + 9, { align: "right" });
   doc.setTextColor(0);
   y += 22;
 
@@ -1224,12 +1224,12 @@ export async function generateCommissionReceipt(
       ["Booking ID", data.bookingTrackingId],
       ["Package", data.packageName],
       ["Travelers", String(data.numTravelers)],
-      ["Commission/Person", fmt(data.commissionPerPerson)],
-      ["Total Commission", fmt(data.totalCommission)],
-      ["Amount Paid Now", fmt(data.paymentAmount)],
+      ["Commission/Person", formatBDT(data.commissionPerPerson)],
+      ["Total Commission", formatBDT(data.totalCommission)],
+      ["Amount Paid Now", formatBDT(data.paymentAmount)],
       ["Payment Method", (data.paymentMethod || "Cash").charAt(0).toUpperCase() + (data.paymentMethod || "cash").slice(1)],
-      ["Total Paid So Far", fmt(data.commissionPaid)],
-      ["Commission Due", fmt(data.commissionDue)],
+      ["Total Paid So Far", formatBDT(data.commissionPaid)],
+      ["Commission Due", formatBDT(data.commissionDue)],
       ...(data.notes ? [["Notes", data.notes]] : []),
     ],
     styles: { fontSize: 8, cellPadding: 3, font: "NotoSansBengali" },
@@ -1247,8 +1247,8 @@ export async function generateCommissionReceipt(
   doc.setTextColor(255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.text(`Paid: ${fmt(data.paymentAmount)}`, 20, y + 9);
-  doc.text(`Remaining Due: ${fmt(Math.max(0, data.commissionDue))}`, pageWidth - 20, y + 9, { align: "right" });
+  doc.text(`Paid: ${formatBDT(data.paymentAmount)}`, 20, y + 9);
+  doc.text(`Remaining Due: ${formatBDT(Math.max(0, data.commissionDue))}`, pageWidth - 20, y + 9, { align: "right" });
   doc.setTextColor(0);
   y += 22;
 

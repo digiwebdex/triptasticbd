@@ -22,8 +22,8 @@ import { Plus, Pencil, Trash2, Eye, Search, Truck, ChevronLeft, ChevronRight, Fi
 import { exportPDF, exportExcel } from "@/lib/reportExport";
 import { normalizePhone, getPhoneError, handlePhoneChange } from "@/lib/phoneValidation";
 import { format } from "date-fns";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
 const PAGE_SIZE = 15;
 
 interface SupplierAgent {
@@ -188,7 +188,7 @@ export default function AdminSupplierAgentsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(a => { const s = getStats(a); return [a.agent_name, a.phone || "—", Number(a.contracted_hajji || 0), s.contractedAmount, s.totalPaid, s.totalDue]; }); exportPDF({ title: "Supplier Agents Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${totals.totalDue.toLocaleString("en-IN")}`] }); }}><FileDown className="h-4 w-4 mr-1" />PDF</Button>
-          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(a => { const s = getStats(a); return [a.agent_name, a.phone || "—", Number(a.contracted_hajji || 0), s.contractedAmount, s.totalPaid, s.totalDue]; }); exportExcel({ title: "Supplier Agents Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.totalPaid.toLocaleString()}`, `Total Due: BDT ${totals.totalDue.toLocaleString()}`] }); }}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
+          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(a => { const s = getStats(a); return [a.agent_name, a.phone || "—", Number(a.contracted_hajji || 0), s.contractedAmount, s.totalPaid, s.totalDue]; }); exportExcel({ title: "Supplier Agents Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${totals.totalDue.toLocaleString("en-IN")}`] }); }}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
           {!isViewer && (
             <Button onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }}>
               <Plus className="h-4 w-4 mr-1" /> New Agent
@@ -205,15 +205,15 @@ export default function AdminSupplierAgentsPage() {
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Contracted Amount</p>
-          <p className="text-lg font-bold text-foreground">{fmt(totals.totalContracted)}</p>
+          <p className="text-lg font-bold text-foreground">{formatBDT(totals.totalContracted)}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Paid</p>
-          <p className="text-lg font-bold text-emerald-600">{fmt(totals.totalPaid)}</p>
+          <p className="text-lg font-bold text-emerald-600">{formatBDT(totals.totalPaid)}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Due</p>
-          <p className="text-lg font-bold text-destructive">{fmt(totals.totalDue)}</p>
+          <p className="text-lg font-bold text-destructive">{formatBDT(totals.totalDue)}</p>
         </div>
       </div>
 
@@ -258,9 +258,9 @@ export default function AdminSupplierAgentsPage() {
                       </TableCell>
                       <TableCell className="text-muted-foreground">{a.phone || "—"}</TableCell>
                       <TableCell className="text-right font-medium">{a.contracted_hajji || 0}</TableCell>
-                      <TableCell className="text-right font-medium">{fmt(stats.contractedAmount)}</TableCell>
-                      <TableCell className="text-right font-medium text-emerald-600">{fmt(stats.totalPaid)}</TableCell>
-                      <TableCell className="text-right font-medium text-destructive">{fmt(stats.totalDue)}</TableCell>
+                      <TableCell className="text-right font-medium">{formatBDT(stats.contractedAmount)}</TableCell>
+                      <TableCell className="text-right font-medium text-emerald-600">{formatBDT(stats.totalPaid)}</TableCell>
+                      <TableCell className="text-right font-medium text-destructive">{formatBDT(stats.totalDue)}</TableCell>
                       <TableCell className="text-center" onClick={e => e.stopPropagation()}>
                         <AdminActionMenu actions={getActions(a)} inlineCount={1} />
                       </TableCell>
@@ -298,7 +298,7 @@ export default function AdminSupplierAgentsPage() {
             <CardTitle className="text-base flex items-center gap-2">
               <Package className="h-4 w-4 text-primary" /> All Service / Items ({itemsWithNames.length})
             </CardTitle>
-            <span className="text-sm font-bold">Total: {fmt(itemsGrandTotal)}</span>
+            <span className="text-sm font-bold">Total: {formatBDT(itemsGrandTotal)}</span>
           </div>
         </CardHeader>
         <CardContent>
@@ -325,14 +325,14 @@ export default function AdminSupplierAgentsPage() {
                       <TableCell className="font-medium">{item.description}</TableCell>
                       <TableCell className="text-primary text-sm">{item.agent_name}</TableCell>
                       <TableCell className="text-right">{item.quantity}</TableCell>
-                      <TableCell className="text-right">{fmt(item.unit_price)}</TableCell>
-                      <TableCell className="text-right font-bold">{fmt(item.total_amount)}</TableCell>
+                      <TableCell className="text-right">{formatBDT(item.unit_price)}</TableCell>
+                      <TableCell className="text-right font-bold">{formatBDT(item.total_amount)}</TableCell>
                       <TableCell className="text-center text-xs text-muted-foreground">{item.created_at ? format(new Date(item.created_at), "dd MMM yyyy") : "—"}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-muted/60 font-bold">
                     <TableCell colSpan={5} className="text-right">Total =</TableCell>
-                    <TableCell className="text-right text-primary">{fmt(itemsGrandTotal)}</TableCell>
+                    <TableCell className="text-right text-primary">{formatBDT(itemsGrandTotal)}</TableCell>
                     <TableCell />
                   </TableRow>
                 </TableBody>
@@ -349,7 +349,7 @@ export default function AdminSupplierAgentsPage() {
             <CardTitle className="text-base flex items-center gap-2">
               <Wallet className="h-4 w-4 text-primary" /> All Payment History ({paymentsWithNames.length})
             </CardTitle>
-            <span className="text-sm font-bold">Total Paid: {fmt(paymentsGrandTotal)}</span>
+            <span className="text-sm font-bold">Total Paid: {formatBDT(paymentsGrandTotal)}</span>
           </div>
         </CardHeader>
         <CardContent>
@@ -374,14 +374,14 @@ export default function AdminSupplierAgentsPage() {
                       <TableCell className="text-center text-muted-foreground text-xs">{i + 1}</TableCell>
                       <TableCell className="font-medium text-primary">{p.agent_name}</TableCell>
                       <TableCell className="text-center text-sm">{p.date ? format(new Date(p.date), "dd/MM/yyyy") : "—"}</TableCell>
-                      <TableCell className="text-right font-bold text-emerald-500">{fmt(p.amount)}</TableCell>
+                      <TableCell className="text-right font-bold text-emerald-500">{formatBDT(p.amount)}</TableCell>
                       <TableCell className="text-center capitalize text-xs">{p.payment_method || "—"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{p.notes || "—"}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-muted/60 font-bold">
                     <TableCell colSpan={3} className="text-right">Total Paid =</TableCell>
-                    <TableCell className="text-right text-emerald-500">{fmt(paymentsGrandTotal)}</TableCell>
+                    <TableCell className="text-right text-emerald-500">{formatBDT(paymentsGrandTotal)}</TableCell>
                     <TableCell colSpan={2} />
                   </TableRow>
                 </TableBody>
@@ -397,15 +397,15 @@ export default function AdminSupplierAgentsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             <div>
               <p className="text-xs text-muted-foreground uppercase">Service Total</p>
-              <p className="text-lg font-bold">{fmt(itemsGrandTotal)}</p>
+              <p className="text-lg font-bold">{formatBDT(itemsGrandTotal)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase">Total Paid</p>
-              <p className="text-lg font-bold text-emerald-500">{fmt(paymentsGrandTotal)}</p>
+              <p className="text-lg font-bold text-emerald-500">{formatBDT(paymentsGrandTotal)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase">Total Due</p>
-              <p className="text-lg font-bold text-destructive">{fmt(Math.max(0, itemsGrandTotal - paymentsGrandTotal))}</p>
+              <p className="text-lg font-bold text-destructive">{formatBDT(Math.max(0, itemsGrandTotal - paymentsGrandTotal))}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase">Total Agents</p>

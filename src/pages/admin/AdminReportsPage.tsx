@@ -18,11 +18,10 @@ import {
   format, parseISO, getYear, getMonth, isWithinInterval,
   startOfMonth, subMonths
 } from "date-fns";
-import { cn } from "@/lib/utils";
+import { formatBDT, cn } from "@/lib/utils";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
 import { useCanSeeProfit } from "@/components/admin/AdminLayout";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 export default function AdminReportsPage() {
@@ -580,7 +579,7 @@ export default function AdminReportsPage() {
   // ══════════════════════════════════════════════
   const handleExport = (type: "pdf" | "excel") => {
     let data: any;
-    const makeSummary = (paid: number, due: number) => [`Total Paid: BDT ${paid.toLocaleString()}`, `Total Due: BDT ${due.toLocaleString()}`];
+    const makeSummary = (paid: number, due: number) => [`Total Paid: BDT ${paid.toLocaleString("en-IN")}`, `Total Due: BDT ${due.toLocaleString("en-IN")}`];
     switch (activeTab) {
       case "financial": {
         const cols = canSeeProfit ? ["Month","Income","Expenses","Profit","Bookings"] : ["Month","Income","Expenses","Bookings"];
@@ -628,20 +627,20 @@ export default function AdminReportsPage() {
         const totalPaid = dailyBookingRows.reduce((s: number, r: any) => s + r.totalPaid, 0);
         const totalDue = dailyBookingRows.reduce((s: number, r: any) => s + r.totalDue, 0);
         const totalAmount = dailyBookingRows.reduce((s: number, r: any) => s + r.totalAmount, 0);
-        data = { title: "Daily Booking Report", columns: ["Date", "Bookings", "Travelers", "Total Amount", "Total Paid", "Total Due"], rows: dailyBookingRows.map((r: any) => [r.dateFormatted, r.count, r.travelers, r.totalAmount, r.totalPaid, r.totalDue]), summary: [`Total Amount: BDT ${totalAmount.toLocaleString()}`, ...makeSummary(totalPaid, totalDue)] };
+        data = { title: "Daily Booking Report", columns: ["Date", "Bookings", "Travelers", "Total Amount", "Total Paid", "Total Due"], rows: dailyBookingRows.map((r: any) => [r.dateFormatted, r.count, r.travelers, r.totalAmount, r.totalPaid, r.totalDue]), summary: [`Total Amount: BDT ${totalAmount.toLocaleString("en-IN")}`, ...makeSummary(totalPaid, totalDue)] };
         break;
       }
       case "payments": {
         const totalInc = paymentReportRows.filter(r => r.type === "income").reduce((s, r) => s + r.amount, 0);
         const totalExp = paymentReportRows.filter(r => r.type === "expense").reduce((s, r) => s + r.amount, 0);
-        data = { title: "Payment Report", columns: ["Source", "Name", "Date", "Amount", "Method", "Type"], rows: paymentReportRows.map(r => [r.source, r.name, r.date, r.amount, r.method, r.type]), summary: [`Total Income: BDT ${totalInc.toLocaleString()}`, `Total Expense: BDT ${totalExp.toLocaleString()}`] };
+        data = { title: "Payment Report", columns: ["Source", "Name", "Date", "Amount", "Method", "Type"], rows: paymentReportRows.map(r => [r.source, r.name, r.date, r.amount, r.method, r.type]), summary: [`Total Income: BDT ${totalInc.toLocaleString("en-IN")}`, `Total Expense: BDT ${totalExp.toLocaleString("en-IN")}`] };
         break;
       }
       case "commission": {
         const totalComm = commissionRows.reduce((s: number, r: any) => s + r.totalCommission, 0);
         const totalPaid = commissionRows.reduce((s: number, r: any) => s + r.commissionPaid, 0);
         const totalDue = commissionRows.reduce((s: number, r: any) => s + r.commissionDue, 0);
-        data = { title: "Commission Report", columns: ["Moallem", "Phone", "Bookings", "Total Commission", "Paid", "Due"], rows: commissionRows.map((r: any) => [r.name, r.phone, r.bookingCount, r.totalCommission, r.commissionPaid, r.commissionDue]), summary: [`Total Commission: BDT ${totalComm.toLocaleString()}`, `Total Paid: BDT ${totalPaid.toLocaleString()}`, `Total Due: BDT ${totalDue.toLocaleString()}`] };
+        data = { title: "Commission Report", columns: ["Moallem", "Phone", "Bookings", "Total Commission", "Paid", "Due"], rows: commissionRows.map((r: any) => [r.name, r.phone, r.bookingCount, r.totalCommission, r.commissionPaid, r.commissionDue]), summary: [`Total Commission: BDT ${totalComm.toLocaleString("en-IN")}`, `Total Paid: BDT ${totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${totalDue.toLocaleString("en-IN")}`] };
         break;
       }
       default:
@@ -798,14 +797,14 @@ export default function AdminReportsPage() {
         ═══════════════════════════════════════ */}
         <TabsContent value="financial">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-            <SummaryCard label="Total Income" value={fmt(financialSummary.totalIncome)} icon={TrendingUp} color="text-primary" subtitle="Customer + Moallem + Cashbook" />
-            <SummaryCard label="Total Expenses" value={fmt(financialSummary.totalExpense)} icon={TrendingDown} color="text-destructive" subtitle="Expenses + Supplier + Commission" />
-            {canSeeProfit && <SummaryCard label="Net Profit" value={fmt(financialSummary.netProfit)} icon={DollarSign} color={financialSummary.netProfit >= 0 ? "text-primary" : "text-destructive"} />}
+            <SummaryCard label="Total Income" value={formatBDT(financialSummary.totalIncome)} icon={TrendingUp} color="text-primary" subtitle="Customer + Moallem + Cashbook" />
+            <SummaryCard label="Total Expenses" value={formatBDT(financialSummary.totalExpense)} icon={TrendingDown} color="text-destructive" subtitle="Expenses + Supplier + Commission" />
+            {canSeeProfit && <SummaryCard label="Net Profit" value={formatBDT(financialSummary.netProfit)} icon={DollarSign} color={financialSummary.netProfit >= 0 ? "text-primary" : "text-destructive"} />}
             <SummaryCard label="Total Bookings" value={financialSummary.bookingCount} icon={CalendarIcon} color="text-foreground" />
-            <SummaryCard label="Total Selling" value={fmt(financialSummary.totalSelling)} icon={DollarSign} color="text-foreground" />
-            <SummaryCard label="Total Due" value={fmt(financialSummary.totalDue)} icon={TrendingDown} color="text-destructive" />
-            {canSeeProfit && <SummaryCard label="Total Cost" value={fmt(financialSummary.totalCost)} icon={TrendingDown} color="text-muted-foreground" />}
-            {canSeeProfit && <SummaryCard label="Total Commission" value={fmt(financialSummary.totalCommission)} icon={DollarSign} color="text-muted-foreground" />}
+            <SummaryCard label="Total Selling" value={formatBDT(financialSummary.totalSelling)} icon={DollarSign} color="text-foreground" />
+            <SummaryCard label="Total Due" value={formatBDT(financialSummary.totalDue)} icon={TrendingDown} color="text-destructive" />
+            {canSeeProfit && <SummaryCard label="Total Cost" value={formatBDT(financialSummary.totalCost)} icon={TrendingDown} color="text-muted-foreground" />}
+            {canSeeProfit && <SummaryCard label="Total Commission" value={formatBDT(financialSummary.totalCommission)} icon={DollarSign} color="text-muted-foreground" />}
           </div>
 
           <Card>
@@ -824,17 +823,17 @@ export default function AdminReportsPage() {
                   {financialSummary.monthly.map(r => (
                     <TableRow key={r.month}>
                       <TableCell className="font-medium">{r.month}</TableCell>
-                      <TableCell className="text-right text-primary">{fmt(r.income)}</TableCell>
-                      <TableCell className="text-right text-destructive">{fmt(r.expense)}</TableCell>
-                      {canSeeProfit && <TableCell className={cn("text-right font-bold", r.profit >= 0 ? "text-primary" : "text-destructive")}>{fmt(r.profit)}</TableCell>}
+                      <TableCell className="text-right text-primary">{formatBDT(r.income)}</TableCell>
+                      <TableCell className="text-right text-destructive">{formatBDT(r.expense)}</TableCell>
+                      {canSeeProfit && <TableCell className={cn("text-right font-bold", r.profit >= 0 ? "text-primary" : "text-destructive")}>{formatBDT(r.profit)}</TableCell>}
                       <TableCell className="text-right">{r.bookings}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="bg-muted/40 font-bold border-t-2 border-border">
                     <TableCell>Total</TableCell>
-                    <TableCell className="text-right text-primary">{fmt(financialSummary.totalIncome)}</TableCell>
-                    <TableCell className="text-right text-destructive">{fmt(financialSummary.totalExpense)}</TableCell>
-                    {canSeeProfit && <TableCell className={cn("text-right", financialSummary.netProfit >= 0 ? "text-primary" : "text-destructive")}>{fmt(financialSummary.netProfit)}</TableCell>}
+                    <TableCell className="text-right text-primary">{formatBDT(financialSummary.totalIncome)}</TableCell>
+                    <TableCell className="text-right text-destructive">{formatBDT(financialSummary.totalExpense)}</TableCell>
+                    {canSeeProfit && <TableCell className={cn("text-right", financialSummary.netProfit >= 0 ? "text-primary" : "text-destructive")}>{formatBDT(financialSummary.netProfit)}</TableCell>}
                     <TableCell className="text-right">{financialSummary.bookingCount}</TableCell>
                   </TableRow>
                 </TableBody>
@@ -857,12 +856,12 @@ export default function AdminReportsPage() {
                       {Object.entries(financialSummary.incomeByType).map(([k, v]) => (
                         <TableRow key={k}>
                           <TableCell>{k}</TableCell>
-                          <TableCell className="text-right text-primary font-medium">{fmt(v as number)}</TableCell>
+                          <TableCell className="text-right text-primary font-medium">{formatBDT(v as number)}</TableCell>
                         </TableRow>
                       ))}
                       <TableRow className="bg-primary/5 font-bold border-t-2">
                         <TableCell>Total Income</TableCell>
-                        <TableCell className="text-right text-primary">{fmt(financialSummary.totalIncome)}</TableCell>
+                        <TableCell className="text-right text-primary">{formatBDT(financialSummary.totalIncome)}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -874,19 +873,19 @@ export default function AdminReportsPage() {
                       {Object.entries(financialSummary.expenseByType).map(([k, v]) => (
                         <TableRow key={k}>
                           <TableCell>{k}</TableCell>
-                          <TableCell className="text-right text-destructive font-medium">{fmt(v as number)}</TableCell>
+                          <TableCell className="text-right text-destructive font-medium">{formatBDT(v as number)}</TableCell>
                         </TableRow>
                       ))}
                       <TableRow className="bg-destructive/5 font-bold border-t-2">
                         <TableCell>Total Expenses</TableCell>
-                        <TableCell className="text-right text-destructive">{fmt(financialSummary.totalExpense)}</TableCell>
+                        <TableCell className="text-right text-destructive">{formatBDT(financialSummary.totalExpense)}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
                 </div>
                 <div className="bg-muted/30 rounded-lg p-4 text-center">
                   <p className="text-sm text-muted-foreground">Net Profit/Loss</p>
-                  <p className={cn("text-2xl font-heading font-bold", financialSummary.netProfit >= 0 ? "text-primary" : "text-destructive")}>{fmt(financialSummary.netProfit)}</p>
+                  <p className={cn("text-2xl font-heading font-bold", financialSummary.netProfit >= 0 ? "text-primary" : "text-destructive")}>{formatBDT(financialSummary.netProfit)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -900,8 +899,8 @@ export default function AdminReportsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <SummaryCard label="Total Days" value={dailyBookingRows.length} icon={CalendarIcon} color="text-foreground" />
             <SummaryCard label="Total Bookings" value={dailyBookingRows.reduce((s: number, r: any) => s + r.count, 0)} icon={ClipboardList} color="text-primary" />
-            <SummaryCard label="Total Paid" value={fmt(dailyBookingRows.reduce((s: number, r: any) => s + r.totalPaid, 0))} icon={TrendingUp} color="text-primary" />
-            <SummaryCard label="Total Due" value={fmt(dailyBookingRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
+            <SummaryCard label="Total Paid" value={formatBDT(dailyBookingRows.reduce((s: number, r: any) => s + r.totalPaid, 0))} icon={TrendingUp} color="text-primary" />
+            <SummaryCard label="Total Due" value={formatBDT(dailyBookingRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
           </div>
           <ExpandableReportTable
             rows={dailyBookingRows}
@@ -911,9 +910,9 @@ export default function AdminReportsPage() {
                 <TableCell className="font-medium">{r.dateFormatted}</TableCell>
                 <TableCell className="text-right">{r.count}</TableCell>
                 <TableCell className="text-right">{r.travelers}</TableCell>
-                <TableCell className="text-right font-medium">{fmt(r.totalAmount)}</TableCell>
-                <TableCell className="text-right text-primary">{fmt(r.totalPaid)}</TableCell>
-                <TableCell className="text-right text-destructive">{fmt(r.totalDue)}</TableCell>
+                <TableCell className="text-right font-medium">{formatBDT(r.totalAmount)}</TableCell>
+                <TableCell className="text-right text-primary">{formatBDT(r.totalPaid)}</TableCell>
+                <TableCell className="text-right text-destructive">{formatBDT(r.totalDue)}</TableCell>
               </>
             )}
             renderExpanded={(r: any) => (
@@ -931,9 +930,9 @@ export default function AdminReportsPage() {
                       <TableCell className="font-mono text-xs">{b.trackingId}</TableCell>
                       <TableCell>{b.guestName}</TableCell><TableCell>{b.packageName}</TableCell>
                       <TableCell className="text-right">{b.travelers}</TableCell>
-                      <TableCell className="text-right">{fmt(b.totalAmount)}</TableCell>
-                      <TableCell className="text-right text-primary">{fmt(b.paidAmount)}</TableCell>
-                      <TableCell className="text-right text-destructive">{fmt(b.dueAmount)}</TableCell>
+                      <TableCell className="text-right">{formatBDT(b.totalAmount)}</TableCell>
+                      <TableCell className="text-right text-primary">{formatBDT(b.paidAmount)}</TableCell>
+                      <TableCell className="text-right text-destructive">{formatBDT(b.dueAmount)}</TableCell>
                       <TableCell><StatusBadge status={b.status} /></TableCell>
                     </TableRow>
                   ))}
@@ -945,9 +944,9 @@ export default function AdminReportsPage() {
                 <TableCell className="font-bold">Total</TableCell>
                 <TableCell className="text-right font-bold">{dailyBookingRows.reduce((s: number, r: any) => s + r.count, 0)}</TableCell>
                 <TableCell className="text-right font-bold">{dailyBookingRows.reduce((s: number, r: any) => s + r.travelers, 0)}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(dailyBookingRows.reduce((s: number, r: any) => s + r.totalAmount, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{fmt(dailyBookingRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-destructive">{fmt(dailyBookingRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
+                <TableCell className="text-right font-bold">{formatBDT(dailyBookingRows.reduce((s: number, r: any) => s + r.totalAmount, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-primary">{formatBDT(dailyBookingRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-destructive">{formatBDT(dailyBookingRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
               </>
             }
           />
@@ -960,8 +959,8 @@ export default function AdminReportsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <SummaryCard label="Service Types" value={serviceTypeRows.length} icon={Layers} color="text-foreground" />
             <SummaryCard label="Total Bookings" value={serviceTypeRows.reduce((s: number, r: any) => s + r.totalBookings, 0)} icon={ClipboardList} color="text-primary" />
-            <SummaryCard label="Total Selling" value={fmt(serviceTypeRows.reduce((s: number, r: any) => s + r.totalSelling, 0))} icon={TrendingUp} color="text-primary" />
-            <SummaryCard label="Total Due" value={fmt(serviceTypeRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
+            <SummaryCard label="Total Selling" value={formatBDT(serviceTypeRows.reduce((s: number, r: any) => s + r.totalSelling, 0))} icon={TrendingUp} color="text-primary" />
+            <SummaryCard label="Total Due" value={formatBDT(serviceTypeRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
           </div>
           <ExpandableReportTable
             rows={serviceTypeRows}
@@ -982,10 +981,10 @@ export default function AdminReportsPage() {
                 </TableCell>
                 <TableCell className="text-right">{r.totalBookings}</TableCell>
                 <TableCell className="text-right">{r.travelers}</TableCell>
-                <TableCell className="text-right font-medium">{fmt(r.totalSelling)}</TableCell>
-                <TableCell className="text-right text-primary font-medium">{fmt(r.totalPaid)}</TableCell>
-                <TableCell className="text-right text-destructive font-medium">{fmt(r.totalDue)}</TableCell>
-                {canSeeProfit && <TableCell className={cn("text-right font-bold", r.profit >= 0 ? "text-primary" : "text-destructive")}>{fmt(r.profit)}</TableCell>}
+                <TableCell className="text-right font-medium">{formatBDT(r.totalSelling)}</TableCell>
+                <TableCell className="text-right text-primary font-medium">{formatBDT(r.totalPaid)}</TableCell>
+                <TableCell className="text-right text-destructive font-medium">{formatBDT(r.totalDue)}</TableCell>
+                {canSeeProfit && <TableCell className={cn("text-right font-bold", r.profit >= 0 ? "text-primary" : "text-destructive")}>{formatBDT(r.profit)}</TableCell>}
               </>
             )}
             renderExpanded={(r: any) => (
@@ -1002,9 +1001,9 @@ export default function AdminReportsPage() {
                     <TableRow key={j}>
                       <TableCell className="font-mono text-xs text-primary">{bd.trackingId}</TableCell>
                       <TableCell>{bd.guestName}</TableCell><TableCell>{bd.packageName}</TableCell>
-                      <TableCell className="text-right">{fmt(bd.total)}</TableCell>
-                      <TableCell className="text-right text-primary">{fmt(bd.paid)}</TableCell>
-                      <TableCell className="text-right text-destructive">{fmt(bd.due)}</TableCell>
+                      <TableCell className="text-right">{formatBDT(bd.total)}</TableCell>
+                      <TableCell className="text-right text-primary">{formatBDT(bd.paid)}</TableCell>
+                      <TableCell className="text-right text-destructive">{formatBDT(bd.due)}</TableCell>
                       <TableCell><StatusBadge status={bd.status} /></TableCell>
                     </TableRow>
                   ))}
@@ -1016,10 +1015,10 @@ export default function AdminReportsPage() {
                 <TableCell className="font-bold">Total</TableCell>
                 <TableCell className="text-right font-bold">{serviceTypeRows.reduce((s: number, r: any) => s + r.totalBookings, 0)}</TableCell>
                 <TableCell className="text-right font-bold">{serviceTypeRows.reduce((s: number, r: any) => s + r.travelers, 0)}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(serviceTypeRows.reduce((s: number, r: any) => s + r.totalSelling, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{fmt(serviceTypeRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-destructive">{fmt(serviceTypeRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
-                {canSeeProfit && <TableCell className={cn("text-right font-bold", serviceTypeRows.reduce((s: number, r: any) => s + r.profit, 0) >= 0 ? "text-primary" : "text-destructive")}>{fmt(serviceTypeRows.reduce((s: number, r: any) => s + r.profit, 0))}</TableCell>}
+                <TableCell className="text-right font-bold">{formatBDT(serviceTypeRows.reduce((s: number, r: any) => s + r.totalSelling, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-primary">{formatBDT(serviceTypeRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-destructive">{formatBDT(serviceTypeRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
+                {canSeeProfit && <TableCell className={cn("text-right font-bold", serviceTypeRows.reduce((s: number, r: any) => s + r.profit, 0) >= 0 ? "text-primary" : "text-destructive")}>{formatBDT(serviceTypeRows.reduce((s: number, r: any) => s + r.profit, 0))}</TableCell>}
               </>
             }
           />
@@ -1031,9 +1030,9 @@ export default function AdminReportsPage() {
         <TabsContent value="customer">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <SummaryCard label="Total Customers" value={customerRows.length} icon={Users} color="text-foreground" />
-            <SummaryCard label="Total Amount" value={fmt(customerRows.reduce((s: number, r: any) => s + r.totalAmount, 0))} icon={DollarSign} color="text-foreground" />
-            <SummaryCard label="Total Paid" value={fmt(customerRows.reduce((s: number, r: any) => s + r.totalPaid, 0))} icon={TrendingUp} color="text-primary" />
-            <SummaryCard label="Total Due" value={fmt(customerRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
+            <SummaryCard label="Total Amount" value={formatBDT(customerRows.reduce((s: number, r: any) => s + r.totalAmount, 0))} icon={DollarSign} color="text-foreground" />
+            <SummaryCard label="Total Paid" value={formatBDT(customerRows.reduce((s: number, r: any) => s + r.totalPaid, 0))} icon={TrendingUp} color="text-primary" />
+            <SummaryCard label="Total Due" value={formatBDT(customerRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
           </div>
           <ExpandableReportTable
             rows={customerRows}
@@ -1048,9 +1047,9 @@ export default function AdminReportsPage() {
                 </TableCell>
                 <TableCell>{r.phone}</TableCell>
                 <TableCell className="text-right">{r.travelers}</TableCell>
-                <TableCell className="text-right font-medium">{fmt(r.totalAmount)}</TableCell>
-                <TableCell className="text-right text-primary font-medium">{fmt(r.totalPaid)}</TableCell>
-                <TableCell className="text-right text-destructive font-medium">{fmt(r.totalDue)}</TableCell>
+                <TableCell className="text-right font-medium">{formatBDT(r.totalAmount)}</TableCell>
+                <TableCell className="text-right text-primary font-medium">{formatBDT(r.totalPaid)}</TableCell>
+                <TableCell className="text-right text-destructive font-medium">{formatBDT(r.totalDue)}</TableCell>
               </>
             )}
             renderExpanded={(r: any) => (
@@ -1070,9 +1069,9 @@ export default function AdminReportsPage() {
                             <td className="py-2 pr-3">{bd.packageName}</td>
                             <td className="py-2 pr-3"><Badge variant="secondary" className="capitalize text-[10px]">{bd.packageType}</Badge></td>
                             <td className="py-2 pr-3 text-muted-foreground">{bd.date}</td>
-                            <td className="py-2 pr-3 text-right">{fmt(bd.total)}</td>
-                            <td className="py-2 pr-3 text-right text-primary">{fmt(bd.paid)}</td>
-                            <td className="py-2 pr-3 text-right text-destructive">{fmt(bd.due)}</td>
+                            <td className="py-2 pr-3 text-right">{formatBDT(bd.total)}</td>
+                            <td className="py-2 pr-3 text-right text-primary">{formatBDT(bd.paid)}</td>
+                            <td className="py-2 pr-3 text-right text-destructive">{formatBDT(bd.due)}</td>
                             <td className="py-2"><StatusBadge status={bd.status} /></td>
                           </tr>
                         ))}
@@ -1092,7 +1091,7 @@ export default function AdminReportsPage() {
                           <tr key={j} className="border-b border-border/30">
                             <td className="py-2 pr-3 font-mono text-xs">{pd.trackingId}</td>
                             <td className="py-2 pr-3 text-muted-foreground">{pd.date}</td>
-                            <td className="py-2 pr-3 text-right text-primary font-medium">{fmt(pd.amount)}</td>
+                            <td className="py-2 pr-3 text-right text-primary font-medium">{formatBDT(pd.amount)}</td>
                             <td className="py-2 capitalize">{pd.method}</td>
                           </tr>
                         ))}
@@ -1107,9 +1106,9 @@ export default function AdminReportsPage() {
                 <TableCell>Total</TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right font-bold">{customerRows.reduce((s: number, r: any) => s + r.travelers, 0)}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(customerRows.reduce((s: number, r: any) => s + r.totalAmount, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{fmt(customerRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-destructive">{fmt(customerRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
+                <TableCell className="text-right font-bold">{formatBDT(customerRows.reduce((s: number, r: any) => s + r.totalAmount, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-primary">{formatBDT(customerRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-destructive">{formatBDT(customerRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
               </>
             }
           />
@@ -1122,8 +1121,8 @@ export default function AdminReportsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <SummaryCard label="Total Packages" value={packageRows.length} icon={Package} color="text-foreground" />
             <SummaryCard label="Total Travelers" value={packageRows.reduce((s: number, r: any) => s + r.totalHajji, 0)} icon={Users} color="text-primary" />
-            <SummaryCard label="Total Selling" value={fmt(packageRows.reduce((s: number, r: any) => s + r.totalSelling, 0))} icon={TrendingUp} color="text-primary" />
-            {canSeeProfit && <SummaryCard label="Total Profit" value={fmt(packageRows.reduce((s: number, r: any) => s + r.profit, 0))} icon={DollarSign} color="text-primary" />}
+            <SummaryCard label="Total Selling" value={formatBDT(packageRows.reduce((s: number, r: any) => s + r.totalSelling, 0))} icon={TrendingUp} color="text-primary" />
+            {canSeeProfit && <SummaryCard label="Total Profit" value={formatBDT(packageRows.reduce((s: number, r: any) => s + r.profit, 0))} icon={DollarSign} color="text-primary" />}
           </div>
           <ExpandableReportTable
             rows={packageRows}
@@ -1133,10 +1132,10 @@ export default function AdminReportsPage() {
                 <TableCell className="font-medium">{r.name}</TableCell>
                 <TableCell><Badge variant="secondary" className="capitalize text-xs">{r.type}</Badge></TableCell>
                 <TableCell className="text-right">{r.totalHajji}</TableCell>
-                <TableCell className="text-right font-medium">{fmt(r.totalSelling)}</TableCell>
-                <TableCell className="text-right text-primary">{fmt(r.totalPaid)}</TableCell>
-                <TableCell className="text-right text-destructive">{fmt(r.totalDue)}</TableCell>
-                {canSeeProfit && <TableCell className={cn("text-right font-bold", r.profit >= 0 ? "text-primary" : "text-destructive")}>{fmt(r.profit)}</TableCell>}
+                <TableCell className="text-right font-medium">{formatBDT(r.totalSelling)}</TableCell>
+                <TableCell className="text-right text-primary">{formatBDT(r.totalPaid)}</TableCell>
+                <TableCell className="text-right text-destructive">{formatBDT(r.totalDue)}</TableCell>
+                {canSeeProfit && <TableCell className={cn("text-right font-bold", r.profit >= 0 ? "text-primary" : "text-destructive")}>{formatBDT(r.profit)}</TableCell>}
               </>
             )}
             renderExpanded={(r: any) => (
@@ -1154,9 +1153,9 @@ export default function AdminReportsPage() {
                       <TableCell className="font-mono text-xs text-primary">{bd.trackingId}</TableCell>
                       <TableCell>{bd.guestName}</TableCell>
                       <TableCell className="text-muted-foreground">{bd.date}</TableCell>
-                      <TableCell className="text-right">{fmt(bd.total)}</TableCell>
-                      <TableCell className="text-right text-primary">{fmt(bd.paid)}</TableCell>
-                      <TableCell className="text-right text-destructive">{fmt(bd.due)}</TableCell>
+                      <TableCell className="text-right">{formatBDT(bd.total)}</TableCell>
+                      <TableCell className="text-right text-primary">{formatBDT(bd.paid)}</TableCell>
+                      <TableCell className="text-right text-destructive">{formatBDT(bd.due)}</TableCell>
                       <TableCell><StatusBadge status={bd.status} /></TableCell>
                     </TableRow>
                   ))}
@@ -1168,10 +1167,10 @@ export default function AdminReportsPage() {
                 <TableCell className="font-bold">Total</TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right font-bold">{packageRows.reduce((s: number, r: any) => s + r.totalHajji, 0)}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(packageRows.reduce((s: number, r: any) => s + r.totalSelling, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{fmt(packageRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-destructive">{fmt(packageRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
-                {canSeeProfit && <TableCell className={cn("text-right font-bold", packageRows.reduce((s: number, r: any) => s + r.profit, 0) >= 0 ? "text-primary" : "text-destructive")}>{fmt(packageRows.reduce((s: number, r: any) => s + r.profit, 0))}</TableCell>}
+                <TableCell className="text-right font-bold">{formatBDT(packageRows.reduce((s: number, r: any) => s + r.totalSelling, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-primary">{formatBDT(packageRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-destructive">{formatBDT(packageRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
+                {canSeeProfit && <TableCell className={cn("text-right font-bold", packageRows.reduce((s: number, r: any) => s + r.profit, 0) >= 0 ? "text-primary" : "text-destructive")}>{formatBDT(packageRows.reduce((s: number, r: any) => s + r.profit, 0))}</TableCell>}
               </>
             }
           />
@@ -1184,8 +1183,8 @@ export default function AdminReportsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <SummaryCard label="Total Moallems" value={moallemRows.length} icon={Briefcase} color="text-foreground" />
             <SummaryCard label="Total Pilgrims" value={moallemRows.reduce((s: number, r: any) => s + r.totalHajji, 0)} icon={Users} color="text-primary" />
-            <SummaryCard label="Total Received" value={fmt(moallemRows.reduce((s: number, r: any) => s + r.totalReceived, 0))} icon={TrendingUp} color="text-primary" />
-            <SummaryCard label="Total Due" value={fmt(moallemRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
+            <SummaryCard label="Total Received" value={formatBDT(moallemRows.reduce((s: number, r: any) => s + r.totalReceived, 0))} icon={TrendingUp} color="text-primary" />
+            <SummaryCard label="Total Due" value={formatBDT(moallemRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
           </div>
           <ExpandableReportTable
             rows={moallemRows}
@@ -1203,9 +1202,9 @@ export default function AdminReportsPage() {
                 </TableCell>
                 <TableCell>{r.phone}</TableCell>
                 <TableCell className="text-right">{r.totalHajji}</TableCell>
-                <TableCell className="text-right font-medium">{fmt(r.totalSale)}</TableCell>
-                <TableCell className="text-right text-primary font-medium">{fmt(r.totalReceived)}</TableCell>
-                <TableCell className="text-right text-destructive font-medium">{fmt(r.totalDue)}</TableCell>
+                <TableCell className="text-right font-medium">{formatBDT(r.totalSale)}</TableCell>
+                <TableCell className="text-right text-primary font-medium">{formatBDT(r.totalReceived)}</TableCell>
+                <TableCell className="text-right text-destructive font-medium">{formatBDT(r.totalDue)}</TableCell>
               </>
             )}
             renderExpanded={(r: any) => (
@@ -1225,9 +1224,9 @@ export default function AdminReportsPage() {
                             <td className="py-2 pr-3">{bd.guestName}</td>
                             <td className="py-2 pr-3">{bd.packageName}</td>
                             <td className="py-2 pr-3 text-muted-foreground">{bd.date}</td>
-                            <td className="py-2 pr-3 text-right">{fmt(bd.total)}</td>
-                            <td className="py-2 pr-3 text-right text-primary">{fmt(bd.paid)}</td>
-                            <td className="py-2 pr-3 text-right text-destructive">{fmt(bd.due)}</td>
+                            <td className="py-2 pr-3 text-right">{formatBDT(bd.total)}</td>
+                            <td className="py-2 pr-3 text-right text-primary">{formatBDT(bd.paid)}</td>
+                            <td className="py-2 pr-3 text-right text-destructive">{formatBDT(bd.due)}</td>
                             <td className="py-2"><StatusBadge status={bd.status} /></td>
                           </tr>
                         ))}
@@ -1246,7 +1245,7 @@ export default function AdminReportsPage() {
                         {r.paymentDetails.map((pd: any, j: number) => (
                           <tr key={j} className="border-b border-border/30">
                             <td className="py-2 pr-3 text-muted-foreground">{pd.date}</td>
-                            <td className="py-2 pr-3 text-right text-primary font-medium">{fmt(pd.amount)}</td>
+                            <td className="py-2 pr-3 text-right text-primary font-medium">{formatBDT(pd.amount)}</td>
                             <td className="py-2 pr-3 capitalize">{pd.method}</td>
                             <td className="py-2 text-muted-foreground">{pd.notes}</td>
                           </tr>
@@ -1262,9 +1261,9 @@ export default function AdminReportsPage() {
                 <TableCell>Total</TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right font-bold">{moallemRows.reduce((s: number, r: any) => s + r.totalHajji, 0)}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(moallemRows.reduce((s: number, r: any) => s + r.totalSale, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{fmt(moallemRows.reduce((s: number, r: any) => s + r.totalReceived, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-destructive">{fmt(moallemRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
+                <TableCell className="text-right font-bold">{formatBDT(moallemRows.reduce((s: number, r: any) => s + r.totalSale, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-primary">{formatBDT(moallemRows.reduce((s: number, r: any) => s + r.totalReceived, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-destructive">{formatBDT(moallemRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
               </>
             }
           />
@@ -1276,9 +1275,9 @@ export default function AdminReportsPage() {
         <TabsContent value="supplier">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <SummaryCard label="Total Suppliers" value={supplierRows.length} icon={Building2} color="text-foreground" />
-            <SummaryCard label="Total Cost" value={fmt(supplierRows.reduce((s: number, r: any) => s + r.totalCost, 0))} icon={DollarSign} color="text-foreground" />
-            <SummaryCard label="Total Paid" value={fmt(supplierRows.reduce((s: number, r: any) => s + r.totalPaid, 0))} icon={TrendingUp} color="text-primary" />
-            <SummaryCard label="Total Due" value={fmt(supplierRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
+            <SummaryCard label="Total Cost" value={formatBDT(supplierRows.reduce((s: number, r: any) => s + r.totalCost, 0))} icon={DollarSign} color="text-foreground" />
+            <SummaryCard label="Total Paid" value={formatBDT(supplierRows.reduce((s: number, r: any) => s + r.totalPaid, 0))} icon={TrendingUp} color="text-primary" />
+            <SummaryCard label="Total Due" value={formatBDT(supplierRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
           </div>
           <ExpandableReportTable
             rows={supplierRows}
@@ -1296,9 +1295,9 @@ export default function AdminReportsPage() {
                 </TableCell>
                 <TableCell className="text-muted-foreground">{r.phone}</TableCell>
                 <TableCell className="text-right font-medium">{r.bookingCount}</TableCell>
-                <TableCell className="text-right font-medium">{fmt(r.totalCost)}</TableCell>
-                <TableCell className="text-right text-primary font-medium">{fmt(r.totalPaid)}</TableCell>
-                <TableCell className="text-right text-destructive font-medium">{fmt(r.totalDue)}</TableCell>
+                <TableCell className="text-right font-medium">{formatBDT(r.totalCost)}</TableCell>
+                <TableCell className="text-right text-primary font-medium">{formatBDT(r.totalPaid)}</TableCell>
+                <TableCell className="text-right text-destructive font-medium">{formatBDT(r.totalDue)}</TableCell>
               </>
             )}
             renderExpanded={(r: any) => (
@@ -1318,9 +1317,9 @@ export default function AdminReportsPage() {
                             <td className="py-2 pr-3">{bd.guestName}</td>
                             <td className="py-2 pr-3">{bd.packageName}</td>
                             <td className="py-2 pr-3 text-muted-foreground">{bd.date}</td>
-                            <td className="py-2 pr-3 text-right">{fmt(bd.cost)}</td>
-                            <td className="py-2 pr-3 text-right text-primary">{fmt(bd.paid)}</td>
-                            <td className="py-2 pr-3 text-right text-destructive">{fmt(bd.due)}</td>
+                            <td className="py-2 pr-3 text-right">{formatBDT(bd.cost)}</td>
+                            <td className="py-2 pr-3 text-right text-primary">{formatBDT(bd.paid)}</td>
+                            <td className="py-2 pr-3 text-right text-destructive">{formatBDT(bd.due)}</td>
                             <td className="py-2"><StatusBadge status={bd.status} /></td>
                           </tr>
                         ))}
@@ -1339,7 +1338,7 @@ export default function AdminReportsPage() {
                         {r.paymentDetails.map((pd: any, j: number) => (
                           <tr key={j} className="border-b border-border/30">
                             <td className="py-2 pr-3 text-muted-foreground">{pd.date}</td>
-                            <td className="py-2 pr-3 text-right text-primary font-medium">{fmt(pd.amount)}</td>
+                            <td className="py-2 pr-3 text-right text-primary font-medium">{formatBDT(pd.amount)}</td>
                             <td className="py-2 pr-3 capitalize">{pd.method}</td>
                             <td className="py-2 text-muted-foreground">{pd.notes}</td>
                           </tr>
@@ -1351,9 +1350,9 @@ export default function AdminReportsPage() {
                 <div className="bg-muted/30 rounded-lg p-3">
                   <p className="text-xs font-semibold text-muted-foreground mb-2">Payable Summary</p>
                   <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div><span className="text-muted-foreground">Total Cost:</span> <span className="font-bold ml-1">{fmt(r.totalCost)}</span></div>
-                    <div><span className="text-muted-foreground">Total Paid:</span> <span className="font-bold text-primary ml-1">{fmt(r.totalPaid)}</span></div>
-                    <div><span className="text-muted-foreground">Outstanding:</span> <span className="font-bold text-destructive ml-1">{fmt(r.totalDue)}</span></div>
+                    <div><span className="text-muted-foreground">Total Cost:</span> <span className="font-bold ml-1">{formatBDT(r.totalCost)}</span></div>
+                    <div><span className="text-muted-foreground">Total Paid:</span> <span className="font-bold text-primary ml-1">{formatBDT(r.totalPaid)}</span></div>
+                    <div><span className="text-muted-foreground">Outstanding:</span> <span className="font-bold text-destructive ml-1">{formatBDT(r.totalDue)}</span></div>
                   </div>
                 </div>
               </div>
@@ -1363,9 +1362,9 @@ export default function AdminReportsPage() {
                 <TableCell>Total</TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right font-bold">{supplierRows.reduce((s: number, r: any) => s + r.bookingCount, 0)}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(supplierRows.reduce((s: number, r: any) => s + r.totalCost, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{fmt(supplierRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-destructive">{fmt(supplierRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
+                <TableCell className="text-right font-bold">{formatBDT(supplierRows.reduce((s: number, r: any) => s + r.totalCost, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-primary">{formatBDT(supplierRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-destructive">{formatBDT(supplierRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
               </>
             }
           />
@@ -1378,8 +1377,8 @@ export default function AdminReportsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <SummaryCard label="Total Suppliers" value={supplierContractRows.length} icon={Building2} color="text-foreground" />
             <SummaryCard label="Total Pilgrims" value={supplierContractRows.reduce((s: number, r: any) => s + r.pilgrimCount, 0)} icon={Users} color="text-foreground" />
-            <SummaryCard label="Total Paid" value={fmt(supplierContractRows.reduce((s: number, r: any) => s + r.totalPaid, 0))} icon={TrendingUp} color="text-primary" />
-            <SummaryCard label="Total Due" value={fmt(supplierContractRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
+            <SummaryCard label="Total Paid" value={formatBDT(supplierContractRows.reduce((s: number, r: any) => s + r.totalPaid, 0))} icon={TrendingUp} color="text-primary" />
+            <SummaryCard label="Total Due" value={formatBDT(supplierContractRows.reduce((s: number, r: any) => s + r.totalDue, 0))} icon={TrendingDown} color="text-destructive" />
           </div>
           <ExpandableReportTable
             rows={supplierContractRows}
@@ -1396,9 +1395,9 @@ export default function AdminReportsPage() {
                   </div>
                 </TableCell>
                 <TableCell className="text-right font-medium">{r.pilgrimCount}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(r.contractAmount)}</TableCell>
-                <TableCell className="text-right text-primary font-medium">{fmt(r.totalPaid)}</TableCell>
-                <TableCell className="text-right text-destructive font-medium">{fmt(r.totalDue)}</TableCell>
+                <TableCell className="text-right font-bold">{formatBDT(r.contractAmount)}</TableCell>
+                <TableCell className="text-right text-primary font-medium">{formatBDT(r.totalPaid)}</TableCell>
+                <TableCell className="text-right text-destructive font-medium">{formatBDT(r.totalDue)}</TableCell>
               </>
             )}
             renderExpanded={(r: any) => (
@@ -1416,9 +1415,9 @@ export default function AdminReportsPage() {
                           <tr key={j} className="border-b border-border/30">
                             <td className="py-2 pr-3 text-muted-foreground">{format(parseISO(c.created_at), "dd MMM yyyy")}</td>
                             <td className="py-2 pr-3 text-right">{c.pilgrim_count}</td>
-                            <td className="py-2 pr-3 text-right font-bold">{fmt(c.contract_amount)}</td>
-                            <td className="py-2 pr-3 text-right text-primary">{fmt(c.total_paid)}</td>
-                            <td className="py-2 text-right text-destructive">{fmt(c.total_due)}</td>
+                            <td className="py-2 pr-3 text-right font-bold">{formatBDT(c.contract_amount)}</td>
+                            <td className="py-2 pr-3 text-right text-primary">{formatBDT(c.total_paid)}</td>
+                            <td className="py-2 text-right text-destructive">{formatBDT(c.total_due)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1436,7 +1435,7 @@ export default function AdminReportsPage() {
                         {r.paymentDetails.map((pd: any, j: number) => (
                           <tr key={j} className="border-b border-border/30">
                             <td className="py-2 pr-3 text-muted-foreground">{pd.date}</td>
-                            <td className="py-2 pr-3 text-right text-primary font-medium">{fmt(pd.amount)}</td>
+                            <td className="py-2 pr-3 text-right text-primary font-medium">{formatBDT(pd.amount)}</td>
                             <td className="py-2 pr-3 capitalize">{pd.method}</td>
                             <td className="py-2 text-muted-foreground">{pd.notes}</td>
                           </tr>
@@ -1451,9 +1450,9 @@ export default function AdminReportsPage() {
               <>
                 <TableCell>Total</TableCell>
                 <TableCell className="text-right font-bold">{supplierContractRows.reduce((s: number, r: any) => s + r.pilgrimCount, 0)}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(supplierContractRows.reduce((s: number, r: any) => s + r.contractAmount, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{fmt(supplierContractRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-destructive">{fmt(supplierContractRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
+                <TableCell className="text-right font-bold">{formatBDT(supplierContractRows.reduce((s: number, r: any) => s + r.contractAmount, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-primary">{formatBDT(supplierContractRows.reduce((s: number, r: any) => s + r.totalPaid, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-destructive">{formatBDT(supplierContractRows.reduce((s: number, r: any) => s + r.totalDue, 0))}</TableCell>
               </>
             }
           />
@@ -1469,9 +1468,9 @@ export default function AdminReportsPage() {
             return (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
                 <SummaryCard label="Total Transactions" value={paymentReportRows.length} icon={CreditCard} color="text-foreground" />
-                <SummaryCard label="Total Income" value={fmt(incomeTotal)} icon={TrendingUp} color="text-primary" />
-                <SummaryCard label="Total Expense" value={fmt(expenseTotal)} icon={TrendingDown} color="text-destructive" />
-                {canSeeProfit && <SummaryCard label="Net" value={fmt(incomeTotal - expenseTotal)} icon={DollarSign} color={incomeTotal - expenseTotal >= 0 ? "text-primary" : "text-destructive"} />}
+                <SummaryCard label="Total Income" value={formatBDT(incomeTotal)} icon={TrendingUp} color="text-primary" />
+                <SummaryCard label="Total Expense" value={formatBDT(expenseTotal)} icon={TrendingDown} color="text-destructive" />
+                {canSeeProfit && <SummaryCard label="Net" value={formatBDT(incomeTotal - expenseTotal)} icon={DollarSign} color={incomeTotal - expenseTotal >= 0 ? "text-primary" : "text-destructive"} />}
               </div>
             );
           })()}
@@ -1497,7 +1496,7 @@ export default function AdminReportsPage() {
                       <TableCell className="font-medium">{r.name}</TableCell>
                       <TableCell className="font-mono text-xs">{r.trackingId !== "-" ? r.trackingId : ""}</TableCell>
                       <TableCell className="text-muted-foreground">{r.date}</TableCell>
-                      <TableCell className={cn("text-right font-medium", r.type === "income" ? "text-primary" : "text-destructive")}>{fmt(r.amount)}</TableCell>
+                      <TableCell className={cn("text-right font-medium", r.type === "income" ? "text-primary" : "text-destructive")}>{formatBDT(r.amount)}</TableCell>
                       <TableCell className="capitalize">{r.method}</TableCell>
                       <TableCell>
                         <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", r.type === "income" ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive")}>
@@ -1509,7 +1508,7 @@ export default function AdminReportsPage() {
                   {paymentReportRows.length > 0 && (
                     <TableRow className="bg-muted/40 font-bold border-t-2 border-border">
                       <TableCell colSpan={4}>Total</TableCell>
-                      <TableCell className="text-right">{fmt(paymentReportRows.reduce((s, r) => s + r.amount, 0))}</TableCell>
+                      <TableCell className="text-right">{formatBDT(paymentReportRows.reduce((s, r) => s + r.amount, 0))}</TableCell>
                       <TableCell colSpan={2}></TableCell>
                     </TableRow>
                   )}
@@ -1525,9 +1524,9 @@ export default function AdminReportsPage() {
         <TabsContent value="commission">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <SummaryCard label="Moallems" value={commissionRows.length} icon={Briefcase} color="text-foreground" />
-            <SummaryCard label="Total Commission" value={fmt(commissionRows.reduce((s: number, r: any) => s + r.totalCommission, 0))} icon={DollarSign} color="text-foreground" />
-            <SummaryCard label="Commission Paid" value={fmt(commissionRows.reduce((s: number, r: any) => s + r.commissionPaid, 0))} icon={TrendingUp} color="text-primary" />
-            <SummaryCard label="Commission Due" value={fmt(commissionRows.reduce((s: number, r: any) => s + r.commissionDue, 0))} icon={TrendingDown} color="text-destructive" />
+            <SummaryCard label="Total Commission" value={formatBDT(commissionRows.reduce((s: number, r: any) => s + r.totalCommission, 0))} icon={DollarSign} color="text-foreground" />
+            <SummaryCard label="Commission Paid" value={formatBDT(commissionRows.reduce((s: number, r: any) => s + r.commissionPaid, 0))} icon={TrendingUp} color="text-primary" />
+            <SummaryCard label="Commission Due" value={formatBDT(commissionRows.reduce((s: number, r: any) => s + r.commissionDue, 0))} icon={TrendingDown} color="text-destructive" />
           </div>
           <ExpandableReportTable
             rows={commissionRows}
@@ -1542,9 +1541,9 @@ export default function AdminReportsPage() {
                 </TableCell>
                 <TableCell>{r.phone}</TableCell>
                 <TableCell className="text-right">{r.bookingCount}</TableCell>
-                <TableCell className="text-right font-medium">{fmt(r.totalCommission)}</TableCell>
-                <TableCell className="text-right text-primary font-medium">{fmt(r.commissionPaid)}</TableCell>
-                <TableCell className="text-right text-destructive font-medium">{fmt(r.commissionDue)}</TableCell>
+                <TableCell className="text-right font-medium">{formatBDT(r.totalCommission)}</TableCell>
+                <TableCell className="text-right text-primary font-medium">{formatBDT(r.commissionPaid)}</TableCell>
+                <TableCell className="text-right text-destructive font-medium">{formatBDT(r.commissionDue)}</TableCell>
               </>
             )}
             renderExpanded={(r: any) => (
@@ -1564,9 +1563,9 @@ export default function AdminReportsPage() {
                             <td className="py-2 pr-3">{bd.guestName}</td>
                             <td className="py-2 pr-3">{bd.packageName}</td>
                             <td className="py-2 pr-3 text-muted-foreground">{bd.date}</td>
-                            <td className="py-2 pr-3 text-right font-medium">{fmt(bd.commission)}</td>
-                            <td className="py-2 pr-3 text-right text-primary">{fmt(bd.paid)}</td>
-                            <td className="py-2 text-right text-destructive">{fmt(bd.due)}</td>
+                            <td className="py-2 pr-3 text-right font-medium">{formatBDT(bd.commission)}</td>
+                            <td className="py-2 pr-3 text-right text-primary">{formatBDT(bd.paid)}</td>
+                            <td className="py-2 text-right text-destructive">{formatBDT(bd.due)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1584,7 +1583,7 @@ export default function AdminReportsPage() {
                         {r.paymentDetails.map((pd: any, j: number) => (
                           <tr key={j} className="border-b border-border/30">
                             <td className="py-2 pr-3 text-muted-foreground">{pd.date}</td>
-                            <td className="py-2 pr-3 text-right text-primary font-medium">{fmt(pd.amount)}</td>
+                            <td className="py-2 pr-3 text-right text-primary font-medium">{formatBDT(pd.amount)}</td>
                             <td className="py-2 pr-3 capitalize">{pd.method}</td>
                             <td className="py-2 text-muted-foreground">{pd.notes}</td>
                           </tr>
@@ -1600,9 +1599,9 @@ export default function AdminReportsPage() {
                 <TableCell>Total</TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right font-bold">{commissionRows.reduce((s: number, r: any) => s + r.bookingCount, 0)}</TableCell>
-                <TableCell className="text-right font-bold">{fmt(commissionRows.reduce((s: number, r: any) => s + r.totalCommission, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{fmt(commissionRows.reduce((s: number, r: any) => s + r.commissionPaid, 0))}</TableCell>
-                <TableCell className="text-right font-bold text-destructive">{fmt(commissionRows.reduce((s: number, r: any) => s + r.commissionDue, 0))}</TableCell>
+                <TableCell className="text-right font-bold">{formatBDT(commissionRows.reduce((s: number, r: any) => s + r.totalCommission, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-primary">{formatBDT(commissionRows.reduce((s: number, r: any) => s + r.commissionPaid, 0))}</TableCell>
+                <TableCell className="text-right font-bold text-destructive">{formatBDT(commissionRows.reduce((s: number, r: any) => s + r.commissionDue, 0))}</TableCell>
               </>
             }
           />

@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Package } from "lucide-react";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
 interface SupplierItem {
   id: string;
@@ -109,7 +109,7 @@ export default function SupplierItemsManager({ supplierId, items, isViewer, onRe
               <Package className="h-4 w-4 text-primary" /> Services / Items ({items.length})
             </CardTitle>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold">Total: {fmt(grandTotal)}</span>
+              <span className="text-sm font-bold">Total: {formatBDT(grandTotal)}</span>
               {!isViewer && (
                 <Button size="sm" onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }}>
                   <Plus className="h-4 w-4 mr-1" /> Add Item
@@ -140,8 +140,8 @@ export default function SupplierItemsManager({ supplierId, items, isViewer, onRe
                       <TableCell className="text-center text-muted-foreground text-xs">{i + 1}</TableCell>
                       <TableCell className="font-medium">{item.description}</TableCell>
                       <TableCell className="text-right">{item.quantity}</TableCell>
-                      <TableCell className="text-right">{fmt(item.unit_price)}</TableCell>
-                      <TableCell className="text-right font-bold">{fmt(item.total_amount)}</TableCell>
+                      <TableCell className="text-right">{formatBDT(item.unit_price)}</TableCell>
+                      <TableCell className="text-right font-bold">{formatBDT(item.total_amount)}</TableCell>
                       {!isViewer && (
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-1">
@@ -158,7 +158,7 @@ export default function SupplierItemsManager({ supplierId, items, isViewer, onRe
                   ))}
                   <TableRow className="bg-muted/60 font-bold">
                     <TableCell colSpan={4} className="text-right">Grand Total =</TableCell>
-                    <TableCell className="text-right text-primary">{fmt(grandTotal)}</TableCell>
+                    <TableCell className="text-right text-primary">{formatBDT(grandTotal)}</TableCell>
                     {!isViewer && <TableCell />}
                   </TableRow>
                 </TableBody>
@@ -193,8 +193,8 @@ export default function SupplierItemsManager({ supplierId, items, isViewer, onRe
             {computedTotal > 0 && (
               <div className="bg-muted/50 rounded-lg p-3 text-center">
                 <p className="text-xs text-muted-foreground">Total Amount</p>
-                <p className="text-xl font-bold text-primary">{fmt(computedTotal)}</p>
-                <p className="text-xs text-muted-foreground">{form.quantity} × {fmt(parseFloat(form.unit_price) || 0)}</p>
+                <p className="text-xl font-bold text-primary">{formatBDT(computedTotal)}</p>
+                <p className="text-xs text-muted-foreground">{form.quantity} × {formatBDT(parseFloat(form.unit_price) || 0)}</p>
               </div>
             )}
           </div>

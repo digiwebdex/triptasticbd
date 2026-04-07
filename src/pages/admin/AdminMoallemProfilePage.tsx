@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { generateMoallemPdf, getCompanyInfoForPdf, MoallemPdfData } from "@/lib/entityPdfGenerator";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const PAYMENT_METHODS = ["cash", "bkash", "nagad", "bank", "other"];
 const SERVICE_TYPES = [
   { value: "", label: "-- Select Service --" },
@@ -401,7 +401,7 @@ export default function AdminMoallemProfilePage() {
           <div className="flex items-center gap-2"><Hash className="h-4 w-4 text-muted-foreground" />NID: {moallem.nid_number || "—"}</div>
           <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-muted-foreground" />Contract: {moallem.contract_date || "—"}</div>
           <div className="flex items-center gap-2"><Users className="h-4 w-4 text-muted-foreground" />Contracted Pilgrims: {moallem.contracted_hajji || 0}</div>
-          <div className="flex items-center gap-2"><CreditCard className="h-4 w-4 text-muted-foreground" />Contracted Amount: {fmt(moallem.contracted_amount || 0)}</div>
+          <div className="flex items-center gap-2"><CreditCard className="h-4 w-4 text-muted-foreground" />Contracted Amount: {formatBDT(moallem.contracted_amount || 0)}</div>
         </div>
       </CardContent></Card>
 
@@ -409,24 +409,24 @@ export default function AdminMoallemProfilePage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card><CardContent className="pt-4 pb-4 text-center">
           <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
-          <p className="text-lg font-bold">{fmt(totalSelling)}</p>
+          <p className="text-lg font-bold">{formatBDT(totalSelling)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Contracted Amount</p>
         </CardContent></Card>
         {totalItemsBilled > 0 && (
           <Card><CardContent className="pt-4 pb-4 text-center">
             <Package className="h-5 w-5 text-primary mx-auto mb-1" />
-            <p className="text-lg font-bold">{fmt(totalItemsBilled)}</p>
+            <p className="text-lg font-bold">{formatBDT(totalItemsBilled)}</p>
             <p className="text-[10px] text-muted-foreground uppercase">Service Items Total</p>
           </CardContent></Card>
         )}
         <Card><CardContent className="pt-4 pb-4 text-center">
           <Wallet className="h-5 w-5 text-emerald-500 mx-auto mb-1" />
-          <p className="text-lg font-bold text-emerald-500">{fmt(totalPaid)}</p>
+          <p className="text-lg font-bold text-emerald-500">{formatBDT(totalPaid)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Total Paid</p>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-4 text-center">
           <TrendingDown className="h-5 w-5 text-destructive mx-auto mb-1" />
-          <p className="text-lg font-bold text-destructive">{fmt(totalMoallemDue)}</p>
+          <p className="text-lg font-bold text-destructive">{formatBDT(totalMoallemDue)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Total Due</p>
         </CardContent></Card>
       </div>
@@ -445,17 +445,17 @@ export default function AdminMoallemProfilePage() {
                 <div className="space-y-1.5">
                   {moallemItems.map((item: any) => (
                     <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{item.description} ({Number(item.quantity)} x {fmt(Number(item.unit_price))})</span>
-                      <span className="font-medium">{fmt(Number(item.total_amount))}</span>
+                      <span className="text-muted-foreground">{item.description} ({Number(item.quantity)} x {formatBDT(Number(item.unit_price))})</span>
+                      <span className="font-medium">{formatBDT(Number(item.total_amount))}</span>
                     </div>
                   ))}
                   <div className="flex justify-between text-sm font-bold border-t border-border pt-2 mt-2">
                     <span>Total Services</span>
-                    <span>{fmt(totalItemsBilled)}</span>
+                    <span>{formatBDT(totalItemsBilled)}</span>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No items — Contracted Amount: {fmt(totalSelling)}</p>
+                <p className="text-sm text-muted-foreground">No items — Contracted Amount: {formatBDT(totalSelling)}</p>
               )}
             </div>
 
@@ -473,12 +473,12 @@ export default function AdminMoallemProfilePage() {
                     {Object.entries(byMethod).map(([method, amount]) => (
                       <div key={method} className="flex justify-between text-sm">
                         <span className="text-muted-foreground capitalize">{method}</span>
-                        <span className="font-medium text-emerald-500">{fmt(amount)}</span>
+                        <span className="font-medium text-emerald-500">{formatBDT(amount)}</span>
                       </div>
                     ))}
                     <div className="flex justify-between text-sm font-bold border-t border-border pt-2 mt-2">
                       <span>Total Paid</span>
-                      <span className="text-emerald-500">{fmt(totalPaid)}</span>
+                      <span className="text-emerald-500">{formatBDT(totalPaid)}</span>
                     </div>
                   </div>
                 );
@@ -492,15 +492,15 @@ export default function AdminMoallemProfilePage() {
           <div className="mt-5 pt-4 border-t-2 border-primary/20 grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-xs text-muted-foreground uppercase">Total Amount</p>
-              <p className="text-lg font-bold">{fmt(effectiveTotal)}</p>
+              <p className="text-lg font-bold">{formatBDT(effectiveTotal)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase">Payment</p>
-              <p className="text-lg font-bold text-emerald-500">{fmt(totalPaid)}</p>
+              <p className="text-lg font-bold text-emerald-500">{formatBDT(totalPaid)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase">Due Amount</p>
-              <p className="text-lg font-bold text-destructive">{fmt(totalMoallemDue)}</p>
+              <p className="text-lg font-bold text-destructive">{formatBDT(totalMoallemDue)}</p>
             </div>
           </div>
         </CardContent>
@@ -531,8 +531,8 @@ export default function AdminMoallemProfilePage() {
                     <tr key={item.id} className="border-b border-border/30">
                       <td className="py-2 pr-3">{item.description}</td>
                       <td className="py-2 pr-3 text-right">{Number(item.quantity)}</td>
-                      <td className="py-2 pr-3 text-right">{fmt(Number(item.unit_price))}</td>
-                      <td className="py-2 pr-3 text-right font-bold">{fmt(Number(item.total_amount))}</td>
+                      <td className="py-2 pr-3 text-right">{formatBDT(Number(item.unit_price))}</td>
+                      <td className="py-2 pr-3 text-right font-bold">{formatBDT(Number(item.total_amount))}</td>
                       {!isViewer && (
                         <td className="py-2">
                           <div className="flex gap-1">
@@ -547,7 +547,7 @@ export default function AdminMoallemProfilePage() {
                 <tfoot>
                   <tr className="border-t border-border">
                     <td colSpan={3} className="py-2 pr-3 text-right font-semibold text-xs text-muted-foreground uppercase">Total</td>
-                    <td className="py-2 pr-3 text-right font-bold text-foreground">{fmt(totalItemsBilled)}</td>
+                    <td className="py-2 pr-3 text-right font-bold text-foreground">{formatBDT(totalItemsBilled)}</td>
                     {!isViewer && <td></td>}
                   </tr>
                 </tfoot>
@@ -587,7 +587,7 @@ export default function AdminMoallemProfilePage() {
                     return (
                     <tr key={p.id} className="border-b border-border/30">
                       <td className="py-2 pr-3 text-xs">{format(new Date(p.date), "dd MMM yyyy")}</td>
-                      <td className="py-2 pr-3 font-bold text-emerald-500">{fmt(p.amount)}</td>
+                      <td className="py-2 pr-3 font-bold text-emerald-500">{formatBDT(p.amount)}</td>
                       <td className="py-2 pr-3 capitalize">{p.payment_method}</td>
                       <td className="py-2 pr-3 text-xs"><Badge variant="outline" className="text-[10px]">{serviceLabel || "—"}</Badge></td>
                       <td className="py-2 pr-3 text-xs font-mono text-primary">{p.booking_id ? bookings.find(b => b.id === p.booking_id)?.tracking_id || "—" : "—"}</td>
@@ -632,7 +632,7 @@ export default function AdminMoallemProfilePage() {
                     return (
                     <tr key={p.id} className="border-b border-border/30">
                       <td className="py-2 pr-3 text-xs">{format(new Date(p.date), "dd MMM yyyy")}</td>
-                      <td className="py-2 pr-3 font-bold text-emerald-500">{fmt(p.amount)}</td>
+                      <td className="py-2 pr-3 font-bold text-emerald-500">{formatBDT(p.amount)}</td>
                       <td className="py-2 pr-3 capitalize">{p.payment_method}</td>
                       <td className="py-2 pr-3 text-xs"><Badge variant="outline" className="text-[10px]">{serviceLabel || "—"}</Badge></td>
                       <td className="py-2 pr-3 text-xs font-mono text-primary">{p.booking_id ? bookings.find(b => b.id === p.booking_id)?.tracking_id || "—" : "—"}</td>
@@ -675,9 +675,9 @@ export default function AdminMoallemProfilePage() {
                       <td className="py-2 pr-3 font-mono text-primary text-xs">{b.tracking_id}</td>
                       <td className="py-2 pr-3">{b.guest_name || "—"}</td>
                       <td className="py-2 pr-3">{b.packages?.name || "—"}</td>
-                      <td className="py-2 pr-3 font-medium">{fmt(b.total_amount)}</td>
-                      <td className="py-2 pr-3 text-emerald-500">{fmt(b.paid_amount)}</td>
-                      <td className="py-2 pr-3 text-destructive">{fmt(b.due_amount)}</td>
+                      <td className="py-2 pr-3 font-medium">{formatBDT(b.total_amount)}</td>
+                      <td className="py-2 pr-3 text-emerald-500">{formatBDT(b.paid_amount)}</td>
+                      <td className="py-2 pr-3 text-destructive">{formatBDT(b.due_amount)}</td>
                       <td className="py-2"><Badge variant={b.status === "completed" ? "default" : "secondary"} className="text-[10px] capitalize">{b.status}</Badge></td>
                     </tr>
                   ))}
@@ -706,7 +706,7 @@ export default function AdminMoallemProfilePage() {
             </div>
             <div className="bg-muted/50 rounded-lg p-3 text-sm">
               <span className="text-muted-foreground">Total: </span>
-              <span className="font-bold">{fmt((parseFloat(itemForm.quantity) || 0) * (parseFloat(itemForm.unit_price) || 0))}</span>
+              <span className="font-bold">{formatBDT((parseFloat(itemForm.quantity) || 0) * (parseFloat(itemForm.unit_price) || 0))}</span>
             </div>
           </div>
           <DialogFooter>

@@ -21,8 +21,8 @@ import { format } from "date-fns";
 import { generateSupplierPdf, getCompanyInfoForPdf, SupplierPdfData } from "@/lib/entityPdfGenerator";
 import SupplierContractManager from "@/components/admin/SupplierContractManager";
 import SupplierItemsManager from "@/components/admin/SupplierItemsManager";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const PAYMENT_METHODS = ["cash", "bkash", "nagad", "bank", "other"];
 const SERVICE_TYPES = [
   { value: "", label: "-- Select Service --" },
@@ -290,22 +290,22 @@ export default function AdminSupplierAgentProfilePage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card><CardContent className="pt-4 pb-4 text-center">
           <Package className="h-5 w-5 text-primary mx-auto mb-1" />
-          <p className="text-lg font-bold">{fmt(totalBilled)}</p>
+          <p className="text-lg font-bold">{formatBDT(totalBilled)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Total Billed</p>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-4 text-center">
           <CreditCard className="h-5 w-5 text-blue-500 mx-auto mb-1" />
-          <p className="text-lg font-bold">{fmt(totalCost)}</p>
+          <p className="text-lg font-bold">{formatBDT(totalCost)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Booking Cost</p>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-4 text-center">
           <Wallet className="h-5 w-5 text-emerald-500 mx-auto mb-1" />
-          <p className="text-lg font-bold text-emerald-500">{fmt(totalAgentPaid)}</p>
+          <p className="text-lg font-bold text-emerald-500">{formatBDT(totalAgentPaid)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Total Paid</p>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-4 text-center">
           <TrendingDown className="h-5 w-5 text-destructive mx-auto mb-1" />
-          <p className="text-lg font-bold text-destructive">{fmt(totalDue)}</p>
+          <p className="text-lg font-bold text-destructive">{formatBDT(totalDue)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Total Due</p>
         </CardContent></Card>
       </div>
@@ -355,7 +355,7 @@ export default function AdminSupplierAgentProfilePage() {
                       <tr key={p.id} className="border-b border-border/30">
                         <td className="py-2 pr-3 text-xs">{format(new Date(p.date), "dd MMM yyyy")}</td>
                         <td className="py-2 pr-3"><Badge variant="outline" className="text-[10px]">{category}</Badge></td>
-                        <td className="py-2 pr-3 font-bold text-emerald-500">{fmt(p.amount)}</td>
+                        <td className="py-2 pr-3 font-bold text-emerald-500">{formatBDT(p.amount)}</td>
                         <td className="py-2 pr-3 capitalize">{p.payment_method}</td>
                         <td className="py-2 pr-3 text-xs text-muted-foreground">{cleanNotes}</td>
                         {!isViewer && (
@@ -407,9 +407,9 @@ export default function AdminSupplierAgentProfilePage() {
                     <tr key={b.id} className="border-b border-border/30">
                       <td className="py-2 pr-3 font-mono text-primary text-xs">{b.tracking_id}</td>
                       <td className="py-2 pr-3">{b.guest_name || "—"}</td>
-                      <td className="py-2 pr-3 font-medium">{fmt(b.total_cost)}</td>
-                      <td className="py-2 pr-3 text-emerald-500">{fmt(b.paid_to_supplier)}</td>
-                      <td className="py-2 pr-3 text-destructive">{fmt(b.supplier_due)}</td>
+                      <td className="py-2 pr-3 font-medium">{formatBDT(b.total_cost)}</td>
+                      <td className="py-2 pr-3 text-emerald-500">{formatBDT(b.paid_to_supplier)}</td>
+                      <td className="py-2 pr-3 text-destructive">{formatBDT(b.supplier_due)}</td>
                       <td className="py-2"><Badge variant={b.status === "completed" ? "default" : "secondary"} className="text-[10px] capitalize">{b.status}</Badge></td>
                     </tr>
                   ))}
@@ -442,7 +442,7 @@ export default function AdminSupplierAgentProfilePage() {
             <div><label className="text-xs text-muted-foreground block mb-1">Booking (Optional)</label>
               <select className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm" value={paymentForm.booking_id} onChange={(e) => setPaymentForm({ ...paymentForm, booking_id: e.target.value })}>
                 <option value="">-- All Bookings --</option>
-                {bookings.map(b => <option key={b.id} value={b.id}>{b.tracking_id} — Due: {fmt(b.supplier_due)}</option>)}
+                {bookings.map(b => <option key={b.id} value={b.id}>{b.tracking_id} — Due: {formatBDT(b.supplier_due)}</option>)}
               </select></div>
             <div><label className="text-xs text-muted-foreground block mb-1">Notes</label>
               <Input value={paymentForm.notes} onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })} placeholder="Notes..." /></div>

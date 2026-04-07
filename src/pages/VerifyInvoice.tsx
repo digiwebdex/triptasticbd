@@ -4,8 +4,8 @@ import { supabase } from "@/lib/api";
 import { CheckCircle, XCircle, FileText, Loader2 } from "lucide-react";
 import { generateVerificationId } from "@/lib/pdfQrCode";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
@@ -150,11 +150,11 @@ export default function VerifyInvoice() {
               </div>
 
               <div className="border-t border-gray-100 pt-4 mt-4 space-y-2">
-                <FinRow label={t("verify.totalAmount")} value={fmt(booking.total_amount)} bold />
-                <FinRow label={t("verify.paidAmount")} value={fmt(booking.paid_amount)} className="text-green-600" />
+                <FinRow label={t("verify.totalAmount")} value={formatBDT(booking.total_amount)} bold />
+                <FinRow label={t("verify.paidAmount")} value={formatBDT(booking.paid_amount)} className="text-green-600" />
                 <FinRow
                   label={t("verify.dueAmount")}
-                  value={fmt(Math.max(0, Number(booking.due_amount || 0)))}
+                  value={formatBDT(Math.max(0, Number(booking.due_amount || 0)))}
                   className={Number(booking.due_amount || 0) > 0 ? "text-red-500" : "text-green-600"}
                   bold
                 />

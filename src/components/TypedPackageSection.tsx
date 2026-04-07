@@ -147,7 +147,7 @@ const TypedPackageSection = ({ packageType, sectionId }: TypedPackageSectionProp
                 </div>
                 <div className="absolute bottom-4 left-4">
                   <p className="text-2xl font-heading font-bold text-white drop-shadow-lg">
-                    ৳{Number(pkg.price).toLocaleString()}
+                    ৳{Number(pkg.price).toLocaleString("en-IN")}
                   </p>
                   <p className="text-xs text-white/80">{t("packages.perPerson")}</p>
                 </div>

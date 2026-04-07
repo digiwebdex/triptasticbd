@@ -21,11 +21,10 @@ import CustomerSearchSelect from "@/components/admin/CustomerSearchSelect";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { formatBDT, cn } from "@/lib/utils";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 const STATUSES = ["pending", "confirmed", "visa_processing", "ticket_issued", "completed", "cancelled"];
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const normalizeBookingType = (value?: string | null) => (value || "").trim().toLowerCase();
 const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBookingType(value).includes("family") || memberCount > 0;
 const toMoney = (value: any) => Math.max(0, Number(value || 0));
@@ -72,22 +71,22 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-secondary/50 rounded-lg p-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Payments Received</p>
-          <p className="font-heading font-bold text-emerald-500 text-lg">{fmt(totalPaid)}</p>
+          <p className="font-heading font-bold text-emerald-500 text-lg">{formatBDT(totalPaid)}</p>
         </div>
         <div className="bg-secondary/50 rounded-lg p-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Expenses Assigned</p>
-          <p className="font-heading font-bold text-destructive text-lg">{fmt(totalExpenses)}</p>
+          <p className="font-heading font-bold text-destructive text-lg">{formatBDT(totalExpenses)}</p>
         </div>
         <div className="bg-secondary/50 rounded-lg p-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Profit</p>
           <p className={`font-heading font-bold text-lg flex items-center gap-1 ${profit >= 0 ? "text-emerald-500" : "text-destructive"}`}>
             {profit >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-            {fmt(profit)}
+            {formatBDT(profit)}
           </p>
         </div>
         <div className="bg-secondary/50 rounded-lg p-3">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Due Amount</p>
-          <p className="font-heading font-bold text-yellow-600 text-lg">{fmt(totalDue)}</p>
+          <p className="font-heading font-bold text-yellow-600 text-lg">{formatBDT(totalDue)}</p>
         </div>
       </div>
 
@@ -107,7 +106,7 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
                     <span className="text-xs font-semibold">{new Date(p.paid_at).toLocaleDateString("en-GB")}</span>
                     <span className="text-[10px] text-muted-foreground ml-2 capitalize">{p.payment_method || "manual"}</span>
                   </div>
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{fmt(p.amount)}</span>
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{formatBDT(p.amount)}</span>
                 </div>
               ))}
             </div>
@@ -131,7 +130,7 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
                 {payments.map((p: any) => (
                   <tr key={p.id} className="border-b border-border/30">
                     <td className="py-2 pr-3 font-medium">{p.installment_number || "—"}</td>
-                    <td className="py-2 pr-3 font-medium">{fmt(p.amount)}</td>
+                    <td className="py-2 pr-3 font-medium">{formatBDT(p.amount)}</td>
                     <td className="py-2 pr-3 capitalize">{p.payment_method || "—"}</td>
                     <td className="py-2 pr-3">{p.due_date ? new Date(p.due_date).toLocaleDateString("en-GB") : "—"}</td>
                     <td className="py-2 pr-3">{p.paid_at ? new Date(p.paid_at).toLocaleDateString("en-GB") : "—"}</td>
@@ -160,7 +159,7 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-xs text-muted-foreground">{new Date(e.date).toLocaleDateString()}</span>
-                  <span className="text-xs font-bold text-destructive">{fmt(e.amount)}</span>
+                  <span className="text-xs font-bold text-destructive">{formatBDT(e.amount)}</span>
                 </div>
               </div>
             ))}
@@ -713,7 +712,7 @@ export default function AdminBookingsPage() {
                   </div>
                   <div>
                      <label className="text-xs text-muted-foreground block mb-1">Total Commission (BDT)</label>
-                    <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalCommission.toLocaleString()}</div>
+                    <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalCommission.toLocaleString("en-IN")}</div>
                   </div>
                 </div>
               )}
@@ -805,12 +804,12 @@ export default function AdminBookingsPage() {
                           </div>
                           <div>
                             <label className="text-[10px] text-muted-foreground block mb-0.5">Final Price</label>
-                            <div className={`${inputClass} bg-muted/50 font-bold text-xs`}>BDT {Number(m.final_price || 0).toLocaleString()}</div>
+                            <div className={`${inputClass} bg-muted/50 font-bold text-xs`}>BDT {Number(m.final_price || 0).toLocaleString("en-IN")}</div>
                           </div>
                         </div>
                       ))}
                       <div className="text-right text-xs font-bold text-primary">
-                        Members Total: BDT {editMembers.reduce((s: number, m: any) => s + Number(m.final_price || 0), 0).toLocaleString()}
+                        Members Total: BDT {editMembers.reduce((s: number, m: any) => s + Number(m.final_price || 0), 0).toLocaleString("en-IN")}
                       </div>
                     </>
                   )}
@@ -826,7 +825,7 @@ export default function AdminBookingsPage() {
                 </div>
                 <div>
                    <label className="text-xs text-muted-foreground block mb-1">Total Selling (BDT)</label>
-                  <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalSelling.toLocaleString()}</div>
+                  <div className={`${inputClass} bg-muted/50 font-bold`}>BDT {editTotalSelling.toLocaleString("en-IN")}</div>
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">Paid (BDT)</label>
@@ -836,13 +835,13 @@ export default function AdminBookingsPage() {
                 <div>
                    <label className="text-xs text-muted-foreground block mb-1">Due (BDT)</label>
                   <div className={`${inputClass} bg-muted/50 font-bold ${editDue > 0 ? "text-destructive" : "text-emerald"}`}>
-                    BDT {editDue.toLocaleString()}
+                    BDT {editDue.toLocaleString("en-IN")}
                   </div>
                 </div>
                 <div>
                    <label className="text-xs text-muted-foreground block mb-1">Profit (BDT)</label>
                   <div className={`${inputClass} bg-muted/50 font-bold ${editProfit >= 0 ? "text-emerald" : "text-destructive"}`}>
-                    BDT {editProfit.toLocaleString()}
+                    BDT {editProfit.toLocaleString("en-IN")}
                   </div>
                 </div>
               </div>
@@ -876,14 +875,14 @@ export default function AdminBookingsPage() {
                 </div>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-8 gap-3 text-sm">
-                <div><p className="text-muted-foreground text-xs">Selling</p><p className="font-medium">{fmt(Number(b.total_amount))}</p></div>
-                <div><p className="text-muted-foreground text-xs">Cost</p><p className="font-medium text-muted-foreground">{fmt(Number(b.total_cost || 0))}</p></div>
-                {b.moallem_id && <div><p className="text-muted-foreground text-xs">Commission</p><p className="font-medium text-yellow-600">{fmt(Number(b.total_commission || 0))}</p></div>}
-                <div><p className="text-muted-foreground text-xs">Paid</p><p className="font-medium text-emerald-500">{fmt(Number(b.paid_amount))}</p></div>
-                <div><p className="text-muted-foreground text-xs">Due</p><p className="font-medium text-destructive">{fmt(Number(b.due_amount || 0))}</p></div>
-                <div><p className="text-muted-foreground text-xs">Supplier Paid</p><p className="font-medium text-emerald-500">{fmt(Number(b.paid_to_supplier || 0))}</p></div>
-                <div><p className="text-muted-foreground text-xs">Supplier Due</p><p className="font-medium text-destructive">{fmt(Number(b.supplier_due || 0))}</p></div>
-                <div><p className="text-muted-foreground text-xs">Profit</p><p className={`font-medium ${Number(b.profit_amount || 0) >= 0 ? "text-emerald-500" : "text-destructive"}`}>{fmt(Number(b.profit_amount || 0))}</p></div>
+                <div><p className="text-muted-foreground text-xs">Selling</p><p className="font-medium">{formatBDT(Number(b.total_amount))}</p></div>
+                <div><p className="text-muted-foreground text-xs">Cost</p><p className="font-medium text-muted-foreground">{formatBDT(Number(b.total_cost || 0))}</p></div>
+                {b.moallem_id && <div><p className="text-muted-foreground text-xs">Commission</p><p className="font-medium text-yellow-600">{formatBDT(Number(b.total_commission || 0))}</p></div>}
+                <div><p className="text-muted-foreground text-xs">Paid</p><p className="font-medium text-emerald-500">{formatBDT(Number(b.paid_amount))}</p></div>
+                <div><p className="text-muted-foreground text-xs">Due</p><p className="font-medium text-destructive">{formatBDT(Number(b.due_amount || 0))}</p></div>
+                <div><p className="text-muted-foreground text-xs">Supplier Paid</p><p className="font-medium text-emerald-500">{formatBDT(Number(b.paid_to_supplier || 0))}</p></div>
+                <div><p className="text-muted-foreground text-xs">Supplier Due</p><p className="font-medium text-destructive">{formatBDT(Number(b.supplier_due || 0))}</p></div>
+                <div><p className="text-muted-foreground text-xs">Profit</p><p className={`font-medium ${Number(b.profit_amount || 0) >= 0 ? "text-emerald-500" : "text-destructive"}`}>{formatBDT(Number(b.profit_amount || 0))}</p></div>
               </div>
               {/* Payment History Chips */}
               {bookingPayments[b.id] && bookingPayments[b.id].length > 0 && (
@@ -891,7 +890,7 @@ export default function AdminBookingsPage() {
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wide self-center mr-1">Payments:</span>
                   {bookingPayments[b.id].map((p: any) => (
                     <span key={p.id} className="inline-flex items-center gap-1 text-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full px-2.5 py-0.5 font-medium">
-                      {new Date(p.paid_at).toLocaleDateString("en-GB")}: {fmt(p.amount)}
+                      {new Date(p.paid_at).toLocaleDateString("en-GB")}: {formatBDT(p.amount)}
                     </span>
                   ))}
                 </div>
@@ -930,26 +929,26 @@ export default function AdminBookingsPage() {
                 <div><span className="text-muted-foreground text-xs block">Phone</span><span className="font-medium">{viewBooking.guest_phone || "—"}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Package</span><span className="font-medium">{viewBooking.packages?.name || "—"}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Travelers</span><span className="font-medium">{viewBooking.num_travelers}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Selling/Person</span><span className="font-medium">{fmt(Number(viewBooking.selling_price_per_person || 0))}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Total Selling</span><span className="font-medium">{fmt(Number(viewBooking.total_amount))}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Cost/Person</span><span className="font-medium">{fmt(Number(viewBooking.cost_price_per_person || 0))}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Total Cost</span><span className="font-medium">{fmt(Number(viewBooking.total_cost || 0))}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Extra Expense</span><span className="font-medium">{fmt(Number(viewBooking.extra_expense || 0))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Selling/Person</span><span className="font-medium">{formatBDT(Number(viewBooking.selling_price_per_person || 0))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Total Selling</span><span className="font-medium">{formatBDT(Number(viewBooking.total_amount))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Cost/Person</span><span className="font-medium">{formatBDT(Number(viewBooking.cost_price_per_person || 0))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Total Cost</span><span className="font-medium">{formatBDT(Number(viewBooking.total_cost || 0))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Extra Expense</span><span className="font-medium">{formatBDT(Number(viewBooking.extra_expense || 0))}</span></div>
                 {viewBooking.moallem_id && <>
-                  <div><span className="text-muted-foreground text-xs block">Commission/Person</span><span className="font-medium">{fmt(Number(viewBooking.commission_per_person || 0))}</span></div>
-                  <div><span className="text-muted-foreground text-xs block">Total Commission</span><span className="font-medium">{fmt(Number(viewBooking.total_commission || 0))}</span></div>
-                  <div><span className="text-muted-foreground text-xs block">Commission Paid</span><span className="font-medium text-emerald-500">{fmt(Number(viewBooking.commission_paid || 0))}</span></div>
-                  <div><span className="text-muted-foreground text-xs block">Commission Due</span><span className="font-medium text-destructive">{fmt(Number(viewBooking.commission_due || 0))}</span></div>
+                  <div><span className="text-muted-foreground text-xs block">Commission/Person</span><span className="font-medium">{formatBDT(Number(viewBooking.commission_per_person || 0))}</span></div>
+                  <div><span className="text-muted-foreground text-xs block">Total Commission</span><span className="font-medium">{formatBDT(Number(viewBooking.total_commission || 0))}</span></div>
+                  <div><span className="text-muted-foreground text-xs block">Commission Paid</span><span className="font-medium text-emerald-500">{formatBDT(Number(viewBooking.commission_paid || 0))}</span></div>
+                  <div><span className="text-muted-foreground text-xs block">Commission Due</span><span className="font-medium text-destructive">{formatBDT(Number(viewBooking.commission_due || 0))}</span></div>
                 </>}
-                <div><span className="text-muted-foreground text-xs block">Supplier Paid</span><span className="font-medium text-emerald-500">{fmt(Number(viewBooking.paid_to_supplier || 0))}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Supplier Due</span><span className="font-medium text-destructive">{fmt(Number(viewBooking.supplier_due || 0))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Supplier Paid</span><span className="font-medium text-emerald-500">{formatBDT(Number(viewBooking.paid_to_supplier || 0))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Supplier Due</span><span className="font-medium text-destructive">{formatBDT(Number(viewBooking.supplier_due || 0))}</span></div>
                 {viewBooking.moallem_id && <>
-                  <div><span className="text-muted-foreground text-xs block">Moallem Paid</span><span className="font-medium text-emerald-500">{fmt(Number(viewBooking.paid_by_moallem || 0))}</span></div>
-                  <div><span className="text-muted-foreground text-xs block">Moallem Due</span><span className="font-medium text-destructive">{fmt(Number(viewBooking.moallem_due || 0))}</span></div>
+                  <div><span className="text-muted-foreground text-xs block">Moallem Paid</span><span className="font-medium text-emerald-500">{formatBDT(Number(viewBooking.paid_by_moallem || 0))}</span></div>
+                  <div><span className="text-muted-foreground text-xs block">Moallem Due</span><span className="font-medium text-destructive">{formatBDT(Number(viewBooking.moallem_due || 0))}</span></div>
                 </>}
-                <div><span className="text-muted-foreground text-xs block">Paid</span><span className="font-medium text-emerald-500">{fmt(Number(viewBooking.paid_amount))}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Due</span><span className="font-medium text-destructive">{fmt(Number(viewBooking.due_amount || 0))}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Profit</span><span className={`font-medium ${Number(viewBooking.profit_amount || 0) >= 0 ? "text-emerald-500" : "text-destructive"}`}>{fmt(Number(viewBooking.profit_amount || 0))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Paid</span><span className="font-medium text-emerald-500">{formatBDT(Number(viewBooking.paid_amount))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Due</span><span className="font-medium text-destructive">{formatBDT(Number(viewBooking.due_amount || 0))}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Profit</span><span className={`font-medium ${Number(viewBooking.profit_amount || 0) >= 0 ? "text-emerald-500" : "text-destructive"}`}>{formatBDT(Number(viewBooking.profit_amount || 0))}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Status</span><Badge variant={viewBooking.status === "completed" ? "default" : "secondary"} className="text-xs capitalize">{viewBooking.status}</Badge></div>
                 <div><span className="text-muted-foreground text-xs block">Passport</span><span className="font-medium">{viewBooking.guest_passport || "—"}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Moallem</span><span className="font-medium">{viewBooking.moallems?.name || "—"}</span></div>

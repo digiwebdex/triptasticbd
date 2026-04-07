@@ -9,8 +9,8 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area
 } from "recharts";
 import { format, parseISO, getMonth, getYear, startOfMonth, subMonths } from "date-fns";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
 const MONTHS_BN = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
 
@@ -146,15 +146,15 @@ export default function AdminAnalyticsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card><CardContent className="p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1"><TrendingUp className="h-4 w-4" /><span className="text-xs">মোট আয়</span></div>
-          <p className="text-xl font-bold text-emerald-600">{fmt(totalRevenue)}</p>
+          <p className="text-xl font-bold text-emerald-600">{formatBDT(totalRevenue)}</p>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1"><TrendingDown className="h-4 w-4" /><span className="text-xs">মোট ব্যয়</span></div>
-          <p className="text-xl font-bold text-destructive">{fmt(totalExpenses)}</p>
+          <p className="text-xl font-bold text-destructive">{formatBDT(totalExpenses)}</p>
         </CardContent></Card>
         {canSeeProfit && <Card><CardContent className="p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1"><BarChart3 className="h-4 w-4" /><span className="text-xs">নেট প্রফিট</span></div>
-          <p className={`text-xl font-bold ${totalRevenue - totalExpenses >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmt(totalRevenue - totalExpenses)}</p>
+          <p className={`text-xl font-bold ${totalRevenue - totalExpenses >= 0 ? "text-emerald-600" : "text-destructive"}`}>{formatBDT(totalRevenue - totalExpenses)}</p>
         </CardContent></Card>}
         <Card><CardContent className="p-4">
           <div className="flex items-center gap-2 text-muted-foreground mb-1"><Users className="h-4 w-4" /><span className="text-xs">মোট বুকিং</span></div>
@@ -181,7 +181,7 @@ export default function AdminAnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" tick={{ fontSize: 11 }} angle={-45} textAnchor="end" height={60} />
                     <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Tooltip formatter={(v: number) => formatBDT(v)} />
                     <Legend />
                     <Area type="monotone" dataKey="revenue" name="আয়" fill="#10b981" fillOpacity={0.3} stroke="#10b981" />
                     <Area type="monotone" dataKey="expenses" name="ব্যয়" fill="#ef4444" fillOpacity={0.2} stroke="#ef4444" />
@@ -238,7 +238,7 @@ export default function AdminAnalyticsPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" tick={{ fontSize: 10 }} />
                       <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={100} />
-                      <Tooltip formatter={(v: number) => fmt(v)} />
+                      <Tooltip formatter={(v: number) => formatBDT(v)} />
                       <Bar dataKey="revenue" name="আয়" fill="#10b981" radius={[0, 4, 4, 0]} />
                       {canSeeProfit && <Bar dataKey="profit" name="প্রফিট" fill="#3b82f6" radius={[0, 4, 4, 0]} />}
                     </BarChart>
@@ -267,8 +267,8 @@ export default function AdminAnalyticsPage() {
                       <td className="px-4 py-2.5">{p.name}</td>
                       <td className="px-4 py-2.5 text-center capitalize">{p.type}</td>
                       <td className="px-4 py-2.5 text-center">{p.bookings}</td>
-                      <td className="px-4 py-2.5 text-right">{fmt(p.revenue)}</td>
-                      {canSeeProfit && <td className={`px-4 py-2.5 text-right font-medium ${p.profit >= 0 ? "text-emerald-600" : "text-destructive"}`}>{fmt(p.profit)}</td>}
+                      <td className="px-4 py-2.5 text-right">{formatBDT(p.revenue)}</td>
+                      {canSeeProfit && <td className={`px-4 py-2.5 text-right font-medium ${p.profit >= 0 ? "text-emerald-600" : "text-destructive"}`}>{formatBDT(p.profit)}</td>}
                     </tr>
                   ))}
                 </tbody>
@@ -288,7 +288,7 @@ export default function AdminAnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" tick={{ fontSize: 10 }} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={120} />
-                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Tooltip formatter={(v: number) => formatBDT(v)} />
                     <Legend />
                     <Bar dataKey="revenue" name="মোট আয়" fill="#10b981" radius={[0, 4, 4, 0]} />
                     <Bar dataKey="deposits" name="জমা" fill="#3b82f6" radius={[0, 4, 4, 0]} />
@@ -316,8 +316,8 @@ export default function AdminAnalyticsPage() {
                       <td className="px-4 py-2.5 font-mono text-muted-foreground">{i + 1}</td>
                       <td className="px-4 py-2.5 font-medium">{m.name}</td>
                       <td className="px-4 py-2.5 text-center">{m.bookings}</td>
-                      <td className="px-4 py-2.5 text-right">{fmt(m.revenue)}</td>
-                      <td className="px-4 py-2.5 text-right">{fmt(m.deposits)}</td>
+                      <td className="px-4 py-2.5 text-right">{formatBDT(m.revenue)}</td>
+                      <td className="px-4 py-2.5 text-right">{formatBDT(m.deposits)}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -206,7 +206,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
                         <p className="font-bold text-lg">{pkg.name}</p>
                         <p className="text-sm text-muted-foreground capitalize">{pkg.type} • {pkg.duration_days} {t("common.days")}</p>
                       </div>
-                      <p className="text-xl font-bold text-primary">৳{Number(pkg.price).toLocaleString()}<span className="text-xs text-muted-foreground font-normal"> {t("common.perPerson")}</span></p>
+                      <p className="text-xl font-bold text-primary">৳{Number(pkg.price).toLocaleString("en-IN")}<span className="text-xs text-muted-foreground font-normal"> {t("common.perPerson")}</span></p>
                     </div>
                   </div>
                   <div className="bg-card border border-border rounded-xl p-6">
@@ -217,7 +217,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
                     </div>
                     <div className="mt-4 p-4 bg-secondary/50 rounded-lg flex justify-between">
                       <span className="text-sm text-muted-foreground">{t("booking.totalAmount")}</span>
-                      <span className="text-lg font-bold text-primary">৳{totalAmount.toLocaleString()}</span>
+                      <span className="text-lg font-bold text-primary">৳{totalAmount.toLocaleString("en-IN")}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -256,7 +256,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
                       {plans.map((plan) => (
                         <button type="button" key={plan.id} onClick={() => setSelectedPlan(plan.id)} className={`w-full text-left p-4 rounded-lg border transition-colors ${selectedPlan === plan.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
                           <div className="flex items-center justify-between">
-                            <div><p className="font-medium text-sm">{plan.name}</p><p className="text-xs text-muted-foreground">{plan.num_installments} {t("booking.installments")} • ৳{Math.round(totalAmount / plan.num_installments).toLocaleString()}{t("booking.perMonth")}</p></div>
+                            <div><p className="font-medium text-sm">{plan.name}</p><p className="text-xs text-muted-foreground">{plan.num_installments} {t("booking.installments")} • ৳{Math.round(totalAmount / plan.num_installments).toLocaleString("en-IN")}{t("booking.perMonth")}</p></div>
                             {selectedPlan === plan.id && <Check className="h-5 w-5 text-primary" />}
                           </div>
                         </button>
@@ -327,7 +327,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
                       <div className="flex justify-between py-2 border-b border-border/50"><span className="text-muted-foreground">{t("booking.documents") || "ডকুমেন্ট"}</span><span className="font-medium">{uploadedDocs.length} {t("booking.filesUploaded") || "টি ফাইল"}</span></div>
                       <div className="flex justify-between py-2 border-b border-border/50"><span className="text-muted-foreground">{t("booking.paymentPlan")}</span><span className="font-medium">{selectedPlan ? plans.find((p) => p.id === selectedPlan)?.name : t("booking.fullPayment")}</span></div>
                       <div className="flex justify-between py-2 border-b border-border/50"><span className="text-muted-foreground">{t("booking.paymentStatus") || "পেমেন্ট স্ট্যাটাস"}</span><span className="font-medium text-primary">{t("booking.notPaid") || "পরে পেমেন্ট করবেন"}</span></div>
-                      <div className="flex justify-between py-3 bg-secondary/50 rounded-lg px-3 mt-2"><span className="font-medium">{t("booking.totalAmount")}</span><span className="text-lg font-bold text-primary">৳{totalAmount.toLocaleString()}</span></div>
+                      <div className="flex justify-between py-3 bg-secondary/50 rounded-lg px-3 mt-2"><span className="font-medium">{t("booking.totalAmount")}</span><span className="text-lg font-bold text-primary">৳{totalAmount.toLocaleString("en-IN")}</span></div>
                     </div>
                   </div>
                 </motion.div>
@@ -346,7 +346,7 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
                   </button>
                 ) : (
                   <button onClick={handleSubmit} disabled={submitting} className="flex-1 py-3 rounded-md text-sm font-semibold bg-gradient-gold text-primary-foreground hover:opacity-90 transition-opacity shadow-gold disabled:opacity-50">
-                    {submitting ? t("booking.processing") : `${t("booking.confirmBooking")} — ৳${totalAmount.toLocaleString()}`}
+                    {submitting ? t("booking.processing") : `${t("booking.confirmBooking")} — ৳${totalAmount.toLocaleString("en-IN")}`}
                   </button>
                 )}
               </div>

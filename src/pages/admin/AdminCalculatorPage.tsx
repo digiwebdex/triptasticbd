@@ -7,6 +7,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoImg from "@/assets/logo-nobg.png";
 import { toast } from "sonner";
+import { formatBDT } from "@/lib/utils";
 
 interface CostItem {
   id: string;
@@ -26,7 +27,6 @@ const DEFAULT_ITEMS: CostItem[] = [
   { id: "9", description: "Miscellaneous", unitPrice: 0 },
 ];
 
-const fmt = (n: number) => `BDT ${n.toLocaleString("en-IN")}`;
 
 export default function AdminCalculatorPage() {
   const [groupName, setGroupName] = useState<string | null>(null);
@@ -126,10 +126,10 @@ export default function AdminCalculatorPage() {
       const costRows = activeItems.map((item, idx) => [
         String(idx + 1),
         item.description || "-",
-        fmt(Number(item.unitPrice || 0)),
-        fmt(Number(item.unitPrice || 0) * pilgrimCount),
+        formatBDT(Number(item.unitPrice || 0)),
+        formatBDT(Number(item.unitPrice || 0) * pilgrimCount),
       ]);
-      costRows.push(["", "Total Cost Per Person", fmt(costPerPerson), fmt(totalCost)]);
+      costRows.push(["", "Total Cost Per Person", formatBDT(costPerPerson), formatBDT(totalCost)]);
 
       (autoTable as any)(doc, {
         startY: y,
@@ -168,13 +168,13 @@ export default function AdminCalculatorPage() {
 
       const summaryRows = [
         ["Total Pilgrims", pilgrimCount > 0 ? String(pilgrimCount) : "-"],
-        ["Cost Per Person", fmt(costPerPerson)],
-        ["Selling Price Per Person", fmt(sellingPricePerPerson)],
-        ["Profit Per Person", fmt(profitPerPerson)],
+        ["Cost Per Person", formatBDT(costPerPerson)],
+        ["Selling Price Per Person", formatBDT(sellingPricePerPerson)],
+        ["Profit Per Person", formatBDT(profitPerPerson)],
         ["", ""],
-        [`Total Cost (${pilgrimCount} × ${fmt(costPerPerson)})`, fmt(totalCost)],
-        [`Total Revenue (${pilgrimCount} × ${fmt(sellingPricePerPerson)})`, fmt(totalRevenue)],
-        [`Total Profit (${pilgrimCount} × ${fmt(profitPerPerson)})`, fmt(totalProfit)],
+        [`Total Cost (${pilgrimCount} × ${formatBDT(costPerPerson)})`, formatBDT(totalCost)],
+        [`Total Revenue (${pilgrimCount} × ${formatBDT(sellingPricePerPerson)})`, formatBDT(totalRevenue)],
+        [`Total Profit (${pilgrimCount} × ${formatBDT(profitPerPerson)})`, formatBDT(totalProfit)],
       ];
 
       (autoTable as any)(doc, {
@@ -225,7 +225,7 @@ export default function AdminCalculatorPage() {
         doc.text("Total Profit", pageWidth / 2, y + 5, { align: "center" });
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.text(fmt(totalProfit), pageWidth / 2, y + 12, { align: "center" });
+        doc.text(formatBDT(totalProfit), pageWidth / 2, y + 12, { align: "center" });
         doc.setTextColor(0);
       }
 
@@ -317,7 +317,7 @@ export default function AdminCalculatorPage() {
                 />
               </div>
               <div className="col-span-2 flex items-center justify-between">
-                <span className="text-sm font-medium">{fmt(Number(item.unitPrice || 0) * pilgrimCount)}</span>
+                <span className="text-sm font-medium">{formatBDT(Number(item.unitPrice || 0) * pilgrimCount)}</span>
                 <button onClick={() => removeItem(item.id)} className="text-destructive/50 hover:text-destructive ml-1">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -328,8 +328,8 @@ export default function AdminCalculatorPage() {
           {/* Per person total */}
           <div className="border-t border-border pt-3 mt-2 grid grid-cols-12 gap-2 px-1">
             <div className="col-span-7 text-sm font-bold">Total Cost Per Person</div>
-            <div className="col-span-3 text-sm font-bold text-destructive">{fmt(costPerPerson)}</div>
-            <div className="col-span-2 text-sm font-bold text-destructive text-right">{fmt(totalCost)}</div>
+            <div className="col-span-3 text-sm font-bold text-destructive">{formatBDT(costPerPerson)}</div>
+            <div className="col-span-2 text-sm font-bold text-destructive text-right">{formatBDT(totalCost)}</div>
           </div>
         </div>
       </div>
@@ -363,37 +363,37 @@ export default function AdminCalculatorPage() {
           </div>
           <div className="bg-secondary/30 rounded-lg p-3 text-center">
             <p className="text-[10px] uppercase text-muted-foreground mb-1">Cost Per Person</p>
-            <p className="text-lg font-bold text-destructive">{fmt(costPerPerson)}</p>
+            <p className="text-lg font-bold text-destructive">{formatBDT(costPerPerson)}</p>
           </div>
           <div className="bg-secondary/30 rounded-lg p-3 text-center">
             <p className="text-[10px] uppercase text-muted-foreground mb-1">Selling Per Person</p>
-            <p className="text-lg font-bold text-primary">{fmt(sellingPricePerPerson)}</p>
+            <p className="text-lg font-bold text-primary">{formatBDT(sellingPricePerPerson)}</p>
           </div>
           <div className="bg-secondary/30 rounded-lg p-3 text-center">
             <p className="text-[10px] uppercase text-muted-foreground mb-1">Profit Per Person</p>
-            <p className={`text-lg font-bold ${profitPerPerson >= 0 ? "text-green-500" : "text-destructive"}`}>{fmt(profitPerPerson)}</p>
+            <p className={`text-lg font-bold ${profitPerPerson >= 0 ? "text-green-500" : "text-destructive"}`}>{formatBDT(profitPerPerson)}</p>
           </div>
         </div>
 
         <div className="space-y-2 border-t border-border pt-3">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Cost ({pilgrimCount} × {fmt(costPerPerson)})</span>
-            <span className="font-bold text-destructive">{fmt(totalCost)}</span>
+            <span className="text-muted-foreground">Total Cost ({pilgrimCount} × {formatBDT(costPerPerson)})</span>
+            <span className="font-bold text-destructive">{formatBDT(totalCost)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Revenue ({pilgrimCount} × {fmt(sellingPricePerPerson)})</span>
-            <span className="font-bold text-primary">{fmt(totalRevenue)}</span>
+            <span className="text-muted-foreground">Total Revenue ({pilgrimCount} × {formatBDT(sellingPricePerPerson)})</span>
+            <span className="font-bold text-primary">{formatBDT(totalRevenue)}</span>
           </div>
           <div className="flex justify-between text-sm border-t border-border pt-2">
-            <span className="font-bold">Total Profit ({pilgrimCount} × {fmt(profitPerPerson)})</span>
-            <span className={`text-lg font-bold ${totalProfit >= 0 ? "text-green-500" : "text-destructive"}`}>{fmt(totalProfit)}</span>
+            <span className="font-bold">Total Profit ({pilgrimCount} × {formatBDT(profitPerPerson)})</span>
+            <span className={`text-lg font-bold ${totalProfit >= 0 ? "text-green-500" : "text-destructive"}`}>{formatBDT(totalProfit)}</span>
           </div>
         </div>
 
         {totalProfit > 0 && (
           <div className="mt-4 bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-center">
             <p className="text-xs text-green-600">Total Profit</p>
-            <p className="text-2xl font-bold text-green-500">{fmt(totalProfit)}</p>
+            <p className="text-2xl font-bold text-green-500">{formatBDT(totalProfit)}</p>
           </div>
         )}
 

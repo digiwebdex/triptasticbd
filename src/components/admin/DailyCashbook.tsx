@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Edit2, Save, X, FileDown, FileSpreadsheet, TrendingUp, TrendingDown } from "lucide-react";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
 import { useCanModifyFinancials } from "@/components/admin/AdminLayout";
+import { formatBDT } from "@/lib/utils";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 
@@ -38,7 +39,6 @@ const PAYMENT_METHODS = [
   { value: "manual", label: "Manual" },
 ];
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
 const EMPTY_FORM = {
   type: "income" as "income" | "expense",
@@ -253,17 +253,17 @@ export default function DailyCashbook({ onEntriesChanged }: DailyCashbookProps =
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-card border border-emerald/30 rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Total Income</p>
-          <p className="text-2xl font-heading font-bold text-emerald">{fmt(dailyIncome)}</p>
+          <p className="text-2xl font-heading font-bold text-emerald">{formatBDT(dailyIncome)}</p>
         </div>
         <div className="bg-card border border-destructive/30 rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Total Expense</p>
-          <p className="text-2xl font-heading font-bold text-destructive">{fmt(dailyExpense)}</p>
+          <p className="text-2xl font-heading font-bold text-destructive">{formatBDT(dailyExpense)}</p>
         </div>
         <div className={`bg-card border rounded-lg p-4 ${dailyBalance >= 0 ? "border-emerald/30" : "border-destructive/30"}`}>
           <p className="text-sm text-muted-foreground">Balance</p>
           <p className={`text-2xl font-heading font-bold ${dailyBalance >= 0 ? "text-emerald" : "text-destructive"}`}>
             {dailyBalance >= 0 ? <TrendingUp className="inline h-5 w-5 mr-1" /> : <TrendingDown className="inline h-5 w-5 mr-1" />}
-            {fmt(Math.abs(dailyBalance))}
+            {formatBDT(Math.abs(dailyBalance))}
           </p>
         </div>
       </div>
@@ -274,8 +274,8 @@ export default function DailyCashbook({ onEntriesChanged }: DailyCashbookProps =
           <button key={date} onClick={() => setSelectedDate(date)}
             className={`bg-card border rounded-lg p-2 text-center text-xs transition-colors hover:border-primary/50 ${selectedDate === date ? "border-primary ring-1 ring-primary/30" : "border-border"}`}>
             <p className="font-medium text-foreground mb-1">{new Date(date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
-            <p className="text-emerald">{fmt(data.income)}</p>
-            <p className="text-destructive">{fmt(data.expense)}</p>
+            <p className="text-emerald">{formatBDT(data.income)}</p>
+            <p className="text-destructive">{formatBDT(data.expense)}</p>
           </button>
         ))}
       </div>
@@ -384,7 +384,7 @@ export default function DailyCashbook({ onEntriesChanged }: DailyCashbookProps =
                   
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <p className={`font-heading font-bold ${e.type === "income" ? "text-emerald" : "text-destructive"}`}>{fmt(e.amount)}</p>
+                  <p className={`font-heading font-bold ${e.type === "income" ? "text-emerald" : "text-destructive"}`}>{formatBDT(e.amount)}</p>
                   {canModify && (
                     <div className="flex gap-1">
                       <button onClick={() => startEdit(e)} className="text-muted-foreground hover:text-foreground"><Edit2 className="h-3.5 w-3.5" /></button>

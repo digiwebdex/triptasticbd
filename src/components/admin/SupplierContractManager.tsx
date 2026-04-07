@@ -15,8 +15,8 @@ import { Plus, FileText, Wallet, CreditCard, TrendingDown } from "lucide-react";
 import { format } from "date-fns";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
 import { FileDown, FileSpreadsheet } from "lucide-react";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const PAYMENT_METHODS = ["cash", "bkash", "nagad", "bank", "other"];
 
 interface Props {
@@ -103,17 +103,17 @@ export default function SupplierContractManager({
       <div className="grid grid-cols-3 gap-3">
         <Card><CardContent className="pt-4 pb-4 text-center">
           <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
-          <p className="text-lg font-bold">{fmt(totalContractAmount)}</p>
+          <p className="text-lg font-bold">{formatBDT(totalContractAmount)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Contract Amount</p>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-4 text-center">
           <Wallet className="h-5 w-5 text-emerald-500 mx-auto mb-1" />
-          <p className="text-lg font-bold text-emerald-500">{fmt(totalContractPaid)}</p>
+          <p className="text-lg font-bold text-emerald-500">{formatBDT(totalContractPaid)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Paid</p>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-4 text-center">
           <TrendingDown className="h-5 w-5 text-destructive mx-auto mb-1" />
-          <p className="text-lg font-bold text-destructive">{fmt(totalContractDue)}</p>
+          <p className="text-lg font-bold text-destructive">{formatBDT(totalContractDue)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">Due</p>
         </CardContent></Card>
       </div>
@@ -155,9 +155,9 @@ export default function SupplierContractManager({
                     <tr key={c.id} className="border-b border-border/30">
                       <td className="py-2 pr-3 text-xs">{format(new Date(c.created_at), "dd MMM yyyy")}</td>
                       <td className="py-2 pr-3 font-medium">{c.pilgrim_count}</td>
-                      <td className="py-2 pr-3 font-bold">{fmt(c.contract_amount)}</td>
-                      <td className="py-2 pr-3 text-emerald-500 font-medium">{fmt(c.total_paid)}</td>
-                      <td className="py-2 pr-3 text-destructive font-medium">{fmt(c.total_due)}</td>
+                      <td className="py-2 pr-3 font-bold">{formatBDT(c.contract_amount)}</td>
+                      <td className="py-2 pr-3 text-emerald-500 font-medium">{formatBDT(c.total_paid)}</td>
+                      <td className="py-2 pr-3 text-destructive font-medium">{formatBDT(c.total_due)}</td>
                       <td className="py-2">
                         <Badge variant={Number(c.total_due) <= 0 ? "default" : "secondary"} className="text-[10px]">
                           {Number(c.total_due) <= 0 ? "Paid" : "Outstanding"}
@@ -204,7 +204,7 @@ export default function SupplierContractManager({
                   {contractPayments.map((p: any) => (
                     <tr key={p.id} className="border-b border-border/30">
                       <td className="py-2 pr-3 text-xs">{format(new Date(p.payment_date), "dd MMM yyyy")}</td>
-                      <td className="py-2 pr-3 font-bold text-emerald-500">{fmt(p.amount)}</td>
+                      <td className="py-2 pr-3 font-bold text-emerald-500">{formatBDT(p.amount)}</td>
                       <td className="py-2 pr-3 capitalize">{p.payment_method}</td>
                       <td className="py-2 text-xs text-muted-foreground">{p.note || "—"}</td>
                     </tr>
@@ -247,7 +247,7 @@ export default function SupplierContractManager({
                 <SelectContent>
                   {contracts.filter(c => Number(c.total_due) > 0).map(c => (
                     <SelectItem key={c.id} value={c.id}>
-                      {format(new Date(c.created_at), "dd MMM yyyy")} — {c.pilgrim_count} pilgrims — Due: {fmt(c.total_due)}
+                      {format(new Date(c.created_at), "dd MMM yyyy")} — {c.pilgrim_count} pilgrims — Due: {formatBDT(c.total_due)}
                     </SelectItem>
                   ))}
                 </SelectContent>

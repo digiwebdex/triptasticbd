@@ -6,6 +6,7 @@ import { exportPDF, exportExcel } from "@/lib/reportExport";
 import { useIsViewer, useCanModifyFinancials } from "@/components/admin/AdminLayout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import DailyCashbook from "@/components/admin/DailyCashbook";
+import { formatBDT } from "@/lib/utils";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 
@@ -52,7 +53,6 @@ const TABS = [
   { key: "customer", label: "Customer Profit" },
 ];
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const normalizeDate = (d: string) => (d ? d.substring(0, 10) : "");
 
 export default function AdminAccountingPage() {
@@ -337,7 +337,7 @@ export default function AdminAccountingPage() {
   const ProfitBadge = ({ value }: { value: number }) => (
     <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${value >= 0 ? "text-emerald bg-emerald/10" : "text-destructive bg-destructive/10"}`}>
       {value >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-      {fmt(value)}
+      {formatBDT(value)}
     </span>
   );
 
@@ -360,11 +360,11 @@ export default function AdminAccountingPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="bg-card border border-emerald/30 rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Today's Income ({today})</p>
-          <p className="text-2xl font-heading font-bold text-emerald">{fmt(dailyIncome)}</p>
+          <p className="text-2xl font-heading font-bold text-emerald">{formatBDT(dailyIncome)}</p>
         </div>
         <div className="bg-card border border-destructive/30 rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Today's Expense ({today})</p>
-          <p className="text-2xl font-heading font-bold text-destructive">{fmt(dailyExpense)}</p>
+          <p className="text-2xl font-heading font-bold text-destructive">{formatBDT(dailyExpense)}</p>
         </div>
       </div>
 
@@ -372,17 +372,17 @@ export default function AdminAccountingPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-card border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Total Income</p>
-          <p className="text-2xl font-heading font-bold text-primary">{fmt(totalIncome)}</p>
-          <p className="text-[10px] text-muted-foreground mt-1">Customer: {fmt(customerRevenue)} · Moallem: {fmt(moallemRevenue)} · Cashbook: {fmt(cashbookTotalIncome)}</p>
+          <p className="text-2xl font-heading font-bold text-primary">{formatBDT(totalIncome)}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">Customer: {formatBDT(customerRevenue)} · Moallem: {formatBDT(moallemRevenue)} · Cashbook: {formatBDT(cashbookTotalIncome)}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Total Expense</p>
-          <p className="text-2xl font-heading font-bold text-destructive">{fmt(totalExpenses)}</p>
-          <p className="text-[10px] text-muted-foreground mt-1">General: {fmt(totalExpenseAmount)} · Supplier: {fmt(supplierExpenseTotal + supplierContractExpenseTotal)} · Commission: {fmt(commissionExpenseTotal)}</p>
+          <p className="text-2xl font-heading font-bold text-destructive">{formatBDT(totalExpenses)}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">General: {formatBDT(totalExpenseAmount)} · Supplier: {formatBDT(supplierExpenseTotal + supplierContractExpenseTotal)} · Commission: {formatBDT(commissionExpenseTotal)}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Net Profit</p>
-          <p className={`text-2xl font-heading font-bold ${netProfit >= 0 ? "text-emerald" : "text-destructive"}`}>{fmt(netProfit)}</p>
+          <p className={`text-2xl font-heading font-bold ${netProfit >= 0 ? "text-emerald" : "text-destructive"}`}>{formatBDT(netProfit)}</p>
         </div>
       </div>
 
@@ -407,7 +407,7 @@ export default function AdminAccountingPage() {
             {EXPENSE_TYPES.map(({ value, label }) => (
               <div key={value} className="bg-card border border-border rounded-lg p-3 text-center">
                 <p className="text-xs text-muted-foreground">{label}</p>
-                <p className="text-lg font-heading font-bold text-foreground">{fmt(typeTotals[value] || 0)}</p>
+                <p className="text-lg font-heading font-bold text-foreground">{formatBDT(typeTotals[value] || 0)}</p>
               </div>
             ))}
           </div>
@@ -462,7 +462,7 @@ export default function AdminAccountingPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0" onClick={(ev) => ev.stopPropagation()}>
-                      <p className="font-heading font-bold text-destructive">{fmt(e.amount)}</p>
+                      <p className="font-heading font-bold text-destructive">{formatBDT(e.amount)}</p>
                       {canModify && <button onClick={() => startEdit(e)} className="text-muted-foreground hover:text-foreground"><Edit2 className="h-3.5 w-3.5" /></button>}
                       {canModify && <button onClick={() => setDeleteId(e.id)} className="text-destructive hover:underline"><Trash2 className="h-3.5 w-3.5" /></button>}
                     </div>
@@ -496,8 +496,8 @@ export default function AdminAccountingPage() {
                   <td className="py-3 pr-4 font-mono text-xs">{b.tracking_id}</td>
                   <td className="py-3 pr-4 text-sm">{b.guest_name || "—"}</td>
                   <td className="py-3 pr-4 text-sm">{b.package_name || "—"}</td>
-                  <td className="py-3 pr-4 font-medium text-primary">{fmt(b.total_payments)}</td>
-                  <td className="py-3 pr-4 font-medium text-destructive">{fmt(b.total_expenses)}</td>
+                  <td className="py-3 pr-4 font-medium text-primary">{formatBDT(b.total_payments)}</td>
+                  <td className="py-3 pr-4 font-medium text-destructive">{formatBDT(b.total_expenses)}</td>
                   <td className="py-3 pr-4"><ProfitBadge value={b.profit} /></td>
                   <td className="py-3">
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${b.status === "completed" ? "text-emerald bg-emerald/10" : "text-primary bg-primary/10"}`}>{b.status}</span>
@@ -509,9 +509,9 @@ export default function AdminAccountingPage() {
           {bookingProfit.length === 0 && <p className="text-center text-muted-foreground py-12">No booking data.</p>}
           {bookingProfit.length > 0 && (
             <div className="mt-4 bg-card border border-border rounded-lg p-4 flex flex-wrap gap-6">
-              <div><p className="text-xs text-muted-foreground">Total Payments</p><p className="font-heading font-bold text-primary">{fmt(bookingProfit.reduce((s: number, b: any) => s + Number(b.total_payments), 0))}</p></div>
-              <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="font-heading font-bold text-destructive">{fmt(bookingProfit.reduce((s: number, b: any) => s + Number(b.total_expenses), 0))}</p></div>
-              <div><p className="text-xs text-muted-foreground">Total Profit</p><p className="font-heading font-bold">{fmt(bookingProfit.reduce((s: number, b: any) => s + Number(b.profit), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Payments</p><p className="font-heading font-bold text-primary">{formatBDT(bookingProfit.reduce((s: number, b: any) => s + Number(b.total_payments), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="font-heading font-bold text-destructive">{formatBDT(bookingProfit.reduce((s: number, b: any) => s + Number(b.total_expenses), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Profit</p><p className="font-heading font-bold">{formatBDT(bookingProfit.reduce((s: number, b: any) => s + Number(b.profit), 0))}</p></div>
             </div>
           )}
         </div>
@@ -537,8 +537,8 @@ export default function AdminAccountingPage() {
                   <td className="py-3 pr-4 font-medium">{p.package_name}</td>
                   <td className="py-3 pr-4 capitalize text-xs">{p.package_type}</td>
                   <td className="py-3 pr-4">{p.total_bookings}</td>
-                  <td className="py-3 pr-4 font-medium text-primary">{fmt(p.total_revenue)}</td>
-                  <td className="py-3 pr-4 font-medium text-destructive">{fmt(p.total_expenses)}</td>
+                  <td className="py-3 pr-4 font-medium text-primary">{formatBDT(p.total_revenue)}</td>
+                  <td className="py-3 pr-4 font-medium text-destructive">{formatBDT(p.total_expenses)}</td>
                   <td className="py-3"><ProfitBadge value={p.profit} /></td>
                 </tr>
               ))}
@@ -547,9 +547,9 @@ export default function AdminAccountingPage() {
           {packageProfit.length === 0 && <p className="text-center text-muted-foreground py-12">No package data.</p>}
           {packageProfit.length > 0 && (
             <div className="mt-4 bg-card border border-border rounded-lg p-4 flex flex-wrap gap-6">
-              <div><p className="text-xs text-muted-foreground">Total Revenue</p><p className="font-heading font-bold text-primary">{fmt(packageProfit.reduce((s: number, p: any) => s + Number(p.total_revenue), 0))}</p></div>
-              <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="font-heading font-bold text-destructive">{fmt(packageProfit.reduce((s: number, p: any) => s + Number(p.total_expenses), 0))}</p></div>
-              <div><p className="text-xs text-muted-foreground">Total Profit</p><p className="font-heading font-bold">{fmt(packageProfit.reduce((s: number, p: any) => s + Number(p.profit), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Revenue</p><p className="font-heading font-bold text-primary">{formatBDT(packageProfit.reduce((s: number, p: any) => s + Number(p.total_revenue), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="font-heading font-bold text-destructive">{formatBDT(packageProfit.reduce((s: number, p: any) => s + Number(p.total_expenses), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Profit</p><p className="font-heading font-bold">{formatBDT(packageProfit.reduce((s: number, p: any) => s + Number(p.profit), 0))}</p></div>
             </div>
           )}
         </div>
@@ -575,8 +575,8 @@ export default function AdminAccountingPage() {
                   <td className="py-3 pr-4 font-medium">{c.full_name || "—"}</td>
                   <td className="py-3 pr-4 text-xs">{c.phone || "—"}</td>
                   <td className="py-3 pr-4">{c.total_bookings}</td>
-                  <td className="py-3 pr-4 font-medium text-primary">{fmt(c.total_payments)}</td>
-                  <td className="py-3 pr-4 font-medium text-destructive">{fmt(c.total_expenses)}</td>
+                  <td className="py-3 pr-4 font-medium text-primary">{formatBDT(c.total_payments)}</td>
+                  <td className="py-3 pr-4 font-medium text-destructive">{formatBDT(c.total_expenses)}</td>
                   <td className="py-3"><ProfitBadge value={c.profit} /></td>
                 </tr>
               ))}
@@ -585,9 +585,9 @@ export default function AdminAccountingPage() {
           {customerProfit.length === 0 && <p className="text-center text-muted-foreground py-12">No customer data.</p>}
           {customerProfit.length > 0 && (
             <div className="mt-4 bg-card border border-border rounded-lg p-4 flex flex-wrap gap-6">
-              <div><p className="text-xs text-muted-foreground">Total Payments</p><p className="font-heading font-bold text-primary">{fmt(customerProfit.reduce((s: number, c: any) => s + Number(c.total_payments), 0))}</p></div>
-              <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="font-heading font-bold text-destructive">{fmt(customerProfit.reduce((s: number, c: any) => s + Number(c.total_expenses), 0))}</p></div>
-              <div><p className="text-xs text-muted-foreground">Total Profit</p><p className="font-heading font-bold">{fmt(customerProfit.reduce((s: number, c: any) => s + Number(c.profit), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Payments</p><p className="font-heading font-bold text-primary">{formatBDT(customerProfit.reduce((s: number, c: any) => s + Number(c.total_payments), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Expenses</p><p className="font-heading font-bold text-destructive">{formatBDT(customerProfit.reduce((s: number, c: any) => s + Number(c.total_expenses), 0))}</p></div>
+              <div><p className="text-xs text-muted-foreground">Total Profit</p><p className="font-heading font-bold">{formatBDT(customerProfit.reduce((s: number, c: any) => s + Number(c.profit), 0))}</p></div>
             </div>
           )}
         </div>
@@ -668,7 +668,7 @@ export default function AdminAccountingPage() {
             <div className="space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2"><span className="text-muted-foreground text-xs block">Title</span><span className="font-medium text-base">{viewExpense.title}</span></div>
-                <div><span className="text-muted-foreground text-xs block">Amount</span><span className="font-bold text-destructive text-lg">{fmt(viewExpense.amount)}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Amount</span><span className="font-bold text-destructive text-lg">{formatBDT(viewExpense.amount)}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Date</span><span className="font-medium">{new Date(viewExpense.date).toLocaleDateString()}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Type</span><span className="font-medium capitalize">{EXPENSE_TYPES.find(t => t.value === viewExpense.expense_type)?.label || viewExpense.expense_type}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Assignment</span><span className="font-medium capitalize">{ASSIGN_TO.find(a => a.value === viewExpense.category)?.label || viewExpense.category || "General"}</span></div>

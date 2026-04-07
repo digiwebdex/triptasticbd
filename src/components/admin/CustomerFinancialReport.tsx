@@ -13,6 +13,7 @@ import {
 import { generateInvoice, generateReceipt, CompanyInfo, InvoicePayment } from "@/lib/invoiceGenerator";
 import { generateCustomerPdf, getCompanyInfoForPdf, CustomerPdfData } from "@/lib/entityPdfGenerator";
 import { toast } from "sonner";
+import { formatBDT } from "@/lib/utils";
 
 interface CustomerFinancialReportProps {
   customer: any;
@@ -20,7 +21,6 @@ interface CustomerFinancialReportProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
 export default function CustomerFinancialReport({ customer, open, onOpenChange }: CustomerFinancialReportProps) {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -272,19 +272,19 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
           </CardContent></Card>
           <Card><CardContent className="p-3 flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-emerald-500" />
-            <div><p className="text-[10px] text-muted-foreground">Total Paid</p><p className="font-semibold text-sm">{fmt(summary.totalPaid)}</p></div>
+            <div><p className="text-[10px] text-muted-foreground">Total Paid</p><p className="font-semibold text-sm">{formatBDT(summary.totalPaid)}</p></div>
           </CardContent></Card>
           <Card><CardContent className="p-3 flex items-center gap-2">
             <Clock className="h-4 w-4 text-yellow-500" />
-            <div><p className="text-[10px] text-muted-foreground">Total Due</p><p className="font-semibold text-sm">{fmt(summary.totalDue)}</p></div>
+            <div><p className="text-[10px] text-muted-foreground">Total Due</p><p className="font-semibold text-sm">{formatBDT(summary.totalDue)}</p></div>
           </CardContent></Card>
           <Card><CardContent className="p-3 flex items-center gap-2">
             <TrendingDown className="h-4 w-4 text-destructive" />
-            <div><p className="text-[10px] text-muted-foreground">Expenses</p><p className="font-semibold text-sm">{fmt(summary.totalExpenses)}</p></div>
+            <div><p className="text-[10px] text-muted-foreground">Expenses</p><p className="font-semibold text-sm">{formatBDT(summary.totalExpenses)}</p></div>
           </CardContent></Card>
           <Card><CardContent className="p-3 flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-primary" />
-            <div><p className="text-[10px] text-muted-foreground">Net Profit</p><p className={`font-semibold text-sm ${summary.netProfit < 0 ? "text-destructive" : ""}`}>{fmt(summary.netProfit)}</p></div>
+            <div><p className="text-[10px] text-muted-foreground">Net Profit</p><p className={`font-semibold text-sm ${summary.netProfit < 0 ? "text-destructive" : ""}`}>{formatBDT(summary.netProfit)}</p></div>
           </CardContent></Card>
         </div>
 
@@ -333,7 +333,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
                             event.amountType === "pending" ? "text-yellow-600" :
                             "text-foreground"
                           }`}>
-                            {event.amountType === "income" ? "+" : event.amountType === "expense" ? "−" : ""}{fmt(event.amount)}
+                            {event.amountType === "income" ? "+" : event.amountType === "expense" ? "−" : ""}{formatBDT(event.amount)}
                           </p>
                           <p className="text-[10px] text-muted-foreground">{new Date(event.date).toLocaleDateString()}</p>
                         </div>
@@ -351,19 +351,19 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
                 <div className="mt-4 bg-card border border-border rounded-lg p-4 flex flex-wrap gap-6">
                   <div>
                     <p className="text-xs text-muted-foreground">Total Inflow</p>
-                    <p className="font-heading font-bold text-emerald-500">{fmt(summary.totalPaid)}</p>
+                    <p className="font-heading font-bold text-emerald-500">{formatBDT(summary.totalPaid)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Total Outflow</p>
-                    <p className="font-heading font-bold text-destructive">{fmt(summary.totalExpenses)}</p>
+                    <p className="font-heading font-bold text-destructive">{formatBDT(summary.totalExpenses)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Outstanding</p>
-                    <p className="font-heading font-bold text-yellow-600">{fmt(summary.totalDue)}</p>
+                    <p className="font-heading font-bold text-yellow-600">{formatBDT(summary.totalDue)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Net Profit</p>
-                    <p className={`font-heading font-bold ${summary.netProfit >= 0 ? "text-emerald-500" : "text-destructive"}`}>{fmt(summary.netProfit)}</p>
+                    <p className={`font-heading font-bold ${summary.netProfit >= 0 ? "text-emerald-500" : "text-destructive"}`}>{formatBDT(summary.netProfit)}</p>
                   </div>
                 </div>
               )}
@@ -386,9 +386,9 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
                         <p className="text-xs text-muted-foreground">{(b.packages as any)?.type} • {(b.packages as any)?.duration_days || "—"} days</p>
                       </TableCell>
                       <TableCell>{b.num_travelers}</TableCell>
-                      <TableCell>{fmt(Number(b.total_amount))}</TableCell>
-                      <TableCell className="text-emerald-500 font-medium">{fmt(Number(b.paid_amount))}</TableCell>
-                      <TableCell className="text-destructive font-medium">{fmt(Number(b.due_amount || 0))}</TableCell>
+                      <TableCell>{formatBDT(Number(b.total_amount))}</TableCell>
+                      <TableCell className="text-emerald-500 font-medium">{formatBDT(Number(b.paid_amount))}</TableCell>
+                      <TableCell className="text-destructive font-medium">{formatBDT(Number(b.due_amount || 0))}</TableCell>
                       <TableCell><Badge variant={b.status === "completed" ? "default" : "secondary"}>{b.status}</Badge></TableCell>
                       <TableCell>
                         <button onClick={() => handleInvoice(b)} disabled={generatingPdf === b.id} className="inline-flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50">
@@ -414,7 +414,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
                     <TableRow key={p.id}>
                       <TableCell className="font-mono text-xs">{(p.bookings as any)?.tracking_id || "—"}</TableCell>
                       <TableCell>{p.installment_number || "—"}</TableCell>
-                      <TableCell className="font-medium">{fmt(Number(p.amount))}</TableCell>
+                      <TableCell className="font-medium">{formatBDT(Number(p.amount))}</TableCell>
                       <TableCell className="capitalize text-xs">{p.payment_method || "—"}</TableCell>
                       <TableCell className="text-xs">{p.due_date ? new Date(p.due_date).toLocaleDateString() : "—"}</TableCell>
                       <TableCell><Badge variant={p.status === "completed" ? "default" : "secondary"}>{p.status}</Badge></TableCell>
@@ -449,7 +449,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
                         <TableCell>
                           <Badge variant="outline" className="capitalize">{EXPENSE_TYPE_LABELS[e.expense_type] || e.category || "other"}</Badge>
                         </TableCell>
-                        <TableCell className="text-destructive font-medium">{fmt(Number(e.amount))}</TableCell>
+                        <TableCell className="text-destructive font-medium">{formatBDT(Number(e.amount))}</TableCell>
                         <TableCell className="text-xs">{new Date(e.date).toLocaleDateString()}</TableCell>
                         <TableCell className="font-mono text-xs">{linkedBooking?.tracking_id || "—"}</TableCell>
                       </TableRow>
@@ -461,7 +461,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
               {expenses.length > 0 && (
                 <div className="mt-3 text-right">
                   <span className="text-sm text-muted-foreground">Total: </span>
-                  <span className="font-heading font-bold text-destructive">{fmt(summary.totalExpenses)}</span>
+                  <span className="font-heading font-bold text-destructive">{formatBDT(summary.totalExpenses)}</span>
                 </div>
               )}
             </TabsContent>
@@ -481,7 +481,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
                       <TableCell className="text-sm">{(hb.hotels as any)?.city || "—"}</TableCell>
                       <TableCell className="text-xs">{new Date(hb.check_in).toLocaleDateString()}</TableCell>
                       <TableCell className="text-xs">{new Date(hb.check_out).toLocaleDateString()}</TableCell>
-                      <TableCell>{fmt(Number(hb.total_price))}</TableCell>
+                      <TableCell>{formatBDT(Number(hb.total_price))}</TableCell>
                       <TableCell><Badge variant={hb.status === "confirmed" ? "default" : "secondary"}>{hb.status}</Badge></TableCell>
                     </TableRow>
                   ))}

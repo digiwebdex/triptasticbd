@@ -163,7 +163,7 @@ const Packages = () => {
                             <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{pkg.description}</p>
                           )}
                           <p className="text-2xl font-heading font-bold text-primary mb-4 mt-auto">
-                            ৳{Number(pkg.price).toLocaleString()}
+                            ৳{Number(pkg.price).toLocaleString("en-IN")}
                             <span className="text-sm font-body text-muted-foreground font-normal"> {t("common.perPerson")}</span>
                           </p>
                           {pkg.features && Array.isArray(pkg.features) && pkg.features.length > 0 && (

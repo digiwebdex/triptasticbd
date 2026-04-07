@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import AdminActionMenu, { ActionItem } from "@/components/admin/AdminActionMenu";
 import { normalizePhone, getPhoneError, handlePhoneChange } from "@/lib/phoneValidation";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 const PAGE_SIZE = 15;
 
 const inputClass =
@@ -185,7 +185,7 @@ export default function AdminCustomersPage() {
     const s = customerStats[c.user_id] || { totalAmount: 0, totalPaid: 0, totalDue: 0, travelers: 0 };
     return [
       { label: "View", icon: <Eye className="h-3.5 w-3.5" />, onClick: () => setSelectedCustomer(c) },
-      { label: "PDF", icon: <FileDown className="h-3.5 w-3.5" />, onClick: () => exportPDF({ title: `Customer - ${c.full_name || "Unknown"}`, columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows: [[c.full_name || "—", c.phone || "—", s.travelers, s.totalAmount, s.totalPaid, s.totalDue]], summary: [`Total Paid: BDT ${s.totalPaid.toLocaleString()}`, `Total Due: BDT ${s.totalDue.toLocaleString()}`] }) },
+      { label: "PDF", icon: <FileDown className="h-3.5 w-3.5" />, onClick: () => exportPDF({ title: `Customer - ${c.full_name || "Unknown"}`, columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows: [[c.full_name || "—", c.phone || "—", s.travelers, s.totalAmount, s.totalPaid, s.totalDue]], summary: [`Total Paid: BDT ${s.totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${s.totalDue.toLocaleString("en-IN")}`] }) },
       { label: "Edit", icon: <Pencil className="h-3.5 w-3.5" />, onClick: () => startEdit(c), variant: "warning", hidden: isViewer },
       { label: "Delete", icon: <Trash2 className="h-3.5 w-3.5" />, onClick: () => setDeleteId(c.id), variant: "destructive", hidden: isViewer, separator: true },
     ];
@@ -202,8 +202,8 @@ export default function AdminCustomersPage() {
           <p className="text-muted-foreground text-sm">Total {customers.length} customers</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(c => { const s = customerStats[c.user_id] || { totalAmount: 0, totalPaid: 0, totalDue: 0, travelers: 0 }; return [c.full_name || "—", c.phone || "—", s.travelers, s.totalAmount, s.totalPaid, s.totalDue]; }); const sumPaid = rows.reduce((a, r) => a + Number(r[4]), 0); const sumDue = rows.reduce((a, r) => a + Number(r[5]), 0); exportPDF({ title: "Customers Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${sumPaid.toLocaleString()}`, `Total Due: BDT ${sumDue.toLocaleString()}`] }); }}><FileDown className="h-4 w-4 mr-1" />PDF</Button>
-          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(c => { const s = customerStats[c.user_id] || { totalAmount: 0, totalPaid: 0, totalDue: 0, travelers: 0 }; return [c.full_name || "—", c.phone || "—", s.travelers, s.totalAmount, s.totalPaid, s.totalDue]; }); const sumPaid = rows.reduce((a, r) => a + Number(r[4]), 0); const sumDue = rows.reduce((a, r) => a + Number(r[5]), 0); exportExcel({ title: "Customers Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${sumPaid.toLocaleString()}`, `Total Due: BDT ${sumDue.toLocaleString()}`] }); }}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
+          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(c => { const s = customerStats[c.user_id] || { totalAmount: 0, totalPaid: 0, totalDue: 0, travelers: 0 }; return [c.full_name || "—", c.phone || "—", s.travelers, s.totalAmount, s.totalPaid, s.totalDue]; }); const sumPaid = rows.reduce((a, r) => a + Number(r[4]), 0); const sumDue = rows.reduce((a, r) => a + Number(r[5]), 0); exportPDF({ title: "Customers Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${sumPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${sumDue.toLocaleString("en-IN")}`] }); }}><FileDown className="h-4 w-4 mr-1" />PDF</Button>
+          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(c => { const s = customerStats[c.user_id] || { totalAmount: 0, totalPaid: 0, totalDue: 0, travelers: 0 }; return [c.full_name || "—", c.phone || "—", s.travelers, s.totalAmount, s.totalPaid, s.totalDue]; }); const sumPaid = rows.reduce((a, r) => a + Number(r[4]), 0); const sumDue = rows.reduce((a, r) => a + Number(r[5]), 0); exportExcel({ title: "Customers Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${sumPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${sumDue.toLocaleString("en-IN")}`] }); }}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
           {!isViewer && (
             <Button onClick={() => setShowAddModal(true)}>
               <Plus className="h-4 w-4 mr-1" /> New Customer
@@ -224,15 +224,15 @@ export default function AdminCustomersPage() {
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Contract Amount</p>
-          <p className="text-lg font-bold text-foreground">{fmt(totals.totalAmount)}</p>
+          <p className="text-lg font-bold text-foreground">{formatBDT(totals.totalAmount)}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Received</p>
-          <p className="text-lg font-bold text-emerald-600">{fmt(totals.totalPaid)}</p>
+          <p className="text-lg font-bold text-emerald-600">{formatBDT(totals.totalPaid)}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Due</p>
-          <p className="text-lg font-bold text-destructive">{fmt(totals.totalDue)}</p>
+          <p className="text-lg font-bold text-destructive">{formatBDT(totals.totalDue)}</p>
         </div>
       </div>
 
@@ -272,9 +272,9 @@ export default function AdminCustomersPage() {
                       <TableCell className="font-medium">{c.full_name || "—"}</TableCell>
                       <TableCell className="text-muted-foreground">{c.phone || "—"}</TableCell>
                       <TableCell className="text-right font-medium">{stats.travelers}</TableCell>
-                      <TableCell className="text-right font-medium">{fmt(stats.totalAmount)}</TableCell>
-                      <TableCell className="text-right font-medium text-emerald-600">{fmt(stats.totalPaid)}</TableCell>
-                      <TableCell className="text-right font-medium text-destructive">{fmt(stats.totalDue)}</TableCell>
+                      <TableCell className="text-right font-medium">{formatBDT(stats.totalAmount)}</TableCell>
+                      <TableCell className="text-right font-medium text-emerald-600">{formatBDT(stats.totalPaid)}</TableCell>
+                      <TableCell className="text-right font-medium text-destructive">{formatBDT(stats.totalDue)}</TableCell>
                       <TableCell className="text-center" onClick={e => e.stopPropagation()}>
                         <AdminActionMenu actions={getActions(c)} inlineCount={1} />
                       </TableCell>

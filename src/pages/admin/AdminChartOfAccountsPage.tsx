@@ -7,9 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { formatBDT, cn } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
 export default function AdminChartOfAccountsPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -59,7 +58,7 @@ export default function AdminChartOfAccountsPage() {
         <CardTitle className="text-base flex items-center gap-2">
           {icon} {title}
           <span className={cn("ml-auto text-sm font-bold", color)}>
-            {fmt(items.reduce((s, a) => s + Number(a.balance), 0))}
+            {formatBDT(items.reduce((s, a) => s + Number(a.balance), 0))}
           </span>
         </CardTitle>
       </CardHeader>
@@ -79,7 +78,7 @@ export default function AdminChartOfAccountsPage() {
             {items.map((a) => (
               <TableRow key={a.id}>
                 <TableCell className="font-medium">{a.name}</TableCell>
-                <TableCell className={cn("text-right font-mono", color)}>{fmt(a.balance)}</TableCell>
+                <TableCell className={cn("text-right font-mono", color)}>{formatBDT(a.balance)}</TableCell>
                 <TableCell>
                   <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(a.id, a.name)}>
                     <Trash2 className="h-3.5 w-3.5" />
@@ -103,15 +102,15 @@ export default function AdminChartOfAccountsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card><CardContent className="p-4">
           <p className="text-xs text-muted-foreground">Total Income</p>
-          <p className="text-xl font-heading font-bold text-primary">{fmt(totalIncome)}</p>
+          <p className="text-xl font-heading font-bold text-primary">{formatBDT(totalIncome)}</p>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <p className="text-xs text-muted-foreground">Total Expenses</p>
-          <p className="text-xl font-heading font-bold text-destructive">{fmt(totalExpense)}</p>
+          <p className="text-xl font-heading font-bold text-destructive">{formatBDT(totalExpense)}</p>
         </CardContent></Card>
         <Card><CardContent className="p-4">
           <p className="text-xs text-muted-foreground">Net Profit</p>
-          <p className={cn("text-xl font-heading font-bold", totalIncome - totalExpense >= 0 ? "text-primary" : "text-destructive")}>{fmt(totalIncome - totalExpense)}</p>
+          <p className={cn("text-xl font-heading font-bold", totalIncome - totalExpense >= 0 ? "text-primary" : "text-destructive")}>{formatBDT(totalIncome - totalExpense)}</p>
         </CardContent></Card>
       </div>
 

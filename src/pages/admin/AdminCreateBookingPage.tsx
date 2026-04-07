@@ -352,7 +352,7 @@ export default function AdminCreateBookingPage() {
                 <option value="">-- Select Package --</option>
                 {packages.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} ({p.type}) — BDT {Number(p.price).toLocaleString()}
+                    {p.name} ({p.type}) — BDT {Number(p.price).toLocaleString("en-IN")}
                   </option>
                 ))}
               </select>
@@ -371,7 +371,7 @@ export default function AdminCreateBookingPage() {
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Final Price (BDT)</label>
-              <div className={`${inputClass} bg-muted/50 font-bold text-foreground`}>BDT {individualFinalPrice.toLocaleString()}</div>
+              <div className={`${inputClass} bg-muted/50 font-bold text-foreground`}>BDT {individualFinalPrice.toLocaleString("en-IN")}</div>
             </div>
             <div>
               <label className="text-xs text-muted-foreground block mb-1">Cost Price / Person (BDT)</label>
@@ -426,7 +426,7 @@ export default function AdminCreateBookingPage() {
                   <label className="text-xs text-muted-foreground block mb-1">Package</label>
                   <select className={inputClass} value={m.package_id} onChange={(e) => updateMember(m.id, "package_id", e.target.value)}>
                     <option value="">-- Package --</option>
-                    {packages.map(p => <option key={p.id} value={p.id}>{p.name} — BDT {Number(p.price).toLocaleString()}</option>)}
+                    {packages.map(p => <option key={p.id} value={p.id}>{p.name} — BDT {Number(p.price).toLocaleString("en-IN")}</option>)}
                   </select>
                 </div>
                 <div>
@@ -443,7 +443,7 @@ export default function AdminCreateBookingPage() {
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground block mb-1">Final Price</label>
-                  <div className={`${inputClass} bg-muted/30 font-bold`}>BDT {Math.max(0, num(m.selling_price) - num(m.discount)).toLocaleString()}</div>
+                  <div className={`${inputClass} bg-muted/30 font-bold`}>BDT {Math.max(0, num(m.selling_price) - num(m.discount)).toLocaleString("en-IN")}</div>
                 </div>
               </div>
             </div>
@@ -452,7 +452,7 @@ export default function AdminCreateBookingPage() {
           {members.length > 0 && (
             <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-sm">
               <span className="text-muted-foreground">Total Selling:</span>{" "}
-              <span className="font-bold text-foreground">BDT {familyTotal.toLocaleString()}</span>
+              <span className="font-bold text-foreground">BDT {familyTotal.toLocaleString("en-IN")}</span>
               <span className="text-muted-foreground ml-3">({members.length} members)</span>
             </div>
           )}
@@ -546,7 +546,7 @@ export default function AdminCreateBookingPage() {
             <select className={inputClass} value={form.wallet_account_id} onChange={(e) => setForm({ ...form, wallet_account_id: e.target.value })}>
               <option value="">Auto (based on method)</option>
               {walletAccounts.map((w: any) => (
-                <option key={w.id} value={w.id}>{w.name} — BDT {Number(w.balance || 0).toLocaleString()}</option>
+                <option key={w.id} value={w.id}>{w.name} — BDT {Number(w.balance || 0).toLocaleString("en-IN")}</option>
               ))}
             </select>
           </div>
@@ -580,11 +580,11 @@ export default function AdminCreateBookingPage() {
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Total Selling</p>
-            <p className="font-heading font-bold text-foreground">BDT {totalSellingPrice.toLocaleString()}</p>
+            <p className="font-heading font-bold text-foreground">BDT {totalSellingPrice.toLocaleString("en-IN")}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Due</p>
-            <p className={`font-heading font-bold ${dueAmount > 0 ? "text-destructive" : "text-foreground"}`}>BDT {dueAmount.toLocaleString()}</p>
+            <p className={`font-heading font-bold ${dueAmount > 0 ? "text-destructive" : "text-foreground"}`}>BDT {dueAmount.toLocaleString("en-IN")}</p>
           </div>
         </div>
       </div>

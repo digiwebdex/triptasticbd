@@ -367,7 +367,7 @@ const Booking = () => {
                         <p className="text-sm text-muted-foreground capitalize">{pkg.type} • {pkg.duration_days} {t("common.days")}</p>
                       </div>
                       <p className="text-xl font-bold text-primary">
-                        ৳{Number(pkg.price).toLocaleString()}
+                        ৳{Number(pkg.price).toLocaleString("en-IN")}
                         <span className="text-xs text-muted-foreground font-normal"> {t("common.perPerson")}</span>
                       </p>
                     </div>
@@ -390,7 +390,7 @@ const Booking = () => {
                     </div>
                     <div className="mt-4 p-4 bg-secondary/50 rounded-lg flex justify-between">
                       <span className="text-sm text-muted-foreground">{t("booking.totalAmount")}</span>
-                      <span className="text-lg font-bold text-primary">৳{totalAmount.toLocaleString()}</span>
+                      <span className="text-lg font-bold text-primary">৳{totalAmount.toLocaleString("en-IN")}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -464,7 +464,7 @@ const Booking = () => {
                             <div>
                               <p className="font-medium text-sm">{plan.name}</p>
                               <p className="text-xs text-muted-foreground">
-                                {plan.num_installments} {t("booking.installments")} • ৳{Math.round(totalAmount / plan.num_installments).toLocaleString()}{t("booking.perMonth")}
+                                {plan.num_installments} {t("booking.installments")} • ৳{Math.round(totalAmount / plan.num_installments).toLocaleString("en-IN")}{t("booking.perMonth")}
                               </p>
                             </div>
                             {selectedPlan === plan.id && <Check className="h-5 w-5 text-primary" />}
@@ -622,7 +622,7 @@ const Booking = () => {
                       </div>
                       <div className="flex justify-between py-3 bg-secondary/50 rounded-lg px-3 mt-2">
                         <span className="font-medium">{t("booking.totalAmount")}</span>
-                        <span className="text-lg font-bold text-primary">৳{totalAmount.toLocaleString()}</span>
+                        <span className="text-lg font-bold text-primary">৳{totalAmount.toLocaleString("en-IN")}</span>
                       </div>
                     </div>
                   </div>
@@ -652,7 +652,7 @@ const Booking = () => {
                     disabled={submitting}
                     className="flex-1 py-3 rounded-md text-sm font-semibold bg-gradient-gold text-primary-foreground hover:opacity-90 transition-opacity shadow-gold disabled:opacity-50"
                   >
-                    {submitting ? t("booking.processing") : `${t("booking.confirmBooking")} — ৳${totalAmount.toLocaleString()}`}
+                    {submitting ? t("booking.processing") : `${t("booking.confirmBooking")} — ৳${totalAmount.toLocaleString("en-IN")}`}
                   </button>
                 )}
               </div>

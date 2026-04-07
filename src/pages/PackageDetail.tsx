@@ -140,7 +140,7 @@ const PackageDetail = () => {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="sticky top-24">
             <div className="bg-card border border-border rounded-xl p-6 shadow-luxury">
               <p className="text-3xl font-heading font-bold text-primary mb-1">
-                ৳{Number(pkg.price).toLocaleString()}
+                ৳{Number(pkg.price).toLocaleString("en-IN")}
               </p>
               <p className="text-sm text-muted-foreground mb-6">{t("pkgDetail.perPerson")}</p>
 

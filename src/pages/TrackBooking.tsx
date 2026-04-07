@@ -6,6 +6,7 @@ import { Search, Package, CheckCircle2, Clock, Plane, FileCheck, Loader2, Histor
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { formatBDT } from "@/lib/utils";
 
 const HISTORY_KEY = "rk_tracking_history";
 
@@ -144,7 +145,6 @@ const TrackBooking = () => {
   };
 
   const isOwner = user && booking && booking.user_id === user.id;
-  const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -326,7 +326,7 @@ const TrackBooking = () => {
                       {Number(booking.due_amount || 0) <= 0 ? (
                         <span className="text-emerald font-semibold">{t("track.fullyPaid")}</span>
                       ) : (
-                        <span className="text-destructive font-semibold">{t("track.due")}: {fmt(booking.due_amount || 0)}</span>
+                        <span className="text-destructive font-semibold">{t("track.due")}: {formatBDT(booking.due_amount || 0)}</span>
                       )}
                     </p>
                   </div>
@@ -363,15 +363,15 @@ const TrackBooking = () => {
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
                       <p className="text-muted-foreground">{t("track.totalAmount")}</p>
-                      <p className="font-medium">{fmt(booking.total_amount)}</p>
+                      <p className="font-medium">{formatBDT(booking.total_amount)}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">{t("track.paid")}</p>
-                      <p className="font-medium text-emerald">{fmt(booking.paid_amount)}</p>
+                      <p className="font-medium text-emerald">{formatBDT(booking.paid_amount)}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">{t("track.due")}</p>
-                      <p className="font-medium text-destructive">{fmt(booking.due_amount || 0)}</p>
+                      <p className="font-medium text-destructive">{formatBDT(booking.due_amount || 0)}</p>
                     </div>
                   </div>
                 </div>

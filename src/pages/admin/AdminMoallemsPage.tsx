@@ -20,8 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Eye, Search, Users, ChevronLeft, ChevronRight, FileDown, FileSpreadsheet } from "lucide-react";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
 import { normalizePhone, getPhoneError, handlePhoneChange } from "@/lib/phoneValidation";
+import { formatBDT } from "@/lib/utils";
 
-const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
 const PAGE_SIZE = 15;
 
 interface Moallem {
@@ -152,7 +152,7 @@ export default function AdminMoallemsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(m => { const s = moallemStats[m.id] || { hajji: 0, received: 0, due: 0 }; return [m.name, m.phone || "—", m.contracted_hajji || 0, m.contracted_amount || 0, s.received, s.due]; }); exportPDF({ title: "Moallems Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.received.toLocaleString("en-IN")}`, `Total Due: BDT ${totals.due.toLocaleString("en-IN")}`] }); }}><FileDown className="h-4 w-4 mr-1" />PDF</Button>
-          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(m => { const s = moallemStats[m.id] || { hajji: 0, received: 0, due: 0 }; return [m.name, m.phone || "—", m.contracted_hajji || 0, m.contracted_amount || 0, s.received, s.due]; }); exportExcel({ title: "Moallems Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.received.toLocaleString()}`, `Total Due: BDT ${totals.due.toLocaleString()}`] }); }}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
+          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(m => { const s = moallemStats[m.id] || { hajji: 0, received: 0, due: 0 }; return [m.name, m.phone || "—", m.contracted_hajji || 0, m.contracted_amount || 0, s.received, s.due]; }); exportExcel({ title: "Moallems Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.received.toLocaleString("en-IN")}`, `Total Due: BDT ${totals.due.toLocaleString("en-IN")}`] }); }}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
           {!isViewer && (
             <Button onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }}>
               <Plus className="h-4 w-4 mr-1" /> New Moallem
@@ -173,15 +173,15 @@ export default function AdminMoallemsPage() {
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Contracted Amount</p>
-          <p className="text-lg font-bold text-foreground">{fmt(totals.contractedAmount)}</p>
+          <p className="text-lg font-bold text-foreground">{formatBDT(totals.contractedAmount)}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Received</p>
-          <p className="text-lg font-bold text-emerald-600">{fmt(totals.received)}</p>
+          <p className="text-lg font-bold text-emerald-600">{formatBDT(totals.received)}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
           <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Due</p>
-          <p className="text-lg font-bold text-destructive">{fmt(totals.due)}</p>
+          <p className="text-lg font-bold text-destructive">{formatBDT(totals.due)}</p>
         </div>
       </div>
 
@@ -222,9 +222,9 @@ export default function AdminMoallemsPage() {
                       <TableCell className="font-medium">{m.name}</TableCell>
                       <TableCell className="text-muted-foreground">{m.phone || "—"}</TableCell>
                       <TableCell className="text-right font-medium">{m.contracted_hajji || 0}</TableCell>
-                      <TableCell className="text-right font-medium">{fmt(m.contracted_amount || 0)}</TableCell>
-                      <TableCell className="text-right font-medium text-emerald-600">{fmt(stats.received)}</TableCell>
-                      <TableCell className="text-right font-medium text-destructive">{fmt(stats.due)}</TableCell>
+                      <TableCell className="text-right font-medium">{formatBDT(m.contracted_amount || 0)}</TableCell>
+                      <TableCell className="text-right font-medium text-emerald-600">{formatBDT(stats.received)}</TableCell>
+                      <TableCell className="text-right font-medium text-destructive">{formatBDT(stats.due)}</TableCell>
                       <TableCell className="text-center">
                         <Badge variant={m.status === "active" ? "default" : "secondary"} className="text-[10px]">
                           {m.status === "active" ? "Active" : "Inactive"}

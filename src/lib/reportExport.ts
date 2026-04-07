@@ -6,6 +6,7 @@ import QRCode from "qrcode";
 import { getSignatureData, SignatureData } from "./pdfSignature";
 import { registerBengaliFont, bengaliCellHook } from "./pdfFontLoader";
 import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
+import { formatBDT } from "@/lib/utils";
 
 // ── Brand Constants ──
 const GOLD = { r: 245, g: 158, b: 11 };
@@ -279,8 +280,7 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
   let y = addCompanyHeader(doc, logoBase64, qrDataUrl, cfg);
   y = addReportTitle(doc, y, title);
 
-  const fmt = (n: number) => `BDT ${n.toLocaleString()}`;
-
+  
   customers.forEach((c, idx) => {
     if (y > doc.internal.pageSize.getHeight() - 60) {
       doc.addPage();
@@ -299,7 +299,7 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
 
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.text(`Bookings: ${c.bookings} | Travelers: ${c.travelers} | Revenue: ${fmt(c.revenue)} | Due: ${fmt(c.due)} | Expenses: ${fmt(c.expenses)} | Profit: ${fmt(c.profit)}`, 18, y);
+    doc.text(`Bookings: ${c.bookings} | Travelers: ${c.travelers} | Revenue: ${formatBDT(c.revenue)} | Due: ${formatBDT(c.due)} | Expenses: ${formatBDT(c.expenses)} | Profit: ${formatBDT(c.profit)}`, 18, y);
     y += 6;
 
     if (c.bookingDetails.length > 0) {
@@ -308,7 +308,7 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
         head: [["Tracking ID", "Package", "Date", "Total", "Paid", "Due", "Status"]],
         body: c.bookingDetails.map((b) => [
           b.trackingId, b.packageName, b.date,
-          fmt(b.total), fmt(b.paid), fmt(b.due),
+          formatBDT(b.total), formatBDT(b.paid), formatBDT(b.due),
           b.status.charAt(0).toUpperCase() + b.status.slice(1),
         ]),
         styles: { fontSize: 7, font: "NotoSansBengali" },
@@ -342,7 +342,7 @@ export async function exportHajjiPDF({ title, customers }: HajjiReportData) {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.text(`Grand Total — Customers: ${customers.length} | Bookings: ${totals.bookings} | Travelers: ${totals.travelers} | Revenue: ${fmt(totals.revenue)} | Due: ${fmt(totals.due)} | Profit: ${fmt(totals.profit)}`, 18, y + 8);
+  doc.text(`Grand Total — Customers: ${customers.length} | Bookings: ${totals.bookings} | Travelers: ${totals.travelers} | Revenue: ${formatBDT(totals.revenue)} | Due: ${formatBDT(totals.due)} | Profit: ${formatBDT(totals.profit)}`, 18, y + 8);
   doc.setTextColor(0, 0, 0);
 
   addCompanyFooter(doc, sig, cfg);

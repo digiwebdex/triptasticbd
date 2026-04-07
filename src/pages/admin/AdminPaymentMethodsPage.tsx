@@ -199,7 +199,7 @@ export default function AdminPaymentMethodsPage() {
                       </div>
                     </div>
                     <CardDescription className="text-xs">
-                      Charge: {method.charge_percent}% | Min: ৳{method.min_amount.toLocaleString()} | Max: ৳{method.max_amount.toLocaleString()}
+                      Charge: {method.charge_percent}% | Min: ৳{method.min_amount.toLocaleString("en-IN")} | Max: ৳{method.max_amount.toLocaleString("en-IN")}
                     </CardDescription>
                   </CardHeader>
 

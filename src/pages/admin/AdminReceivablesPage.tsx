@@ -8,10 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDown, FileSpreadsheet, Search, AlertTriangle, DollarSign, TrendingDown, CheckCircle, Clock } from "lucide-react";
 import { differenceInDays, format, parseISO } from "date-fns";
-import { cn } from "@/lib/utils";
+import { formatBDT, cn } from "@/lib/utils";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
 
-const fmt = (n: number) => `BDT ${Number(n || 0).toLocaleString()}`;
 
 interface BookingReceivable {
   id: string;
@@ -177,9 +176,9 @@ export default function AdminReceivablesPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Total Receivable", value: fmt(totalReceivable), icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Overdue Receivable", value: fmt(overdueReceivable), icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
-          { label: "Total Collected", value: fmt(totalCollected), icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Total Receivable", value: formatBDT(totalReceivable), icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Overdue Receivable", value: formatBDT(overdueReceivable), icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
+          { label: "Total Collected", value: formatBDT(totalCollected), icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
           { label: "Overdue Bookings", value: overdueCount, icon: Clock, color: "text-destructive", bg: "bg-destructive/10" },
         ].map((c) => (
           <Card key={c.label}>
@@ -202,7 +201,7 @@ export default function AdminReceivablesPage() {
           <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0" />
           <div>
             <p className="font-semibold text-destructive text-sm">
-              {overdueCount} booking{overdueCount > 1 ? "s" : ""} with overdue payments totaling {fmt(overdueReceivable)}
+              {overdueCount} booking{overdueCount > 1 ? "s" : ""} with overdue payments totaling {formatBDT(overdueReceivable)}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">Review and send reminders from the Due Alerts page.</p>
           </div>
@@ -258,10 +257,10 @@ export default function AdminReceivablesPage() {
                     <span className="text-sm">{b.package_name}</span>
                     <span className="text-xs text-muted-foreground ml-1 capitalize">({b.package_type})</span>
                   </TableCell>
-                  <TableCell className="text-right font-medium">{fmt(b.total_amount)}</TableCell>
+                  <TableCell className="text-right font-medium">{formatBDT(b.total_amount)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex flex-col items-end gap-1">
-                      <span className="text-primary font-medium">{fmt(b.paid_amount)}</span>
+                      <span className="text-primary font-medium">{formatBDT(b.paid_amount)}</span>
                       <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
                         <div className="h-full bg-primary rounded-full" style={{ width: `${paidPercent}%` }} />
                       </div>
@@ -269,7 +268,7 @@ export default function AdminReceivablesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <span className={cn("font-bold", b.due_amount > 0 ? "text-destructive" : "text-primary")}>
-                      {fmt(b.due_amount)}
+                      {formatBDT(b.due_amount)}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -296,9 +295,9 @@ export default function AdminReceivablesPage() {
             {filtered.length > 0 && (
               <TableRow className="bg-muted/40 font-bold border-t-2 border-border">
                 <TableCell colSpan={3}>Total ({filtered.length} bookings)</TableCell>
-                <TableCell className="text-right">{fmt(filtered.reduce((s, b) => s + b.total_amount, 0))}</TableCell>
-                <TableCell className="text-right text-primary">{fmt(filtered.reduce((s, b) => s + b.paid_amount, 0))}</TableCell>
-                <TableCell className="text-right text-destructive">{fmt(filtered.reduce((s, b) => s + Math.max(0, b.due_amount), 0))}</TableCell>
+                <TableCell className="text-right">{formatBDT(filtered.reduce((s, b) => s + b.total_amount, 0))}</TableCell>
+                <TableCell className="text-right text-primary">{formatBDT(filtered.reduce((s, b) => s + b.paid_amount, 0))}</TableCell>
+                <TableCell className="text-right text-destructive">{formatBDT(filtered.reduce((s, b) => s + Math.max(0, b.due_amount), 0))}</TableCell>
                 <TableCell colSpan={2}></TableCell>
               </TableRow>
             )}

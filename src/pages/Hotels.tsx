@@ -114,7 +114,7 @@ const Hotels = () => {
                         <div className="flex items-center justify-between">
                           {minPrice ? (
                             <p className="text-lg font-heading font-bold text-primary">
-                              ৳{minPrice.toLocaleString()}<span className="text-xs font-body text-muted-foreground font-normal"> {t("hotels.perNight")}</span>
+                              ৳{minPrice.toLocaleString("en-IN")}<span className="text-xs font-body text-muted-foreground font-normal"> {t("hotels.perNight")}</span>
                             </p>
                           ) : (
                             <p className="text-sm text-muted-foreground">{t("hotels.contactPricing")}</p>
