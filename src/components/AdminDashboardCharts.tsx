@@ -71,8 +71,10 @@ const AdminDashboardCharts = ({
       .reduce((s, e) => s + Number(e.amount || 0), 0);
     const netProfit = bookingProfit - generalExpenses - cashbookExpense;
 
-    const walletAccounts = accounts.filter(a => a.type === "asset");
-    const cashBalance = walletAccounts.reduce((s, a) => s + Number(a.balance || 0), 0);
+    const cashAccount = accounts.find(
+      (a) => a.type === "asset" && String(a.name || "").trim().toLowerCase() === "cash"
+    );
+    const cashBalance = Number(cashAccount?.balance || 0);
 
     const moallemDue = moallems.reduce((s, m) => s + Number(m.total_due || 0), 0);
     const customerDue = activeBookings.reduce((s, b) => s + Number(b.due_amount || 0), 0);
