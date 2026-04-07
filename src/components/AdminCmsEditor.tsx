@@ -3,6 +3,7 @@ import { useAllSiteContent, useUpdateSiteContent } from "@/hooks/useSiteContent"
 import { Save, Plus, Trash2, ChevronDown, ChevronUp, Type, FileText, Globe, Phone, MapPin, Languages, Image, MessageCircle, Star, BookOpen, Video, Shield, Layout, Navigation } from "lucide-react";
 import { toast } from "sonner";
 import { Language } from "@/i18n/translations";
+import BannerImageUpload from "@/components/admin/BannerImageUpload";
 
 const inputClass = "w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
 
