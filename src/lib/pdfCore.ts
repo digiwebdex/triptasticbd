@@ -125,68 +125,81 @@ export async function initPdf(options?: { orientation?: "portrait" | "landscape"
 }
 
 // ═══════════════════════════════════════════════════════════════
-// HEADER
+// HEADER — Premium Redesign
 // ═══════════════════════════════════════════════════════════════
 export async function addPdfHeader(
   doc: jsPDF, cfg: PdfCompanyConfig, logoBase64: string, qrDataUrl?: string
 ): Promise<number> {
   const pw = getPageWidth(doc);
+  const phone2 = (cfg as any).phone2 || "+880 1711-999920";
 
-  // Top gold accent bar
+  // ── Dark header band ──
+  doc.setFillColor(DARK.r, DARK.g, DARK.b);
+  doc.rect(0, 0, pw, 32, "F");
+
+  // Gold accent strip at top
   doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.rect(0, 0, pw, 3, "F");
+  doc.rect(0, 0, pw, 2.5, "F");
 
-  // Logo
+  // Logo (white bg circle area)
   if (logoBase64) {
-    try { doc.addImage(logoBase64, "PNG", 14, 8, 28, 14); } catch { /* skip */ }
+    try {
+      // White circle behind logo for contrast
+      doc.setFillColor(255, 255, 255);
+      doc.circle(26, 17, 10, "F");
+      doc.addImage(logoBase64, "PNG", 16, 7, 20, 20);
+    } catch { /* skip */ }
   }
 
-  // QR code top-right
-  if (qrDataUrl) {
-    try { doc.addImage(qrDataUrl, "PNG", pw - 30, 10, 16, 16); } catch { /* skip */ }
-  }
+  const textX = logoBase64 ? 42 : 14;
 
-  const textX = logoBase64 ? 46 : 14;
-
-  // Company name
-  doc.setFontSize(18);
+  // Company name — white on dark
+  doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(cfg.company_name, textX, 16);
+  doc.setTextColor(255, 255, 255);
+  doc.text(cfg.company_name, textX, 14);
 
-  // Tagline
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 21);
-
-  // Contact line with both phones
+  // Tagline — gold on dark
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(100);
-  const phone2 = (cfg as any).phone2 || "+880 1711-999920";
-  doc.text(`Tel: ${cfg.phone}, ${phone2}  |  Email: ${cfg.email}`, textX, 26);
+  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
+  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 19);
 
-  // Address
+  // Contact info — light gray on dark
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(200, 200, 200);
+  doc.text(`Tel: ${cfg.phone}  |  ${phone2}  |  ${cfg.email}`, textX, 24);
+
+  // Address — lighter gray
   if (cfg.address) {
-    doc.setFontSize(7);
-    doc.setTextColor(100);
+    doc.setFontSize(6.5);
+    doc.setTextColor(170, 170, 170);
     if (hasBengali(cfg.address)) {
-      await addBengaliText(doc, cfg.address, textX, 31, { fontSize: 7, color: "#646464" });
+      await addBengaliText(doc, cfg.address, textX, 29, { fontSize: 6.5, color: "#AAAAAA" });
     } else {
-      const addr = cfg.address.length > 100 ? cfg.address.substring(0, 100) + "..." : cfg.address;
-      doc.text(addr, textX, 31);
+      const addr = cfg.address.length > 110 ? cfg.address.substring(0, 110) + "..." : cfg.address;
+      doc.text(addr, textX, 29);
     }
   }
 
-  // Gold accent line
-  doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.setLineWidth(0.8);
-  doc.line(14, 38, pw - 14, 38);
-  doc.setLineWidth(0.2);
-  doc.setTextColor(0);
+  // QR code — top right on dark bg with white border
+  if (qrDataUrl) {
+    try {
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(pw - 30, 5, 22, 22, 1.5, 1.5, "F");
+      doc.addImage(qrDataUrl, "PNG", pw - 28.5, 6.5, 19, 19);
+    } catch { /* skip */ }
+  }
 
-  return 44;
+  // Gold bottom border of header
+  doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
+  doc.rect(0, 32, pw, 1.5, "F");
+
+  doc.setTextColor(0);
+  doc.setFontSize(10);
+
+  return 39;
 }
 
 // ═══════════════════════════════════════════════════════════════
