@@ -137,12 +137,17 @@ export default function AdminCreateBookingPage() {
 
   // Calculations
   const sellingPrice = num(form.selling_price_per_person);
+  const costPrice = num(form.cost_price_per_person);
+  const commissionPP = num(form.commission_per_person);
   const discountVal = num(form.discount);
   const paidAmount = num(form.paid_amount);
   const individualFinalPrice = Math.max(0, sellingPrice - discountVal);
   const familyTotal = members.reduce((s, m) => s + Math.max(0, num(m.selling_price) - num(m.discount)), 0);
   const totalSellingPrice = bookingType === "family" ? familyTotal : individualFinalPrice;
   const numTravelers = bookingType === "family" ? members.length : 1;
+  const totalCost = costPrice * numTravelers;
+  const totalCommission = commissionPP * numTravelers;
+  const estimatedProfit = totalSellingPrice - totalCost - totalCommission;
   const dueAmount = Math.max(0, totalSellingPrice - paidAmount);
 
   const handleDocSelect = (docType: string, file: File | null) => {
