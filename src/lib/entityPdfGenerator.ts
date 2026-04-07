@@ -9,7 +9,7 @@ import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from
 import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
 import { formatBDT } from "@/lib/utils";
 
-const GOLD = { r: 245, g: 158, b: 11 };
+const GOLD = { r: 197, g: 165, b: 90 };
 const DARK = { r: 35, g: 40, b: 48 };
 
 const fmtDate = (d: string | null) =>

@@ -75,7 +75,7 @@ const formatAmount = (value: number) => {
 const fmtDate = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-const GOLD = { r: 245, g: 158, b: 11 };
+const GOLD = { r: 197, g: 165, b: 90 };
 const DARK = { r: 35, g: 40, b: 48 };
 const LIGHT_BG = { r: 250, g: 249, b: 247 };
 
