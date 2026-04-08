@@ -79,7 +79,7 @@ export function loadLogoBase64(): Promise<string> {
       canvas.height = img.height;
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0);
-      _logoCache = canvas.toDataURL("image/jpeg");
+      _logoCache = canvas.toDataURL("image/png");
       resolve(_logoCache);
     };
     img.onerror = () => resolve("");
@@ -132,67 +132,61 @@ export async function addPdfHeader(
 ): Promise<number> {
   const pw = getPageWidth(doc);
   const phone2 = (cfg as any).phone2 || "+880 1711-999920";
-  const headerH = 36;
-
-  // ── White header background ──
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, pw, headerH, "F");
+  const headerH = 38;
+  const centerX = pw / 2;
 
   // ── Top gold accent strip ──
   doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
   doc.rect(0, 0, pw, 2, "F");
 
-  // ── Logo ──
+  // ── Logo — centered ──
+  const logoW = 30;
+  const logoH = 12;
   if (logoBase64) {
     try {
-      doc.addImage(logoBase64, "PNG", 10, 5, 38, 16);
+      doc.addImage(logoBase64, "PNG", centerX - logoW / 2, 4, logoW, logoH);
     } catch { /* skip */ }
   }
 
-  const textX = logoBase64 ? 52 : 14;
-
-  // Company name — dark text
-  doc.setFontSize(14);
+  // Company name — centered below logo
+  doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(cfg.company_name, textX, 12);
+  doc.text(cfg.company_name, centerX, 20, { align: "center" });
 
-  // Tagline — gold
-  doc.setFontSize(7.5);
+  // Tagline — centered, gold
+  doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 17);
+  doc.text(cfg.tagline || "Hajj & Umrah Services", centerX, 24, { align: "center" });
 
-  // Contact info — muted gray
-  doc.setFontSize(6.5);
+  // Contact info — centered, muted
+  doc.setFontSize(6);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
-  doc.text(`Tel: ${cfg.phone}  |  ${phone2}  |  Email: ${cfg.email}`, textX, 22);
+  doc.text(`Tel: ${cfg.phone}  |  ${phone2}  |  Email: ${cfg.email}`, centerX, 28, { align: "center" });
 
-  // Address
+  // Address — centered
   if (cfg.address) {
-    doc.setFontSize(6);
+    doc.setFontSize(5.5);
     doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
     if (hasBengali(cfg.address)) {
-      await addBengaliText(doc, cfg.address, textX, 26.5, { fontSize: 6, color: "#787878" });
+      await addBengaliText(doc, cfg.address, centerX - 50, 31.5, { fontSize: 5.5, color: "#787878" });
     } else {
-      const addr = cfg.address.length > 110 ? cfg.address.substring(0, 110) + "..." : cfg.address;
-      doc.text(addr, textX, 26.5);
+      const addr = cfg.address.length > 120 ? cfg.address.substring(0, 120) + "..." : cfg.address;
+      doc.text(addr, centerX, 31.5, { align: "center" });
     }
   }
 
-  // Website
-  doc.setFontSize(6);
+  // Website — centered
+  doc.setFontSize(5.5);
   doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.text(cfg.website || "https://manasiktravelhub.com", textX, 30.5);
+  doc.text(cfg.website || "https://manasiktravelhub.com", centerX, 34.5, { align: "center" });
 
-  // QR code — top right
+  // QR code — top right corner
   if (qrDataUrl) {
     try {
-      doc.setDrawColor(220, 220, 220);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(pw - 28, 5, 20, 20, 1, 1, "S");
-      doc.addImage(qrDataUrl, "PNG", pw - 27, 6, 18, 18);
+      doc.addImage(qrDataUrl, "PNG", pw - 24, 4, 16, 16);
     } catch { /* skip */ }
   }
 
@@ -202,16 +196,10 @@ export async function addPdfHeader(
   doc.setFillColor(DARK.r, DARK.g, DARK.b);
   doc.rect(0, headerH - 0.5, pw, 0.5, "F");
 
-  // ── Side borders for the header ──
-  doc.setDrawColor(DARK.r, DARK.g, DARK.b);
-  doc.setLineWidth(0.5);
-  doc.line(0.25, 0, 0.25, headerH);
-  doc.line(pw - 0.25, 0, pw - 0.25, headerH);
-
   doc.setTextColor(0);
   doc.setFontSize(10);
 
-  return headerH + 5;
+  return headerH + 4;
 }
 
 // ═══════════════════════════════════════════════════════════════
