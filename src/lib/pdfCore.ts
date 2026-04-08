@@ -132,74 +132,86 @@ export async function addPdfHeader(
 ): Promise<number> {
   const pw = getPageWidth(doc);
   const phone2 = (cfg as any).phone2 || "+880 1711-999920";
+  const headerH = 36;
 
-  // ── Dark header band ──
-  doc.setFillColor(DARK.r, DARK.g, DARK.b);
-  doc.rect(0, 0, pw, 32, "F");
+  // ── White header background ──
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, pw, headerH, "F");
 
-  // Gold accent strip at top
+  // ── Top gold accent strip ──
   doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.rect(0, 0, pw, 2.5, "F");
+  doc.rect(0, 0, pw, 2, "F");
 
-  // Logo (white bg circle area)
+  // ── Logo ──
   if (logoBase64) {
     try {
-      // White circle behind logo for contrast
-      doc.setFillColor(255, 255, 255);
-      doc.circle(26, 17, 10, "F");
-      doc.addImage(logoBase64, "PNG", 16, 7, 20, 20);
+      doc.addImage(logoBase64, "PNG", 10, 5, 38, 16);
     } catch { /* skip */ }
   }
 
-  const textX = logoBase64 ? 42 : 14;
+  const textX = logoBase64 ? 52 : 14;
 
-  // Company name — white on dark
-  doc.setFontSize(16);
+  // Company name — dark text
+  doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(255, 255, 255);
-  doc.text(cfg.company_name, textX, 14);
+  doc.setTextColor(DARK.r, DARK.g, DARK.b);
+  doc.text(cfg.company_name, textX, 12);
 
-  // Tagline — gold on dark
-  doc.setFontSize(8);
+  // Tagline — gold
+  doc.setFontSize(7.5);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 19);
+  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 17);
 
-  // Contact info — light gray on dark
-  doc.setFontSize(7);
+  // Contact info — muted gray
+  doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(200, 200, 200);
-  doc.text(`Tel: ${cfg.phone}  |  ${phone2}  |  ${cfg.email}`, textX, 24);
+  doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
+  doc.text(`Tel: ${cfg.phone}  |  ${phone2}  |  Email: ${cfg.email}`, textX, 22);
 
-  // Address — lighter gray
+  // Address
   if (cfg.address) {
-    doc.setFontSize(6.5);
-    doc.setTextColor(170, 170, 170);
+    doc.setFontSize(6);
+    doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
     if (hasBengali(cfg.address)) {
-      await addBengaliText(doc, cfg.address, textX, 29, { fontSize: 6.5, color: "#AAAAAA" });
+      await addBengaliText(doc, cfg.address, textX, 26.5, { fontSize: 6, color: "#787878" });
     } else {
       const addr = cfg.address.length > 110 ? cfg.address.substring(0, 110) + "..." : cfg.address;
-      doc.text(addr, textX, 29);
+      doc.text(addr, textX, 26.5);
     }
   }
 
-  // QR code — top right on dark bg with white border
+  // Website
+  doc.setFontSize(6);
+  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
+  doc.text(cfg.website || "https://manasiktravelhub.com", textX, 30.5);
+
+  // QR code — top right
   if (qrDataUrl) {
     try {
-      doc.setFillColor(255, 255, 255);
-      doc.roundedRect(pw - 30, 5, 22, 22, 1.5, 1.5, "F");
-      doc.addImage(qrDataUrl, "PNG", pw - 28.5, 6.5, 19, 19);
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(pw - 28, 5, 20, 20, 1, 1, "S");
+      doc.addImage(qrDataUrl, "PNG", pw - 27, 6, 18, 18);
     } catch { /* skip */ }
   }
 
-  // Gold bottom border of header
+  // ── Bottom border: gold line + dark thin line ──
   doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.rect(0, 32, pw, 1.5, "F");
+  doc.rect(0, headerH - 2, pw, 1.5, "F");
+  doc.setFillColor(DARK.r, DARK.g, DARK.b);
+  doc.rect(0, headerH - 0.5, pw, 0.5, "F");
+
+  // ── Side borders for the header ──
+  doc.setDrawColor(DARK.r, DARK.g, DARK.b);
+  doc.setLineWidth(0.5);
+  doc.line(0.25, 0, 0.25, headerH);
+  doc.line(pw - 0.25, 0, pw - 0.25, headerH);
 
   doc.setTextColor(0);
   doc.setFontSize(10);
 
-  return 39;
+  return headerH + 5;
 }
 
 // ═══════════════════════════════════════════════════════════════
