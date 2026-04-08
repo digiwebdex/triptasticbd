@@ -70,9 +70,9 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
-      const { data: claimsData } = await supabase.auth.getClaims(token);
-      if (claimsData?.claims?.sub) {
-        userId = claimsData.claims.sub;
+      const { data: { user: authUser } } = await supabase.auth.getUser(token);
+      if (authUser?.id) {
+        userId = authUser.id;
       }
     }
 
