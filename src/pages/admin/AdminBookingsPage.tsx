@@ -941,7 +941,7 @@ export default function AdminBookingsPage() {
                 <th className="text-right py-3 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
                 <th className="text-center py-3 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Payment</th>
                 <th className="text-center py-3 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="text-left py-3 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tracking</th>
+                <th className="text-center py-3 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Documents</th>
                 <th className="text-center py-3 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
