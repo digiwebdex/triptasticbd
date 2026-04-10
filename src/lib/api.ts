@@ -673,38 +673,54 @@ const storage = {
 // =============================================
 const functions = {
   async invoke(name: string, options?: { body?: any }) {
-    // Try VPS first
-    try {
-      const path = name.startsWith('auth/') ? `/${name}` : ['track-booking', 'verify-invoice'].includes(name) ? `/${name}` : `/functions/${name}`;
-      const res = await apiFetch(path, {
-        method: 'POST',
-        body: options?.body ? JSON.stringify(options.body) : undefined,
-      });
-      const contentType = res.headers?.get?.('content-type') || '';
-      if (contentType.includes('application/json')) {
-        if (!res.ok) {
-          const err = await res.json();
-          return { data: null, error: { message: err.error } };
+    // Edge functions that have VPS equivalents — try VPS first
+    const vpsRoutes = ['track-booking', 'verify-invoice'];
+    const isVpsRoute = name.startsWith('auth/') || vpsRoutes.includes(name);
+
+    if (isVpsRoute) {
+      try {
+        const path = name.startsWith('auth/') ? `/${name}` : `/${name}`;
+        const res = await apiFetch(path, {
+          method: 'POST',
+          body: options?.body ? JSON.stringify(options.body) : undefined,
+        });
+        const contentType = res.headers?.get?.('content-type') || '';
+        if (contentType.includes('application/json')) {
+          if (!res.ok) {
+            const err = await res.json();
+            return { data: null, error: { message: err.error } };
+          }
+          const data = await res.json();
+          return { data, error: null };
         }
-        const data = await res.json();
-        return { data, error: null };
+      } catch {
+        // VPS unreachable — fall through to Supabase
       }
-      // Non-JSON response (HTML 404 etc.) — fall through to Supabase edge function
-    } catch {
-      // VPS unreachable — fall through
     }
 
-    // Fallback: call Supabase Edge Function directly
-    if (supabaseClient) {
+    // Call Supabase Edge Function directly
+    const supabaseUrl = SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL || '';
+    const supabaseKey = SUPABASE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || '';
+
+    // Build the edge function URL
+    let edgeFnUrl = '';
+    if (supabaseUrl) {
+      edgeFnUrl = `${supabaseUrl}/functions/v1/${name}`;
+    } else if (projectId) {
+      edgeFnUrl = `https://${projectId}.supabase.co/functions/v1/${name}`;
+    }
+
+    if (edgeFnUrl) {
       try {
-        const supabaseUrl = SUPABASE_URL;
-        const url = `${supabaseUrl}/functions/v1/${name}`;
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
         };
-        const res = await fetch(url, {
+        if (supabaseKey) {
+          headers['apikey'] = supabaseKey;
+          headers['Authorization'] = `Bearer ${supabaseKey}`;
+        }
+        const res = await fetch(edgeFnUrl, {
           method: 'POST',
           headers,
           body: options?.body ? JSON.stringify(options.body) : undefined,
@@ -719,6 +735,23 @@ const functions = {
         return { data: null, error: { message: err.message } };
       }
     }
+
+    // Last resort: try VPS /functions/ path for non-VPS routes
+    try {
+      const res = await apiFetch(`/functions/${name}`, {
+        method: 'POST',
+        body: options?.body ? JSON.stringify(options.body) : undefined,
+      });
+      const contentType = res.headers?.get?.('content-type') || '';
+      if (contentType.includes('application/json')) {
+        if (!res.ok) {
+          const err = await res.json();
+          return { data: null, error: { message: err.error } };
+        }
+        const data = await res.json();
+        return { data, error: null };
+      }
+    } catch {}
 
     return { data: null, error: { message: 'Function not available' } };
   },
