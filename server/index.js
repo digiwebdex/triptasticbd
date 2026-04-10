@@ -1003,7 +1003,7 @@ app.post('/api/verify-invoice', async (req, res) => {
 // =============================================
 app.post('/api/functions/send-notification', authenticate, requireRole('admin'), async (req, res) => {
   try {
-    const { type, channels, user_id, booking_id, custom_subject, custom_message } = req.body;
+    const { type, channels, user_id, booking_id, custom_subject, custom_message, sms_message } = req.body;
     if (!type || !channels || !user_id) {
       return res.status(400).json({ error: 'type, channels, and user_id are required' });
     }
@@ -1059,7 +1059,7 @@ app.post('/api/functions/send-notification', authenticate, requireRole('admin'),
       const BULKSMS_API_KEY = process.env.BULKSMS_API_KEY;
       if (BULKSMS_API_KEY) {
         try {
-          const smsMessage = custom_message || `Manasik Travel Hub: Booking ${booking?.tracking_id || ''} - ${type}`;
+          const smsMessage = sms_message || custom_message || `Manasik Travel Hub: Booking ${booking?.tracking_id || ''} - ${type}`;
           const smsRes = await fetch(`https://bulksmsbd.net/api/smsapi?api_key=${BULKSMS_API_KEY}&type=text&number=${profile.phone}&senderid=${process.env.BULKSMS_SENDER_ID || 'MANASIK'}&message=${encodeURIComponent(smsMessage)}`);
           const status = smsRes.ok ? 'sent' : 'failed';
           results.push({ channel: 'sms', status });
