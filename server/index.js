@@ -1078,7 +1078,7 @@ app.post('/api/send-notification', authenticate, requireRole('admin'), async (re
 
     res.json({ success: true, results });
   } catch (err) {
-    console.error('POST /api/functions/send-notification error:', err.message);
+    console.error('POST /api/send-notification error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
