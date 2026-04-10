@@ -350,7 +350,7 @@ export default function AdminBookingsPage() {
     } catch (e) { console.error("Auto-create customer failed:", e); }
   };
 
-
+  const handleInlineStatusChange = async (bookingId: string, newStatus: string) => {
     setInlineStatusId(null);
     const booking = bookings.find((b) => b.id === bookingId);
     if (!booking || booking.status === newStatus) return;
@@ -1288,3 +1288,4 @@ export default function AdminBookingsPage() {
     </div>
   );
 }
+
