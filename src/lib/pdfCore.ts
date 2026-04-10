@@ -21,8 +21,9 @@ export const GOLD = { r: 197, g: 165, b: 90 };
 export const DARK = { r: 35, g: 40, b: 48 };
 export const LIGHT_BG = { r: 250, g: 249, b: 247 };
 export const MUTED = { r: 120, g: 120, b: 120 };
+export const ORANGE = { r: 234, g: 160, b: 45 }; // matches logo plane color
 
-export const FOOTER_HEIGHT = 16;
+export const FOOTER_HEIGHT = 14;
 const CONTENT_BOTTOM_PADDING = 4;
 const CONTINUATION_START_Y = 18;
 
@@ -125,81 +126,86 @@ export async function initPdf(options?: { orientation?: "portrait" | "landscape"
 }
 
 // ═══════════════════════════════════════════════════════════════
-// HEADER — Premium Redesign
+// HEADER — Premium Left-aligned Logo Design
 // ═══════════════════════════════════════════════════════════════
 export async function addPdfHeader(
   doc: jsPDF, cfg: PdfCompanyConfig, logoBase64: string, qrDataUrl?: string
 ): Promise<number> {
   const pw = getPageWidth(doc);
   const phone2 = (cfg as any).phone2 || "+880 1711-999920";
-  const headerH = 38;
-  const centerX = pw / 2;
 
-  // ── Top gold accent strip ──
-  doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.rect(0, 0, pw, 2, "F");
+  // ── Top accent bar — dark with orange accent ──
+  doc.setFillColor(DARK.r, DARK.g, DARK.b);
+  doc.rect(0, 0, pw, 2.5, "F");
+  doc.setFillColor(ORANGE.r, ORANGE.g, ORANGE.b);
+  doc.rect(0, 2.5, pw, 1, "F");
 
-  // ── Logo — centered ──
-  const logoW = 30;
-  const logoH = 12;
+  // ── Logo — left side, larger for new horizontal logo ──
+  const logoW = 42;
+  const logoH = 18;
   if (logoBase64) {
     try {
-      doc.addImage(logoBase64, "PNG", centerX - logoW / 2, 4, logoW, logoH);
+      doc.addImage(logoBase64, "PNG", 14, 6, logoW, logoH);
     } catch { /* skip */ }
   }
 
-  // Company name — centered below logo
-  doc.setFontSize(13);
+  // ── Company details — right of logo ──
+  const textX = 60;
+
+  // Company name
+  doc.setFontSize(15);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(cfg.company_name, centerX, 20, { align: "center" });
+  doc.text(cfg.company_name, textX, 13);
 
-  // Tagline — centered, gold
-  doc.setFontSize(7);
+  // Tagline
+  doc.setFontSize(7.5);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.text(cfg.tagline || "Hajj & Umrah Services", centerX, 24, { align: "center" });
+  doc.setTextColor(ORANGE.r, ORANGE.g, ORANGE.b);
+  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 18);
 
-  // Contact info — centered, muted
-  doc.setFontSize(6);
+  // Contact line 1 — phone numbers
+  doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
-  doc.text(`Tel: ${cfg.phone}  |  ${phone2}  |  Email: ${cfg.email}`, centerX, 28, { align: "center" });
+  doc.text(`\u260E ${cfg.phone}  |  ${phone2}  |  \u2709 ${cfg.email}`, textX, 23);
 
-  // Address — centered
+  // Address
   if (cfg.address) {
-    doc.setFontSize(5.5);
+    doc.setFontSize(6);
     doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
     if (hasBengali(cfg.address)) {
-      await addBengaliText(doc, cfg.address, centerX - 50, 31.5, { fontSize: 5.5, color: "#787878" });
+      await addBengaliText(doc, cfg.address, textX, 27.5, { fontSize: 5.5, color: "#787878" });
     } else {
-      const addr = cfg.address.length > 120 ? cfg.address.substring(0, 120) + "..." : cfg.address;
-      doc.text(addr, centerX, 31.5, { align: "center" });
+      const addr = cfg.address.length > 100 ? cfg.address.substring(0, 100) + "..." : cfg.address;
+      doc.text(addr, textX, 27.5);
     }
   }
-
-  // Website — centered
-  doc.setFontSize(5.5);
-  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.text(cfg.website || "https://manasiktravelhub.com", centerX, 34.5, { align: "center" });
 
   // QR code — top right corner
   if (qrDataUrl) {
     try {
-      doc.addImage(qrDataUrl, "PNG", pw - 24, 4, 16, 16);
+      doc.addImage(qrDataUrl, "PNG", pw - 22, 5, 14, 14);
+      doc.setFontSize(4);
+      doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
+      doc.text("Scan to verify", pw - 15, 21, { align: "center" });
     } catch { /* skip */ }
   }
 
-  // ── Bottom border: gold line + dark thin line ──
-  doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.rect(0, headerH - 2, pw, 1.5, "F");
-  doc.setFillColor(DARK.r, DARK.g, DARK.b);
-  doc.rect(0, headerH - 0.5, pw, 0.5, "F");
+  // ── Bottom separator — thin dark + orange accent ──
+  const lineY = 31;
+  doc.setDrawColor(DARK.r, DARK.g, DARK.b);
+  doc.setLineWidth(0.6);
+  doc.line(14, lineY, pw - 14, lineY);
+  doc.setDrawColor(ORANGE.r, ORANGE.g, ORANGE.b);
+  doc.setLineWidth(0.3);
+  doc.line(14, lineY + 1, pw - 14, lineY + 1);
+  doc.setLineWidth(0.2);
 
   doc.setTextColor(0);
   doc.setFontSize(10);
 
-  return headerH + 4;
+  return 36;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -213,25 +219,30 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
     const pw = getPageWidth(doc);
     const ph = getPageHeight(doc);
 
-    // Bottom gold bar
-    doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-    doc.rect(0, ph - FOOTER_HEIGHT, pw, FOOTER_HEIGHT, "F");
+    // Top line
+    doc.setDrawColor(DARK.r, DARK.g, DARK.b);
+    doc.setLineWidth(0.3);
+    doc.line(14, ph - FOOTER_HEIGHT - 1, pw - 14, ph - FOOTER_HEIGHT - 1);
 
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(255);
+    // Footer text area
+    doc.setFontSize(6);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
     doc.text(cfg.footer_text, pw / 2, ph - 10, { align: "center" });
 
-    doc.setFontSize(5.5);
-    doc.setFont("helvetica", "normal");
-    doc.text(cfg.footer_contact, pw / 2, ph - 5, { align: "center" });
+    doc.setFontSize(5);
+    doc.text(cfg.footer_contact, pw / 2, ph - 6, { align: "center" });
+
+    // Orange accent at bottom
+    doc.setFillColor(ORANGE.r, ORANGE.g, ORANGE.b);
+    doc.rect(0, ph - 2, pw, 2, "F");
 
     // Page numbers
     if (options?.showPageNumbers !== false && totalPages > 1) {
       doc.setFontSize(6);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(255);
-      doc.text(`Page ${i} of ${totalPages}`, pw - 16, ph - 2.5, { align: "right" });
+      doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
+      doc.text(`Page ${i} of ${totalPages}`, pw - 14, ph - 10, { align: "right" });
     }
 
     doc.setTextColor(0);
@@ -291,7 +302,7 @@ export function addSignatureBlock(doc: jsPDF, sig: SignatureData, y: number): nu
 export type StatusType = "completed" | "pending" | "confirmed" | "cancelled" | "processing" | "paid" | "partial" | "due";
 
 const STATUS_COLORS: Record<string, { r: number; g: number; b: number }> = {
-  completed: { r: GOLD.r, g: GOLD.g, b: GOLD.b },
+  completed: { r: 34, g: 139, b: 34 },
   paid: { r: 34, g: 139, b: 34 },
   pending: { r: 210, g: 140, b: 20 },
   confirmed: { r: 30, g: 100, b: 200 },
@@ -306,14 +317,18 @@ export function addTitleBlock(
 ): number {
   const pw = getPageWidth(doc);
 
-  // Title badge
-  const titleW = Math.min(doc.getTextWidth(title) * 0.65 + 16, pw - 28);
+  // Title badge with orange left accent
+  const titleW = Math.min(doc.getTextWidth(title) * 0.65 + 20, pw - 28);
   doc.setFillColor(DARK.r, DARK.g, DARK.b);
-  doc.roundedRect(14, y, titleW, 10, 2, 2, "F");
-  doc.setFontSize(12);
+  doc.roundedRect(14, y, titleW, 10, 1.5, 1.5, "F");
+  // Orange left accent
+  doc.setFillColor(ORANGE.r, ORANGE.g, ORANGE.b);
+  doc.rect(14, y, 3, 10, "F");
+
+  doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255);
-  doc.text(title.toUpperCase(), 16, y + 7);
+  doc.text(title.toUpperCase(), 20, y + 7);
   doc.setTextColor(0);
 
   // Status badge
@@ -322,7 +337,7 @@ export function addTitleBlock(
     const statusText = status.toUpperCase();
     const statusW = doc.getTextWidth(statusText) * 0.6 + 10;
     doc.setFillColor(sc.r, sc.g, sc.b);
-    doc.roundedRect(pw - 14 - statusW, y, statusW, 10, 2, 2, "F");
+    doc.roundedRect(pw - 14 - statusW, y, statusW, 10, 1.5, 1.5, "F");
     doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255);
@@ -357,8 +372,8 @@ export function addSectionTitle(doc: jsPDF, y: number, title: string): number {
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
   doc.text(title, 14, y);
-  doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.setLineWidth(0.4);
+  doc.setDrawColor(ORANGE.r, ORANGE.g, ORANGE.b);
+  doc.setLineWidth(0.5);
   doc.line(14, y + 1.5, 14 + doc.getTextWidth(title), y + 1.5);
   doc.setLineWidth(0.2);
   doc.setTextColor(0);
@@ -393,6 +408,9 @@ export function addSummaryCards(doc: jsPDF, y: number, cards: SummaryCard[]): nu
     if (card.highlight) {
       doc.setFillColor(DARK.r, DARK.g, DARK.b);
       doc.roundedRect(x, cy, cardW, cardH, 1.5, 1.5, "F");
+      // Orange top accent
+      doc.setFillColor(ORANGE.r, ORANGE.g, ORANGE.b);
+      doc.rect(x, cy, cardW, 1.5, "F");
       doc.setTextColor(255);
     } else {
       doc.setFillColor(LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b);
@@ -488,7 +506,7 @@ export async function addInfoBox(doc: jsPDF, y: number, fields: InfoField[], tit
     doc.setTextColor(DARK.r, DARK.g, DARK.b);
     doc.text(title, col1, row + 4);
 
-    doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
+    doc.setDrawColor(ORANGE.r, ORANGE.g, ORANGE.b);
     doc.setLineWidth(0.5);
     doc.line(col1, row + 5.5, col1 + doc.getTextWidth(title), row + 5.5);
     doc.setLineWidth(0.2);
@@ -548,9 +566,8 @@ export function addFinancialBox(
     doc.text(item.label, boxX + 4, iy);
     doc.text(item.value, boxX + boxW - 4, iy, { align: "right" });
 
-    // Separator after 3rd item (before paid/due)
     if (idx === 2 && items.length > 3) {
-      doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
+      doc.setDrawColor(ORANGE.r, ORANGE.g, ORANGE.b);
       doc.setLineWidth(0.3);
       doc.line(boxX + 4, iy + 2, boxX + boxW - 4, iy + 2);
       doc.setLineWidth(0.2);
@@ -573,16 +590,20 @@ export function addTotalsBar(doc: jsPDF, y: number, items: string[], height = 12
 
   doc.setFillColor(DARK.r, DARK.g, DARK.b);
   doc.rect(14, y, pw - 28, height, "F");
+  // Orange left accent
+  doc.setFillColor(ORANGE.r, ORANGE.g, ORANGE.b);
+  doc.rect(14, y, 3, height, "F");
+
   doc.setTextColor(255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
 
   if (items.length === 1) {
-    doc.text(items[0], 18, y + height / 2 + 2);
+    doc.text(items[0], 22, y + height / 2 + 2);
   } else {
-    const spacing = (pw - 36) / items.length;
+    const spacing = (pw - 40) / items.length;
     items.forEach((item, i) => {
-      doc.text(item, 18 + i * spacing, y + height / 2 + 2);
+      doc.text(item, 22 + i * spacing, y + height / 2 + 2);
     });
   }
 
@@ -745,10 +766,13 @@ export function addBalanceBar(doc: jsPDF, y: number, leftLabel: string, leftValu
 
   doc.setFillColor(DARK.r, DARK.g, DARK.b);
   doc.roundedRect(14, y, pw - 28, 14, 2, 2, "F");
+  // Orange left accent
+  doc.setFillColor(ORANGE.r, ORANGE.g, ORANGE.b);
+  doc.rect(14, y, 3, 14, "F");
   doc.setTextColor(255);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
-  doc.text(`${leftLabel}: ${leftValue}`, 20, y + 9);
+  doc.text(`${leftLabel}: ${leftValue}`, 22, y + 9);
   doc.text(`${rightLabel}: ${rightValue}`, pw - 20, y + 9, { align: "right" });
   doc.setTextColor(0);
 
