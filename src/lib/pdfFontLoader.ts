@@ -38,7 +38,9 @@ function renderBengaliTextToImage(
   const textWidth = measured.width;
   const textHeight = actualFontSize * 1.3;
   
-  canvas.width = Math.ceil(maxWidth ? maxWidth * scaleFactor : textWidth + 4);
+  // Clamp canvas width to maxWidth to prevent overflow in PDF
+  const maxCanvasWidth = maxWidth ? Math.min(textWidth + 4, maxWidth * scaleFactor) : textWidth + 4;
+  canvas.width = Math.ceil(maxCanvasWidth);
   canvas.height = Math.ceil(textHeight + 4);
   
   // Re-set font after resize (canvas clears on resize)

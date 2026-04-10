@@ -380,7 +380,9 @@ async function generateIndividualInvoice(
 
   y = addSectionTitle(doc, y, "SERVICE DETAILS");
 
-  const unitPrice = Number(booking.selling_price_per_person || 0) || Math.round(Number(booking.total_amount) / booking.num_travelers);
+  const rawSellingPrice = Number(booking.selling_price_per_person || 0);
+  const rawPackagePrice = Number(booking.packages?.price || 0);
+  const unitPrice = rawSellingPrice > 0 ? rawSellingPrice : (rawPackagePrice > 0 ? rawPackagePrice : Math.round(Number(booking.total_amount) / Math.max(booking.num_travelers, 1)));
   const discount = Number(booking.discount || 0);
   const grossAmount = unitPrice * booking.num_travelers;
 
