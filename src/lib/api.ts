@@ -309,8 +309,23 @@ export const auth = {
     return { data: { subscription: { unsubscribe: () => window.removeEventListener('storage', handler) } } };
   },
 
-  async setSession(_session: any) {
-    return { error: null };
+  async setSession(session: { access_token: string; refresh_token: string }) {
+    TokenManager.clear();
+
+    if (supabaseClient) {
+      const { error } = await supabaseClient.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+
+      if (error) {
+        return { error: { message: error.message } };
+      }
+
+      return { error: null };
+    }
+
+    return { error: { message: 'Authentication client unavailable' } };
   },
 };
 
@@ -674,7 +689,7 @@ const storage = {
 const functions = {
   async invoke(name: string, options?: { body?: any }) {
     // Edge functions that have VPS equivalents — try VPS first
-    const vpsRoutes = ['track-booking', 'verify-invoice', 'create-guest-booking', 'send-notification', 'send-otp', 'send-reminder', 'booking-notifications'];
+    const vpsRoutes = ['track-booking', 'verify-invoice', 'create-guest-booking', 'send-notification', 'send-reminder', 'booking-notifications'];
     const isVpsRoute = name.startsWith('auth/') || vpsRoutes.includes(name);
 
     if (isVpsRoute) {
