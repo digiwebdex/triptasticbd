@@ -162,25 +162,38 @@ export default function AdminCreateBookingPage() {
     const filesToUpload = Object.entries(docFiles).filter(([_, file]) => file !== null);
     if (filesToUpload.length === 0) return;
 
+    const API_URL = import.meta.env.VITE_API_URL || '/api';
+    const token = localStorage.getItem('rk_access_token');
+
     for (const [docType, file] of filesToUpload) {
       if (!file) continue;
       setDocUploading(docType);
       try {
-        const ext = file.name.split(".").pop() || "pdf";
-        const filePath = `${bookingId}/${docType}_${Date.now()}.${ext}`;
-        
-        const { error: uploadError } = await supabase.storage.from("booking-documents").upload(filePath, file, { upsert: true });
-        if (uploadError) throw uploadError;
-        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('bucket', 'booking-documents');
+        formData.append('path', `${bookingId}/${docType}_${Date.now()}.${file.name.split('.').pop() || 'pdf'}`);
+
+        const uploadRes = await fetch(`${API_URL}/upload`, {
+          method: 'POST',
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+          body: formData,
+        });
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.error || 'Upload failed');
+        }
+        const uploadData = await uploadRes.json();
+
         await supabase.from("booking_documents").insert({
           booking_id: bookingId,
           user_id: userId,
           document_type: docType,
           file_name: file.name,
-          file_path: filePath,
+          file_path: uploadData.file_path,
           file_size: file.size,
         });
-        
+
         setUploadedDocs(prev => ({ ...prev, [docType]: file.name }));
       } catch (err: any) {
         toast.error(`Failed to upload ${docType}: ${err.message}`);
@@ -235,15 +248,16 @@ export default function AdminCreateBookingPage() {
       if (form.moallem_id) bookingData.moallem_id = form.moallem_id;
       if (form.supplier_agent_id) bookingData.supplier_agent_id = form.supplier_agent_id;
 
-      // Numeric fields - only include if non-zero
-      if (bookingType === "individual") {
-        bookingData.selling_price_per_person = sellingPrice;
-        if (discountVal > 0) bookingData.discount = discountVal;
-      }
-      if (costPrice > 0) bookingData.cost_price_per_person = costPrice;
-      if (commissionPP > 0) bookingData.commission_per_person = commissionPP;
-      if (paidAmount > 0) bookingData.paid_amount = paidAmount;
+      // Financial fields
+      bookingData.selling_price_per_person = sellingPrice;
+      bookingData.cost_price_per_person = costPrice;
+      bookingData.commission_per_person = commissionPP;
+      bookingData.total_cost = totalCost;
+      bookingData.total_commission = totalCommission;
+      bookingData.profit_amount = estimatedProfit;
+      bookingData.paid_amount = paidAmount;
       bookingData.due_amount = dueAmount;
+      if (bookingType === "individual" && discountVal > 0) bookingData.discount = discountVal;
 
       const { data: booking, error } = await supabase.from("bookings").insert(bookingData as any).select("id, tracking_id").single();
       if (error) throw error;
