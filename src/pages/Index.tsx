@@ -11,13 +11,22 @@ import BackToTop from "@/components/BackToTop";
 import { useSectionVisibility } from "@/hooks/useSectionVisibility";
 import SEOHead, { organizationJsonLd } from "@/components/SEOHead";
 
-// Lazy load below-fold sections
-const GuidelineSection = lazy(() => import("@/components/GuidelineSection"));
-const VideoGuideSection = lazy(() => import("@/components/VideoGuideSection"));
-const GallerySection = lazy(() => import("@/components/GallerySection"));
-const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));
-const AboutSection = lazy(() => import("@/components/AboutSection"));
-const ContactSection = lazy(() => import("@/components/ContactSection"));
+// Lazy load below-fold sections with retry for stale chunk errors
+const lazyRetry = (importFn: () => Promise<any>) =>
+  lazy(() =>
+    importFn().catch(() => {
+      // Force reload on stale chunk errors
+      window.location.reload();
+      return importFn();
+    })
+  );
+
+const GuidelineSection = lazyRetry(() => import("@/components/GuidelineSection"));
+const VideoGuideSection = lazyRetry(() => import("@/components/VideoGuideSection"));
+const GallerySection = lazyRetry(() => import("@/components/GallerySection"));
+const TestimonialsSection = lazyRetry(() => import("@/components/TestimonialsSection"));
+const AboutSection = lazyRetry(() => import("@/components/AboutSection"));
+const ContactSection = lazyRetry(() => import("@/components/ContactSection"));
 
 const SectionFallback = () => <div className="py-20" />;
 
