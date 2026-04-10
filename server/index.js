@@ -902,14 +902,15 @@ app.post('/api/create-guest-booking', async (req, res) => {
     const pkg = pkgResult.rows[0];
 
     const travelers = Math.max(1, Number(num_travelers) || 1);
-    const totalAmount = pkg.price * travelers;
+    const sellingPricePerPerson = Number(pkg.price) || 0;
+    const totalAmount = sellingPricePerPerson * travelers;
 
-    // Insert booking
+    // Insert booking with full financial fields
     const bookingResult = await query(
-      `INSERT INTO bookings (package_id, total_amount, due_amount, num_travelers, guest_name, guest_phone, guest_email, guest_address, guest_passport, notes, status, booking_type)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', 'individual')
+      `INSERT INTO bookings (package_id, total_amount, due_amount, num_travelers, guest_name, guest_phone, guest_email, guest_address, guest_passport, notes, status, booking_type, selling_price_per_person, paid_amount)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', 'individual', $11, 0)
        RETURNING *`,
-      [package_id, totalAmount, totalAmount, travelers, guest_name, guest_phone, guest_email || null, guest_address || null, guest_passport || null, notes || null]
+      [package_id, totalAmount, totalAmount, travelers, guest_name, guest_phone, guest_email || null, guest_address || null, guest_passport || null, notes ? `${notes}${payment_method ? ` | Payment Method: ${payment_method}` : ''}` : (payment_method ? `Payment Method: ${payment_method}` : null), sellingPricePerPerson]
     );
 
     const booking = bookingResult.rows[0];
@@ -1001,7 +1002,7 @@ app.post('/api/verify-invoice', async (req, res) => {
 // =============================================
 // SEND NOTIFICATION (admin only)
 // =============================================
-app.post('/api/functions/send-notification', authenticate, requireRole('admin'), async (req, res) => {
+app.post('/api/send-notification', authenticate, requireRole('admin'), async (req, res) => {
   try {
     const { type, channels, user_id, booking_id, custom_subject, custom_message, sms_message } = req.body;
     if (!type || !channels || !user_id) {

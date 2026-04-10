@@ -138,12 +138,14 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
     if (!pkg) return;
     setSubmitting(true);
     try {
+      const selectedMethod = paymentMethods.find(m => m.id === selectedPaymentMethod);
       const response = await supabase.functions.invoke("create-guest-booking", {
         body: {
           fullName: personalInfo.fullName.trim(), phone: personalInfo.phone.trim(),
           email: email.trim() || null, address: personalInfo.address.trim() || null,
           passportNumber: personalInfo.passportNumber.trim() || null, packageId: pkg.id,
           numTravelers, notes: notes.trim() || null, installmentPlanId: selectedPlan || null,
+          paymentMethod: selectedMethod?.name || selectedPaymentMethod || null,
         },
       });
       if (response.error) throw new Error(response.error.message);
