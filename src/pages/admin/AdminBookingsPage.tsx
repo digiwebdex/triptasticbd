@@ -1081,8 +1081,12 @@ export default function AdminBookingsPage() {
                 <div><span className="text-muted-foreground text-xs block">Profit</span><span className={`font-medium ${Number(viewBooking.profit_amount || 0) >= 0 ? "text-emerald-500" : "text-destructive"}`}>{formatBDT(Number(viewBooking.profit_amount || 0))}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Status</span><Badge variant={viewBooking.status === "completed" ? "default" : "secondary"} className="text-xs capitalize">{viewBooking.status}</Badge></div>
                 <div><span className="text-muted-foreground text-xs block">Passport</span><span className="font-medium">{viewBooking.guest_passport || "—"}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Email</span><span className="font-medium">{viewBooking.guest_email || "—"}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Address</span><span className="font-medium">{viewBooking.guest_address || "—"}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Moallem</span><span className="font-medium">{viewBooking.moallems?.name || "—"}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Package Price</span><span className="font-medium">{formatBDT(Number(viewBooking.packages?.price || 0))}</span></div>
                 <div><span className="text-muted-foreground text-xs block">Date</span><span className="font-medium">{new Date(viewBooking.created_at).toLocaleDateString()}</span></div>
+                <div><span className="text-muted-foreground text-xs block">Booking Type</span><span className="font-medium capitalize">{viewBooking.booking_type || "individual"}</span></div>
               </div>
               {viewBooking.notes && (
                 <div><span className="text-muted-foreground text-xs block">Notes</span><p className="text-sm">{viewBooking.notes}</p></div>
