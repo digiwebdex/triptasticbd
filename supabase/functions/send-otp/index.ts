@@ -27,6 +27,28 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
 
     if (action === "send") {
+      // Check if there's a profile or guest booking with this phone
+      const { data: profileCheck } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("phone", sanitizedPhone)
+        .limit(1)
+        .maybeSingle();
+
+      const { data: bookingCheck } = await supabase
+        .from("bookings")
+        .select("id")
+        .eq("guest_phone", sanitizedPhone)
+        .limit(1)
+        .maybeSingle();
+
+      if (!profileCheck && !bookingCheck) {
+        return new Response(JSON.stringify({ error: "এই নম্বরে কোনো বুকিং পাওয়া যায়নি। আগে বুকিং করুন।" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Rate limit: max 3 OTPs per phone in last 5 minutes
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       const { count } = await supabase
@@ -36,7 +58,7 @@ Deno.serve(async (req) => {
         .gte("created_at", fiveMinAgo);
 
       if ((count || 0) >= 3) {
-        return new Response(JSON.stringify({ error: "Too many OTP requests. Please wait 5 minutes." }), {
+        return new Response(JSON.stringify({ error: "অনেক বেশি OTP অনুরোধ। ৫ মিনিট অপেক্ষা করুন।" }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -94,7 +116,7 @@ Deno.serve(async (req) => {
         .single();
 
       if (!otpRecord) {
-        return new Response(JSON.stringify({ error: "Invalid or expired OTP" }), {
+        return new Response(JSON.stringify({ error: "ভুল বা মেয়াদোত্তীর্ণ OTP" }), {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -108,24 +130,124 @@ Deno.serve(async (req) => {
         .from("profiles")
         .select("user_id")
         .eq("phone", sanitizedPhone)
-        .single();
+        .maybeSingle();
 
-      if (!profile) {
-        return new Response(JSON.stringify({ error: "No account found with this phone number. Please register first." }), {
-          status: 404,
+      let userId = profile?.user_id;
+
+      // If no profile found, auto-create auth user from guest booking data
+      if (!userId) {
+        // Find the latest guest booking with this phone
+        const { data: guestBooking } = await supabase
+          .from("bookings")
+          .select("id, guest_name, guest_phone, guest_email, guest_address, guest_passport")
+          .eq("guest_phone", sanitizedPhone)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!guestBooking) {
+          return new Response(JSON.stringify({ error: "এই নম্বরে কোনো অ্যাকাউন্ট বা বুকিং পাওয়া যায়নি।" }), {
+            status: 404,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        // Create auth user with a random password (they'll use OTP to login)
+        const tempEmail = `${sanitizedPhone.replace(/\+/g, "")}@phone.manasiktravelhub.com`;
+        const tempPassword = crypto.randomUUID() + "Aa1!";
+
+        const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+          email: guestBooking.guest_email || tempEmail,
+          password: tempPassword,
+          email_confirm: true,
+          user_metadata: {
+            full_name: guestBooking.guest_name || "",
+            phone: sanitizedPhone,
+          },
+        });
+
+        if (createError) {
+          console.error("User creation error:", createError);
+          // If email already exists, try to find the user
+          if (createError.message?.includes("already") || createError.message?.includes("exists")) {
+            const { data: existingUsers } = await supabase.auth.admin.listUsers();
+            const existingUser = existingUsers?.users?.find(
+              (u) => u.email === (guestBooking.guest_email || tempEmail)
+            );
+            if (existingUser) {
+              userId = existingUser.id;
+              // Update profile phone if needed
+              await supabase.from("profiles").upsert({
+                user_id: existingUser.id,
+                phone: sanitizedPhone,
+                full_name: guestBooking.guest_name || existingUser.user_metadata?.full_name || "",
+              }, { onConflict: "user_id" });
+            } else {
+              return new Response(JSON.stringify({ error: "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে।" }), {
+                status: 500,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+          } else {
+            return new Response(JSON.stringify({ error: "অ্যাকাউন্ট তৈরি করতে সমস্যা হয়েছে।" }), {
+              status: 500,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        } else if (newUser?.user) {
+          userId = newUser.user.id;
+
+          // Create profile
+          await supabase.from("profiles").insert({
+            user_id: newUser.user.id,
+            full_name: guestBooking.guest_name || "",
+            phone: sanitizedPhone,
+            email: guestBooking.guest_email || null,
+            address: guestBooking.guest_address || null,
+            passport_number: guestBooking.guest_passport || null,
+          });
+
+          // Assign 'user' role
+          await supabase.from("user_roles").insert({
+            user_id: newUser.user.id,
+            role: "user",
+          });
+        }
+
+        // Link all guest bookings with this phone to the new user
+        if (userId) {
+          await supabase
+            .from("bookings")
+            .update({ user_id: userId })
+            .eq("guest_phone", sanitizedPhone)
+            .is("user_id", null);
+
+          // Also link payments
+          const { data: userBookings } = await supabase
+            .from("bookings")
+            .select("id")
+            .eq("user_id", userId);
+
+          if (userBookings?.length) {
+            const bookingIds = userBookings.map((b) => b.id);
+            await supabase
+              .from("payments")
+              .update({ user_id: userId })
+              .in("booking_id", bookingIds)
+              .eq("user_id", "00000000-0000-0000-0000-000000000000");
+          }
+        }
+      }
+
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Authentication failed" }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      // Generate a magic link / custom token for the user
-      // We'll use admin API to generate a link
-      const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-        type: "magiclink",
-        email: "", // We need the email
-      });
-
-      // Instead, get user email and sign them in
-      const { data: authUser } = await supabase.auth.admin.getUserById(profile.user_id);
+      // Get user email for magic link
+      const { data: authUser } = await supabase.auth.admin.getUserById(userId);
 
       if (!authUser?.user?.email) {
         return new Response(JSON.stringify({ error: "User account issue. Please contact support." }), {
@@ -134,7 +256,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Generate a magic link for the user
+      // Generate magic link tokens
       const { data: magicLink, error: magicError } = await supabase.auth.admin.generateLink({
         type: "magiclink",
         email: authUser.user.email,
@@ -148,11 +270,11 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Return the token properties for client-side session creation
       return new Response(JSON.stringify({
         success: true,
         access_token: magicLink.properties?.access_token,
         refresh_token: magicLink.properties?.refresh_token,
+        user_id: userId,
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

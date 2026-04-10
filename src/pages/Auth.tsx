@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth as api } from "@/lib/api";
+import { auth as api, supabase } from "@/lib/api";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
-import { Eye, EyeOff, Phone, Mail, Shield, CheckCircle2, XCircle } from "lucide-react";
+import { Eye, EyeOff, Phone, Mail, Shield, CheckCircle2, XCircle, Smartphone } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { normalizePhone, getPhoneError, handlePhoneChange } from "@/lib/phoneValidation";
 
-type AuthMode = "login" | "register" | "forgot";
+type AuthMode = "login" | "register" | "forgot" | "otp";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [mode, setMode] = useState<AuthMode>("login");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +48,6 @@ const Auth = () => {
       if (error) throw error;
 
       const roles = data?.user?.roles || [];
-      console.log("Login roles:", roles, "userId:", data?.user?.id);
       const isAdminRole = roles.some((r: string) => ["admin", "manager", "staff", "accountant", "booking", "cms", "viewer"].includes(r));
       toast.success(t("auth.welcomeBackToast"));
       navigate(isAdminRole ? "/admin" : "/dashboard");
@@ -58,7 +57,6 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,15 +91,20 @@ const Auth = () => {
   const handleSendOtp = async () => {
     const cleaned = otpPhone.trim().replace(/[^\d+]/g, "");
     if (cleaned.length < 10) {
-      toast.error(t("auth.validPhone"));
+      toast.error(language === "bn" ? "সঠিক ফোন নম্বর দিন" : "Enter a valid phone number");
       return;
     }
     setLoading(true);
     try {
-      // OTP not supported with custom backend yet
-      toast.error("OTP login is not available at this time");
+      const { data, error } = await supabase.functions.invoke("send-otp", {
+        body: { phone: cleaned, action: "send" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setOtpSent(true);
+      toast.success(language === "bn" ? "OTP পাঠানো হয়েছে!" : "OTP sent successfully!");
     } catch (err: any) {
-      toast.error(err.message || "Failed to send OTP");
+      toast.error(err.message || "OTP পাঠাতে সমস্যা হয়েছে");
     } finally {
       setLoading(false);
     }
@@ -109,14 +112,32 @@ const Auth = () => {
 
   const handleVerifyOtp = async () => {
     if (otpCode.length !== 6) {
-      toast.error(t("auth.enter6Digit"));
+      toast.error(language === "bn" ? "৬ সংখ্যার OTP দিন" : "Enter 6-digit OTP");
       return;
     }
     setLoading(true);
     try {
-      toast.error("OTP login is not available at this time");
+      const cleaned = otpPhone.trim().replace(/[^\d+]/g, "");
+      const { data, error } = await supabase.functions.invoke("send-otp", {
+        body: { phone: cleaned, action: "verify", code: otpCode },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.access_token && data?.refresh_token) {
+        // Set session with the tokens
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+        if (sessionError) throw sessionError;
+        toast.success(language === "bn" ? "সফলভাবে লগইন হয়েছে!" : "Successfully logged in!");
+        navigate("/dashboard");
+      } else {
+        throw new Error("Authentication failed");
+      }
     } catch (err: any) {
-      toast.error(err.message || "OTP verification failed");
+      toast.error(err.message || "OTP যাচাই ব্যর্থ হয়েছে");
     } finally {
       setLoading(false);
     }
@@ -151,13 +172,39 @@ const Auth = () => {
             {mode === "login" && t("auth.welcomeBack")}
             {mode === "register" && t("auth.createAccount")}
             {mode === "forgot" && t("auth.resetPassword")}
+            {mode === "otp" && (language === "bn" ? "ফোনে লগইন করুন" : "Login with Phone")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {mode === "login" && t("auth.signInDesc")}
             {mode === "register" && t("auth.registerDesc")}
             {mode === "forgot" && t("auth.forgotDesc")}
+            {mode === "otp" && (language === "bn" ? "বুকিং করার সময় যে নম্বর দিয়েছিলেন সেটি দিন" : "Enter the phone number you used for booking")}
           </p>
         </div>
+
+        {/* OTP / Email toggle for login */}
+        {(mode === "login" || mode === "otp") && (
+          <div className="flex gap-1 mb-4 bg-secondary rounded-lg p-1">
+            <button
+              onClick={() => { setMode("login"); setOtpSent(false); setOtpCode(""); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
+                mode === "login" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Mail className="h-4 w-4" />
+              {language === "bn" ? "ইমেইল" : "Email"}
+            </button>
+            <button
+              onClick={() => { setMode("otp"); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-all ${
+                mode === "otp" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Smartphone className="h-4 w-4" />
+              {language === "bn" ? "ফোন OTP" : "Phone OTP"}
+            </button>
+          </div>
+        )}
 
         {mode === "login" && (
           <form onSubmit={handleEmailLogin} className="bg-card border border-border rounded-xl p-6 space-y-4">
@@ -191,6 +238,95 @@ const Auth = () => {
               {loading ? t("auth.signingIn") : t("auth.signIn")}
             </button>
           </form>
+        )}
+
+        {mode === "otp" && (
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            {!otpSent ? (
+              <>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">
+                    {language === "bn" ? "ফোন নম্বর" : "Phone Number"}
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="tel"
+                      value={otpPhone}
+                      onChange={(e) => handlePhoneChange(e.target.value, setOtpPhone)}
+                      className={`${inputClass} pl-10`}
+                      placeholder="01XXXXXXXXX"
+                      maxLength={15}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    {language === "bn"
+                      ? "বুকিং করার সময় যে ফোন নম্বর দিয়েছিলেন সেটি লিখুন"
+                      : "Enter the phone number you used during booking"}
+                  </p>
+                </div>
+                <button
+                  onClick={handleSendOtp}
+                  disabled={loading || otpPhone.trim().length < 10}
+                  className="w-full bg-gradient-gold text-primary-foreground font-semibold py-3 rounded-md text-sm hover:opacity-90 transition-opacity shadow-gold disabled:opacity-50"
+                >
+                  {loading
+                    ? (language === "bn" ? "পাঠানো হচ্ছে..." : "Sending...")
+                    : (language === "bn" ? "OTP পাঠান" : "Send OTP")}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="text-center mb-2">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
+                    <Smartphone className="h-6 w-6 text-primary" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {language === "bn"
+                      ? `${otpPhone} নম্বরে OTP পাঠানো হয়েছে`
+                      : `OTP sent to ${otpPhone}`}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block">
+                    {language === "bn" ? "OTP কোড" : "OTP Code"}
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                    className={`${inputClass} text-center text-2xl tracking-[0.5em] font-mono`}
+                    placeholder="••••••"
+                    autoFocus
+                  />
+                </div>
+                <button
+                  onClick={handleVerifyOtp}
+                  disabled={loading || otpCode.length !== 6}
+                  className="w-full bg-gradient-gold text-primary-foreground font-semibold py-3 rounded-md text-sm hover:opacity-90 transition-opacity shadow-gold disabled:opacity-50"
+                >
+                  {loading
+                    ? (language === "bn" ? "যাচাই হচ্ছে..." : "Verifying...")
+                    : (language === "bn" ? "যাচাই করুন ও লগইন করুন" : "Verify & Login")}
+                </button>
+                <button
+                  onClick={() => { setOtpSent(false); setOtpCode(""); }}
+                  className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+                >
+                  {language === "bn" ? "অন্য নম্বর ব্যবহার করুন" : "Use a different number"}
+                </button>
+                <button
+                  onClick={handleSendOtp}
+                  disabled={loading}
+                  className="w-full text-sm text-primary hover:underline py-1"
+                >
+                  {language === "bn" ? "আবার OTP পাঠান" : "Resend OTP"}
+                </button>
+              </>
+            )}
+          </div>
         )}
 
         {mode === "register" && (
@@ -252,7 +388,6 @@ const Auth = () => {
           </form>
         )}
 
-
         {mode === "forgot" && (
           <form onSubmit={handleForgotPassword} className="bg-card border border-border rounded-xl p-6 space-y-4">
             <div>
@@ -270,9 +405,8 @@ const Auth = () => {
           </form>
         )}
 
-
         <div className="text-center text-sm text-muted-foreground mt-4 space-y-1">
-          {mode === "login" && (
+          {(mode === "login" || mode === "otp") && (
             <p>{t("auth.noAccount")}{" "}
               <button onClick={() => setMode("register")} className="text-primary hover:underline font-medium">{t("auth.signUp")}</button>
             </p>
@@ -282,7 +416,7 @@ const Auth = () => {
               <button onClick={() => setMode("login")} className="text-primary hover:underline font-medium">{t("auth.signIn")}</button>
             </p>
           )}
-          {(mode === "forgot") && (
+          {mode === "forgot" && (
             <p>
               <button onClick={() => setMode("login")} className="text-primary hover:underline font-medium">{t("auth.backToSignIn")}</button>
             </p>
