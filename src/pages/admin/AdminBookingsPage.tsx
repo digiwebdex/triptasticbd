@@ -34,20 +34,23 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
   const [payments, setPayments] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const [bkRes, payRes, expRes, memRes] = await Promise.all([
+      const [bkRes, payRes, expRes, memRes, docRes] = await Promise.all([
         supabase.from("bookings").select("total_amount, paid_amount, due_amount, total_cost, total_commission, extra_expense, profit_amount").eq("id", bookingId).single(),
         supabase.from("payments").select("*").eq("booking_id", bookingId).order("installment_number", { ascending: true }),
         supabase.from("expenses").select("*").eq("booking_id", bookingId).order("date", { ascending: false }),
         supabase.from("booking_members").select("*, packages(name)").eq("booking_id", bookingId).order("created_at", { ascending: true }),
+        supabase.from("booking_documents").select("*").eq("booking_id", bookingId).order("created_at", { ascending: false }),
       ]);
       setBooking(bkRes.data || null);
       setPayments(payRes.data || []);
       setExpenses(expRes.data || []);
       setMembers(memRes.data || []);
+      setDocuments(docRes.data || []);
       setLoading(false);
     };
     load();
@@ -145,6 +148,76 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
         ) : (
           <p className="text-xs text-muted-foreground">No installments recorded.</p>
         )}
+      </div>
+
+      {/* Members */}
+      {members.length > 0 && (
+        <div>
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Family Members ({members.length})</h4>
+          <div className="space-y-1">
+            {members.map((m: any, i: number) => (
+              <div key={m.id} className="flex items-center justify-between bg-secondary/30 rounded px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-muted-foreground">{i + 1}.</span>
+                  <span className="text-xs font-medium">{m.full_name}</span>
+                  {m.passport_number && <span className="text-[10px] text-muted-foreground">({m.passport_number})</span>}
+                </div>
+                <span className="text-xs font-bold">{formatBDT(Number(m.final_price || 0))}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Documents */}
+      <div>
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          Documents ({documents.length})
+          {documents.length > 0 && <span className="ml-2 text-emerald-500">✓</span>}
+        </h4>
+        {documents.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {documents.map((doc: any) => {
+              const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name || doc.file_path || "");
+              const fileUrl = doc.file_path?.startsWith("/") ? doc.file_path : `/uploads/${doc.file_path}`;
+              return (
+                <div key={doc.id} className="bg-secondary/30 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-[10px] capitalize">{doc.document_type}</Badge>
+                    <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline">View</a>
+                  </div>
+                  {isImage && (
+                    <img src={fileUrl} alt={doc.document_type} className="w-full h-20 object-cover rounded border border-border" />
+                  )}
+                  <p className="text-[10px] text-muted-foreground truncate">{doc.file_name}</p>
+                  {doc.file_size && <p className="text-[10px] text-muted-foreground">{(doc.file_size / 1024).toFixed(1)} KB</p>}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3">
+            <p className="text-xs text-destructive font-medium">⚠ No documents uploaded for this booking</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Passport, NID, and photo should be uploaded before processing.</p>
+          </div>
+        )}
+        {/* Document completeness check */}
+        {documents.length > 0 && (() => {
+          const uploaded = documents.map((d: any) => d.document_type);
+          const required = ["passport", "nid", "photo"];
+          const missing = required.filter(r => !uploaded.includes(r));
+          return missing.length > 0 ? (
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2 mt-2">
+              <p className="text-[10px] text-yellow-700 dark:text-yellow-400 font-medium">
+                Missing: {missing.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(", ")}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2 mt-2">
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">✓ All required documents uploaded</p>
+            </div>
+          );
+        })()}
       </div>
 
       <div>
@@ -477,9 +550,66 @@ export default function AdminBookingsPage() {
 
   const handleStatusChange = async () => {
     if (!statusChangeId || !statusChangeVal) return;
+    const booking = bookings.find((b: any) => b.id === statusChangeId);
+    const oldStatus = booking?.status;
+    
     const { error } = await supabase.from("bookings").update({ status: statusChangeVal }).eq("id", statusChangeId);
     if (error) { toast.error(error.message); return; }
     toast.success("Status updated");
+
+    // Auto-send notification to customer
+    if (booking?.user_id && oldStatus !== statusChangeVal) {
+      try {
+        const statusLabels: Record<string, string> = {
+          pending: "Pending",
+          confirmed: "Confirmed ✅",
+          visa_processing: "Visa Processing 📋",
+          ticket_issued: "Ticket Issued 🎫",
+          completed: "Completed 🎉",
+          cancelled: "Cancelled ❌",
+        };
+        const newLabel = statusLabels[statusChangeVal] || statusChangeVal;
+        const pkgName = booking.packages?.name || "your package";
+        const smsMsg = `Manasik Travel Hub: Dear ${booking.guest_name || "Customer"}, your booking (${booking.tracking_id}) status has been updated to "${newLabel}". Package: ${pkgName}. For queries: 01711-999910`;
+        const emailSubject = `Booking Status Updated — ${booking.tracking_id}`;
+        const emailHtml = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+            <div style="background:#C5A55A;padding:15px;text-align:center;border-radius:8px 8px 0 0;">
+              <h2 style="color:#fff;margin:0;">Manasik Travel Hub</h2>
+            </div>
+            <div style="border:1px solid #e5e5e5;border-top:0;padding:20px;border-radius:0 0 8px 8px;">
+              <p>Dear <strong>${booking.guest_name || "Customer"}</strong>,</p>
+              <p>Your booking status has been updated:</p>
+              <table style="width:100%;border-collapse:collapse;margin:15px 0;">
+                <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">Tracking ID</td><td style="padding:8px;border:1px solid #eee;">${booking.tracking_id}</td></tr>
+                <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">Package</td><td style="padding:8px;border:1px solid #eee;">${pkgName}</td></tr>
+                <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">Previous Status</td><td style="padding:8px;border:1px solid #eee;">${statusLabels[oldStatus] || oldStatus}</td></tr>
+                <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">New Status</td><td style="padding:8px;border:1px solid #eee;color:#C5A55A;font-weight:bold;">${newLabel}</td></tr>
+              </table>
+              <p>For any queries, contact us at <strong>01711-999910</strong></p>
+              <p style="color:#888;font-size:12px;margin-top:20px;">Thank you for choosing Manasik Travel Hub.</p>
+            </div>
+          </div>`;
+
+        await supabase.functions.invoke("send-notification", {
+          body: {
+            type: "booking_status_updated",
+            channels: ["sms", "email"],
+            user_id: booking.user_id,
+            booking_id: booking.id,
+            custom_subject: emailSubject,
+            custom_message: emailHtml,
+            sms_message: smsMsg,
+            new_status: statusChangeVal,
+          },
+        });
+        toast.success("Customer notified via SMS & Email");
+      } catch (notifErr: any) {
+        console.error("Notification failed:", notifErr);
+        toast.info("Status updated but notification failed to send");
+      }
+    }
+
     setStatusChangeId(null);
     fetchBookings();
   };
