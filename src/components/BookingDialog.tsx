@@ -174,24 +174,28 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
       const result = response.data;
       if (!result?.success) throw new Error(result?.error || "Booking failed");
 
-      const userId = user?.id || result.user_id || "guest";
-
-      // Upload documents
+      // Upload documents via edge function (works for guest users too)
       if (uploadedDocs.length > 0 && result.booking_id) {
         for (const doc of uploadedDocs) {
-          const ext = doc.file.name.split(".").pop();
-          const filePath = `${userId}/${result.booking_id}/${doc.type}_${Date.now()}.${ext}`;
-          await supabase.storage.from("booking-documents").upload(filePath, doc.file);
-          await supabase.from("booking_documents").insert({ booking_id: result.booking_id, user_id: userId, document_type: doc.type, file_name: doc.file.name, file_path: filePath, file_size: doc.file.size });
+          const formData = new FormData();
+          formData.append("booking_id", result.booking_id);
+          formData.append("tracking_id", result.tracking_id);
+          formData.append("document_type", doc.type);
+          formData.append("file", doc.file);
+          const uploadRes = await supabase.functions.invoke("upload-booking-document", { body: formData });
+          if (uploadRes.error) console.error("Doc upload failed:", doc.type, uploadRes.error);
         }
       }
 
-      // Upload payment screenshot
+      // Upload payment screenshot via edge function
       if (paymentScreenshot && result.booking_id) {
-        const ext = paymentScreenshot.name.split(".").pop();
-        const filePath = `${userId}/${result.booking_id}/payment_receipt_${Date.now()}.${ext}`;
-        await supabase.storage.from("booking-documents").upload(filePath, paymentScreenshot);
-        await supabase.from("booking_documents").insert({ booking_id: result.booking_id, user_id: userId, document_type: "payment_receipt", file_name: paymentScreenshot.name, file_path: filePath, file_size: paymentScreenshot.size });
+        const formData = new FormData();
+        formData.append("booking_id", result.booking_id);
+        formData.append("tracking_id", result.tracking_id);
+        formData.append("document_type", "payment_receipt");
+        formData.append("file", paymentScreenshot);
+        const uploadRes = await supabase.functions.invoke("upload-booking-document", { body: formData });
+        if (uploadRes.error) console.error("Payment screenshot upload failed:", uploadRes.error);
       }
 
       setCreatedBooking({ id: result.booking_id, tracking_id: result.tracking_id });
