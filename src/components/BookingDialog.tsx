@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/api";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { ArrowRight, Package, Users, CreditCard, Check, User, FileText, Upload, X } from "lucide-react";
+import { ArrowRight, Package, Users, CreditCard, Check, User, FileText, Upload, X, Camera, ImageIcon } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import bkashLogo from "@/assets/payment/bkash.png";
 import nagadLogo from "@/assets/payment/nagad.png";
@@ -26,7 +26,8 @@ const PAYMENT_LOGOS: Record<string, string> = {
 const FALLBACK_PAYMENT_METHODS = [
   { id: "bkash", name: "bKash", name_bn: "বিকাশ", icon: "🟣", category: "mfs", enabled: true, account_name: "", account_number: "", instructions: "Send money to our bKash number", instructions_bn: "আমাদের বিকাশ নম্বরে টাকা পাঠান", charge_percent: 0 },
   { id: "nagad", name: "Nagad", name_bn: "নগদ", icon: "🟠", category: "mfs", enabled: true, account_name: "", account_number: "", instructions: "Send money to our Nagad number", instructions_bn: "আমাদের নগদ নম্বরে টাকা পাঠান", charge_percent: 0 },
-  { id: "bank_transfer", name: "Bank Transfer", name_bn: "ব্যাংক ট্রান্সফার", icon: "🏦", category: "bank", enabled: true, account_name: "", account_number: "", instructions: "Transfer to our bank account and share receipt", instructions_bn: "আমাদের ব্যাংক একাউন্টে ট্রান্সফার করে রসিদ শেয়ার করুন", charge_percent: 0 },
+  { id: "bank_shahjalal", name: "Shahjalal Islami Bank", name_bn: "শাহজালাল ইসলামী ব্যাংক", icon: "🏦", category: "bank", enabled: true, account_name: "Manasik Travel Hub", account_number: "9036-1111005012911", instructions: "Transfer to Shahjalal Islami Bank, Tangail Branch. Routing No: 190932291", instructions_bn: "শাহজালাল ইসলামী ব্যাংক, টাঙ্গাইল শাখায় ট্রান্সফার করুন। রাউটিং নং: 190932291", charge_percent: 0 },
+  { id: "bank_alarafah", name: "Al-Arafah Islami Bank", name_bn: "আল-আরাফাহ ইসলামী ব্যাংক", icon: "🏦", category: "bank", enabled: true, account_name: "Manasik Travel Hub", account_number: "1121020006204", instructions: "Transfer to Al-Arafah Islami Bank (AIB), Tangail Branch. Al-Wadiah Current Account.", instructions_bn: "আল-আরাফাহ ইসলামী ব্যাংক, টাঙ্গাইল শাখায় ট্রান্সফার করুন। আল-ওয়াদিয়াহ চলতি হিসাব।", charge_percent: 0 },
   { id: "cod", name: "Cash / Office", name_bn: "ক্যাশ / অফিস", icon: "💵", category: "cod", enabled: true, account_name: "", account_number: "", instructions: "Pay at office or later", instructions_bn: "অফিসে বা পরে পেমেন্ট করুন", charge_percent: 0 },
 ];
 
