@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import {
   Download, Edit2, Trash2, Save, X, Search, ChevronDown, ChevronUp,
   TrendingUp, TrendingDown, Plus, Eye, Copy, CreditCard, Receipt,
-  FileText, RefreshCw, Upload as UploadIcon, User, FileDown, FileSpreadsheet,
-  CalendarIcon
+  FileText, RefreshCw, Upload as UploadIcon, User, Users, FileDown, FileSpreadsheet,
+  CalendarIcon, Package
 } from "lucide-react";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
 import { generateInvoice, CompanyInfo, InvoicePayment } from "@/lib/invoiceGenerator";
