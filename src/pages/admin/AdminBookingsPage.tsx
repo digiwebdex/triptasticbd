@@ -776,20 +776,6 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h2 className="font-heading text-xl font-bold">All Bookings</h2>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => exportPDF({ title: "Bookings Report", columns: ["Tracking ID", "Customer", "Package", "Travelers", "Total", "Paid", "Due", "Status"], rows: filtered.map(b => [b.tracking_id, b.guest_name || "—", b.packages?.name || "—", b.num_travelers, Number(b.total_amount), Number(b.paid_amount), Number(b.due_amount ?? 0), b.status]) })}><FileDown className="h-4 w-4 mr-1" />PDF</Button>
-            <Button variant="outline" size="sm" onClick={() => exportExcel({ title: "Bookings Report", columns: ["Tracking ID", "Customer", "Package", "Travelers", "Total", "Paid", "Due", "Status"], rows: filtered.map(b => [b.tracking_id, b.guest_name || "—", b.packages?.name || "—", b.num_travelers, Number(b.total_amount), Number(b.paid_amount), Number(b.due_amount ?? 0), b.status]) })}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
-            {!isViewer && (
-              <button onClick={() => navigate("/admin/bookings/create")}
-                className="inline-flex items-center gap-1.5 text-sm bg-gradient-gold text-primary-foreground font-semibold px-4 py-2 rounded-md hover:opacity-90 transition-opacity shadow-gold">
-                <Plus className="h-4 w-4" /> New Booking
-              </button>
-            )}
-          </div>
-        </div>
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
