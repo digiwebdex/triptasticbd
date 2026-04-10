@@ -306,9 +306,71 @@ export default function AdminBookingsPage() {
         setBookingPayments(grouped);
       });
 
+  const fetchBookingDocs = async () => {
+    const { data } = await supabase.from("booking_documents").select("booking_id, document_type");
+    const grouped: Record<string, any[]> = {};
+    (data || []).forEach((d: any) => {
+      if (!grouped[d.booking_id]) grouped[d.booking_id] = [];
+      grouped[d.booking_id].push(d);
+    });
+    setBookingDocs(grouped);
+  };
+
+  const handleInlineStatusChange = async (bookingId: string, newStatus: string) => {
+    setInlineStatusId(null);
+    const booking = bookings.find((b) => b.id === bookingId);
+    if (!booking || booking.status === newStatus) return;
+    
+    setStatusChangeId(bookingId);
+    setStatusChangeVal(newStatus);
+    // Trigger the existing handleStatusChange flow
+    const oldStatus = booking.status;
+    const { error } = await supabase.from("bookings").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", bookingId);
+    if (error) { toast.error(error.message); setStatusChangeId(null); return; }
+    toast.success(`Status updated to ${newStatus}`);
+
+    // Auto-create customer on confirm
+    if (newStatus === "confirmed") {
+      try {
+        const guestName = booking.guest_name || "";
+        const guestPhone = booking.guest_phone || "";
+        const guestEmail = booking.guest_email || "";
+        const guestPassport = booking.guest_passport || "";
+        const guestAddress = booking.guest_address || "";
+        const userId = booking.user_id;
+        if (guestName || guestPhone) {
+          let exists = false;
+          if (userId) {
+            const { data: ep } = await supabase.from("profiles").select("id").eq("user_id", userId).maybeSingle();
+            if (ep) exists = true;
+          }
+          if (!exists && guestPhone) {
+            const { data: pp } = await supabase.from("profiles").select("id").eq("phone", guestPhone).maybeSingle();
+            if (pp) exists = true;
+          }
+          if (!exists) {
+            await supabase.from("profiles").insert({
+              user_id: userId || booking.id,
+              full_name: guestName,
+              phone: guestPhone,
+              email: guestEmail,
+              passport_number: guestPassport,
+              address: guestAddress,
+            });
+            toast.success(`Customer "${guestName}" added`);
+          }
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    setStatusChangeId(null);
+    fetchBookings();
+  };
+
   useEffect(() => {
     fetchBookings();
     fetchAllPayments();
+    fetchBookingDocs();
     supabase.from("moallems").select("id, name, phone, status").eq("status", "active").order("name").then(({ data }) => setMoallems(data || []));
   }, []);
 
