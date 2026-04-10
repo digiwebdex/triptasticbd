@@ -332,36 +332,7 @@ export default function AdminBookingsPage() {
 
     // Auto-create customer on confirm
     if (newStatus === "confirmed") {
-      try {
-        const guestName = booking.guest_name || "";
-        const guestPhone = booking.guest_phone || "";
-        const guestEmail = booking.guest_email || "";
-        const guestPassport = booking.guest_passport || "";
-        const guestAddress = booking.guest_address || "";
-        const userId = booking.user_id;
-        if (guestName || guestPhone) {
-          let exists = false;
-          if (userId) {
-            const { data: ep } = await supabase.from("profiles").select("id").eq("user_id", userId).maybeSingle();
-            if (ep) exists = true;
-          }
-          if (!exists && guestPhone) {
-            const { data: pp } = await supabase.from("profiles").select("id").eq("phone", guestPhone).maybeSingle();
-            if (pp) exists = true;
-          }
-          if (!exists) {
-            await supabase.from("profiles").insert({
-              user_id: userId || booking.id,
-              full_name: guestName,
-              phone: guestPhone,
-              email: guestEmail,
-              passport_number: guestPassport,
-              address: guestAddress,
-            });
-            toast.success(`Customer "${guestName}" added`);
-          }
-        }
-      } catch (e) { console.error(e); }
+      await autoCreateCustomer(booking);
     }
 
     setStatusChangeId(null);
