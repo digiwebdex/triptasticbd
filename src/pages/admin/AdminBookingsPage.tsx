@@ -477,9 +477,65 @@ export default function AdminBookingsPage() {
 
   const handleStatusChange = async () => {
     if (!statusChangeId || !statusChangeVal) return;
+    const booking = bookings.find((b: any) => b.id === statusChangeId);
+    const oldStatus = booking?.status;
+    
     const { error } = await supabase.from("bookings").update({ status: statusChangeVal }).eq("id", statusChangeId);
     if (error) { toast.error(error.message); return; }
     toast.success("Status updated");
+
+    // Auto-send notification to customer
+    if (booking?.user_id && oldStatus !== statusChangeVal) {
+      try {
+        const statusLabels: Record<string, string> = {
+          pending: "Pending",
+          confirmed: "Confirmed ✅",
+          visa_processing: "Visa Processing 📋",
+          ticket_issued: "Ticket Issued 🎫",
+          completed: "Completed 🎉",
+          cancelled: "Cancelled ❌",
+        };
+        const newLabel = statusLabels[statusChangeVal] || statusChangeVal;
+        const pkgName = booking.packages?.name || "your package";
+        const smsMsg = `Manasik Travel Hub: Dear ${booking.guest_name || "Customer"}, your booking (${booking.tracking_id}) status has been updated to "${newLabel}". Package: ${pkgName}. For queries: 01711-999910`;
+        const emailSubject = `Booking Status Updated — ${booking.tracking_id}`;
+        const emailHtml = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+            <div style="background:#C5A55A;padding:15px;text-align:center;border-radius:8px 8px 0 0;">
+              <h2 style="color:#fff;margin:0;">Manasik Travel Hub</h2>
+            </div>
+            <div style="border:1px solid #e5e5e5;border-top:0;padding:20px;border-radius:0 0 8px 8px;">
+              <p>Dear <strong>${booking.guest_name || "Customer"}</strong>,</p>
+              <p>Your booking status has been updated:</p>
+              <table style="width:100%;border-collapse:collapse;margin:15px 0;">
+                <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">Tracking ID</td><td style="padding:8px;border:1px solid #eee;">${booking.tracking_id}</td></tr>
+                <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">Package</td><td style="padding:8px;border:1px solid #eee;">${pkgName}</td></tr>
+                <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">Previous Status</td><td style="padding:8px;border:1px solid #eee;">${statusLabels[oldStatus] || oldStatus}</td></tr>
+                <tr><td style="padding:8px;border:1px solid #eee;font-weight:bold;">New Status</td><td style="padding:8px;border:1px solid #eee;color:#C5A55A;font-weight:bold;">${newLabel}</td></tr>
+              </table>
+              <p>For any queries, contact us at <strong>01711-999910</strong></p>
+              <p style="color:#888;font-size:12px;margin-top:20px;">Thank you for choosing Manasik Travel Hub.</p>
+            </div>
+          </div>`;
+
+        await supabase.functions.invoke("send-notification", {
+          body: {
+            type: "booking_status_updated",
+            channels: ["sms", "email"],
+            user_id: booking.user_id,
+            booking_id: booking.id,
+            custom_subject: emailSubject,
+            custom_message: emailHtml,
+            new_status: statusChangeVal,
+          },
+        });
+        toast.success("Customer notified via SMS & Email");
+      } catch (notifErr: any) {
+        console.error("Notification failed:", notifErr);
+        toast.info("Status updated but notification failed to send");
+      }
+    }
+
     setStatusChangeId(null);
     fetchBookings();
   };
