@@ -679,22 +679,19 @@ const functions = {
 
     if (isVpsRoute) {
       try {
-        const path = name.startsWith('auth/') ? `/${name}` : `/${name}`;
+        const path = `/${name}`;
         const res = await apiFetch(path, {
           method: 'POST',
           body: options?.body ? JSON.stringify(options.body) : undefined,
         });
-        const contentType = res.headers?.get?.('content-type') || '';
-        if (contentType.includes('application/json')) {
-          if (!res.ok) {
-            const err = await res.json();
-            return { data: null, error: { message: err.error } };
-          }
-          const data = await res.json();
-          return { data, error: null };
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Request failed' }));
+          return { data: null, error: { message: err.error || 'Request failed' } };
         }
-      } catch {
-        // VPS unreachable — fall through to Supabase
+        const data = await res.json().catch(() => ({}));
+        return { data, error: null };
+      } catch (err: any) {
+        return { data: null, error: { message: err.message || 'VPS unreachable' } };
       }
     }
 
