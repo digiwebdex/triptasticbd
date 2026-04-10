@@ -880,7 +880,18 @@ app.delete('/api/storage/:bucket', authenticate, async (req, res) => {
 // =============================================
 app.post('/api/create-guest-booking', async (req, res) => {
   try {
-    const { guest_name, guest_phone, guest_email, guest_address, guest_passport, package_id, num_travelers, installment_plan_id, notes, payment_method } = req.body;
+    const body = req.body;
+    // Support both camelCase (frontend) and snake_case field names
+    const guest_name = body.guest_name || body.fullName;
+    const guest_phone = body.guest_phone || body.phone;
+    const guest_email = body.guest_email || body.email;
+    const guest_address = body.guest_address || body.address;
+    const guest_passport = body.guest_passport || body.passportNumber;
+    const package_id = body.package_id || body.packageId;
+    const num_travelers = body.num_travelers || body.numTravelers;
+    const installment_plan_id = body.installment_plan_id || body.installmentPlanId;
+    const notes = body.notes;
+    const payment_method = body.payment_method || body.paymentMethod;
     if (!guest_name || !guest_phone || !package_id) {
       return res.status(400).json({ error: 'guest_name, guest_phone, and package_id are required' });
     }
