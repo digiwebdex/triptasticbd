@@ -1,12 +1,21 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import logoImg from "@/assets/logo-pdf.png";
-import { getSignatureData, SignatureData } from "./pdfSignature";
-import { generateTrackingQr, addQrToDoc, addPaymentWatermark, getWatermarkStatus } from "./pdfQrCode";
+import {
+  initPdf, addPdfHeader, addPdfFooter, addTitleBlock, addMetaLine,
+  addSectionTitle, addInfoBox, addSignatureBlock, addWatermark,
+  addRawTable, addDueHighlight, addBalanceBar,
+  getWatermarkStatus, ensurePageSpace, buildFileName,
+  fmtDate, fmtBDT, fmtAmount, bengaliCellHook,
+  GOLD, DARK, LIGHT_BG, ORANGE,
+  loadLogoBase64,
+  type SummaryCard, type InfoField, type PdfCompanyConfig, type SignatureData,
+} from "./pdfCore";
+import { generateTrackingQr, addQrToDoc, addPaymentWatermark } from "./pdfQrCode";
 import { supabase } from "@/lib/api";
-import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from "./pdfFontLoader";
-import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
-import { formatBDT } from "@/lib/utils";
+import { registerBengaliFont, addBengaliText, hasBengali } from "./pdfFontLoader";
+import { getSignatureData } from "./pdfSignature";
+import { getPdfCompanyConfig } from "./pdfCompanyConfig";
+import { formatBDT, formatAmount } from "@/lib/utils";
 
 export interface CompanyInfo {
   name?: string;
@@ -65,21 +74,10 @@ export interface BookingMember {
 }
 
 // ── Helpers ──
-const formatAmount = (value: number) => {
-  const numericValue = Number(value || 0);
-  return numericValue.toLocaleString("en-IN", {
-    minimumFractionDigits: Number.isInteger(numericValue) ? 0 : 2,
-    maximumFractionDigits: 2,
-  });
-};
-const fmtDate = (d: string | null) =>
+const fmtDateLocal = (d: string | null) =>
   d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
-const GOLD = { r: 197, g: 165, b: 90 };
-const DARK = { r: 35, g: 40, b: 48 };
-const LIGHT_BG = { r: 250, g: 249, b: 247 };
-
-const FOOTER_HEIGHT = 16;
+const FOOTER_HEIGHT = 14;
 const CONTENT_BOTTOM_PADDING = 4;
 const CONTINUATION_START_Y = 18;
 
@@ -87,27 +85,10 @@ function getContentBottomY(doc: jsPDF): number {
   return doc.internal.pageSize.getHeight() - FOOTER_HEIGHT - CONTENT_BOTTOM_PADDING;
 }
 
-function ensurePageSpace(doc: jsPDF, y: number, requiredHeight: number, nextPageStartY = CONTINUATION_START_Y): number {
+function ensurePageSpaceLocal(doc: jsPDF, y: number, requiredHeight: number, nextPageStartY = CONTINUATION_START_Y): number {
   if (y + requiredHeight <= getContentBottomY(doc)) return y;
   doc.addPage();
   return nextPageStartY;
-}
-
-function loadLogoBase64(): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d")!;
-      ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/jpeg"));
-    };
-    img.onerror = () => resolve("");
-    img.src = logoImg;
-  });
 }
 
 // ── Fetch booking members ──
@@ -141,34 +122,26 @@ const cleanText = (...values: unknown[]): string => {
       if (trimmed) return trimmed;
       continue;
     }
-
     if (typeof value === "number" && Number.isFinite(value)) {
       return String(value);
     }
   }
-
   return "";
 };
 
 const toPackageShortLabel = (value: string): string => {
   const label = cleanText(value, "N/A");
   if (label === "N/A" || label.length <= 18) return label;
-
   const words = label.split(/\s+/).filter(Boolean);
   const acronym = words.map((word) => word[0]?.toUpperCase()).join("");
   if (acronym.length >= 2 && acronym.length <= 10) return acronym;
-
   return `${label.slice(0, 17)}…`;
 };
 
 const extractDelimitedValues = (value?: string | null): string[] => {
   const source = cleanText(value);
   if (!source) return [];
-
-  return source
-    .split(/[\n,;|/]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return source.split(/[\n,;|/]+/).map((item) => item.trim()).filter(Boolean);
 };
 
 const isGenericTravelerLabel = (value?: string | null): boolean => {
@@ -180,17 +153,8 @@ const isGenericTravelerLabel = (value?: string | null): boolean => {
 async function fetchPackageNameMap(packageIds: string[]): Promise<Record<string, string>> {
   const uniqueIds = Array.from(new Set(packageIds.filter(Boolean)));
   if (uniqueIds.length === 0) return {};
-
-  const { data, error } = await supabase
-    .from("packages")
-    .select("id, name")
-    .in("id", uniqueIds);
-
-  if (error) {
-    console.error("fetchPackageNameMap error:", error);
-    return {};
-  }
-
+  const { data, error } = await supabase.from("packages").select("id, name").in("id", uniqueIds);
+  if (error) return {};
   return (data || []).reduce((acc: Record<string, string>, row: any) => {
     const id = cleanText(row?.id);
     const name = cleanText(row?.name);
@@ -202,22 +166,11 @@ async function fetchPackageNameMap(packageIds: string[]): Promise<Record<string,
 async function fetchBookingGuestFallback(trackingId: string): Promise<{ guest_name: string | null; guest_passport: string | null } | null> {
   const normalizedTrackingId = cleanText(trackingId).toUpperCase();
   if (!normalizedTrackingId) return null;
-
   const { data, error } = await supabase
-    .from("bookings")
-    .select("guest_name, guest_passport")
-    .eq("tracking_id", normalizedTrackingId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("fetchBookingGuestFallback error:", error);
-    return null;
-  }
-
-  return {
-    guest_name: (data as any)?.guest_name || null,
-    guest_passport: (data as any)?.guest_passport || null,
-  };
+    .from("bookings").select("guest_name, guest_passport")
+    .eq("tracking_id", normalizedTrackingId).maybeSingle();
+  if (error) return null;
+  return { guest_name: (data as any)?.guest_name || null, guest_passport: (data as any)?.guest_passport || null };
 }
 
 const hasMeaningfulName = (value?: string | null) => {
@@ -226,41 +179,20 @@ const hasMeaningfulName = (value?: string | null) => {
 };
 
 function normalizeMembers(members: Partial<BookingMember>[], fallbackPackageName: string): BookingMember[] {
-  return (members || []).map((member, index) => {
+  return (members || []).map((member) => {
     const memberAny = member as any;
     const rawPackage = memberAny?.packages;
     const packageName = cleanText(
       Array.isArray(rawPackage) ? rawPackage[0]?.name : rawPackage?.name,
-      memberAny?.package_name,
-      memberAny?.packageName,
-      fallbackPackageName,
-      "N/A"
+      memberAny?.package_name, memberAny?.packageName, fallbackPackageName, "N/A"
     );
-
     const selling = Math.max(0, Number(memberAny?.selling_price ?? memberAny?.price ?? 0));
     const discount = Math.min(Math.max(0, Number(memberAny?.discount ?? 0)), selling);
     const fallbackFinal = Math.max(0, selling - discount);
     const finalPrice = Math.max(0, Number(memberAny?.final_price ?? memberAny?.finalPrice ?? fallbackFinal));
-
     return {
-      full_name: cleanText(
-        memberAny?.full_name,
-        memberAny?.fullName,
-        memberAny?.name,
-        memberAny?.traveler_name,
-        memberAny?.travelerName,
-        memberAny?.member_name,
-        memberAny?.memberName
-      ),
-      passport_number: cleanText(
-        memberAny?.passport_number,
-        memberAny?.passportNumber,
-        memberAny?.passport,
-        memberAny?.traveler_passport,
-        memberAny?.travelerPassport,
-        memberAny?.member_passport,
-        memberAny?.memberPassport
-      ) || null,
+      full_name: cleanText(memberAny?.full_name, memberAny?.fullName, memberAny?.name, memberAny?.traveler_name, memberAny?.travelerName, memberAny?.member_name, memberAny?.memberName),
+      passport_number: cleanText(memberAny?.passport_number, memberAny?.passportNumber, memberAny?.passport, memberAny?.traveler_passport, memberAny?.travelerPassport, memberAny?.member_passport, memberAny?.memberPassport) || null,
       package_id: cleanText(memberAny?.package_id, memberAny?.packageId) || null,
       packages: { name: packageName },
       selling_price: selling,
@@ -273,265 +205,55 @@ function normalizeMembers(members: Partial<BookingMember>[], fallbackPackageName
 function buildFallbackMembers(booking: InvoiceBooking, customer: InvoiceCustomer): BookingMember[] {
   const travelerCount = Math.max(Number(booking.num_travelers || 0), 0);
   if (travelerCount <= 1) return [];
-
   const packageName = cleanText(booking.packages?.name, "N/A");
-  const unitPriceHint = Math.max(
-    0,
-    Number(booking.selling_price_per_person || 0),
-    Number(booking.packages?.price || 0)
-  );
-
+  const unitPriceHint = Math.max(0, Number(booking.selling_price_per_person || 0), Number(booking.packages?.price || 0));
   const roundedTotal = Math.max(0, Math.round(Number(booking.total_amount || 0)));
   const roundedDiscount = Math.max(0, Math.round(Number(booking.discount || 0)));
   const roundedGross = roundedTotal + roundedDiscount;
-
   const distribute = (total: number, count: number, index: number) => {
     const base = Math.floor(total / count);
     const remainder = total % count;
     return base + (index < remainder ? 1 : 0);
   };
-
   return Array.from({ length: travelerCount }, (_, index) => {
     const gross = unitPriceHint > 0 ? Math.round(unitPriceHint) : distribute(roundedGross, travelerCount, index);
     const discount = distribute(roundedDiscount, travelerCount, index);
     const final = Math.max(0, gross - discount);
-
-    return {
-      full_name: "",
-      passport_number: null,
-      selling_price: gross,
-      discount,
-      final_price: final,
-      packages: { name: packageName },
-      package_id: booking.package_id || null,
-    };
+    return { full_name: "", passport_number: null, selling_price: gross, discount, final_price: final, packages: { name: packageName }, package_id: booking.package_id || null };
   });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// SHARED LAYOUT FUNCTIONS
+// CUSTOMER SECTION (used in invoices/receipts)
 // ═══════════════════════════════════════════════════════════════
 
-async function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string): Promise<number> {
-  const pageWidth = doc.internal.pageSize.getWidth();
+async function addCustomerSection(
+  doc: jsPDF, y: number, customer: InvoiceCustomer, moallemName?: string | null, totalMembers?: number, notes?: string | null
+): Promise<number> {
+  const fields: InfoField[] = [
+    { label: "Name", value: customer.full_name || "N/A" },
+    { label: "Phone", value: customer.phone || "N/A" },
+    { label: "Passport", value: customer.passport_number || "N/A" },
+    { label: "Address", value: customer.address || "N/A" },
+  ];
+  if (customer.email) fields.push({ label: "Email", value: customer.email });
+  if (moallemName) fields.push({ label: "Moallem", value: moallemName });
+  if (totalMembers) fields.push({ label: "Members", value: String(totalMembers) });
+  if (notes) fields.push({ label: "Notes", value: notes.length > 60 ? notes.substring(0, 60) + "..." : notes });
 
-  // Top gold accent bar
-  doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.rect(0, 0, pageWidth, 3, "F");
-
-  if (logoBase64) {
-    try { doc.addImage(logoBase64, "PNG", 14, 8, 28, 14); } catch { /* skip */ }
-  }
-
-  const textX = logoBase64 ? 46 : 14;
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(company.name || "MANASIK Travel Hub", textX, 16);
-
-  // Tagline
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
-  const cfg = await getPdfCompanyConfig();
-  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 21);
-
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(100);
-
-  const contactParts: string[] = [];
-  if (company.phone) contactParts.push(`Tel: ${company.phone}`);
-  if (company.email) contactParts.push(`Email: ${company.email}`);
-  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 26);
-  if (company.address) {
-    if (hasBengali(company.address)) {
-      await addBengaliText(doc, company.address, textX, 31, { fontSize: 7, color: "#646464" });
-    } else {
-      const addr = company.address.length > 80 ? company.address.substring(0, 80) + "..." : company.address;
-      doc.text(addr, textX, 31);
-    }
-  }
-
-  // Gold accent line
-  doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.setLineWidth(0.8);
-  doc.line(14, 38, pageWidth - 14, 38);
-  doc.setLineWidth(0.2);
-  doc.setTextColor(0);
-
-  return 44;
+  return addInfoBox(doc, y, fields, "BILL TO");
 }
 
 function addInvoiceTitleBlock(
   doc: jsPDF, y: number, trackingId: string, invoiceDate: string,
   travelDate: string | null, paymentStatus: string, isFamily: boolean
 ): number {
-  const pageWidth = doc.internal.pageSize.getWidth();
-
-  // Invoice title badge
-  doc.setFillColor(DARK.r, DARK.g, DARK.b);
-  doc.roundedRect(14, y, 55, 10, 2, 2, "F");
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255);
-  doc.text(isFamily ? "FAMILY INVOICE" : "INVOICE", 16, y + 7);
-  doc.setTextColor(0);
-
-  // Status badge (right side)
-  const statusColors: Record<string, { r: number; g: number; b: number }> = {
-    completed: { r: GOLD.r, g: GOLD.g, b: GOLD.b },
-    pending: { r: 210, g: 140, b: 20 },
-    confirmed: { r: 30, g: 100, b: 200 },
-  };
-  const sc = statusColors[paymentStatus] || statusColors.pending;
-  const statusText = paymentStatus.toUpperCase();
-  const statusW = doc.getTextWidth(statusText) * 0.6 + 10;
-  doc.setFillColor(sc.r, sc.g, sc.b);
-  doc.roundedRect(pageWidth - 14 - statusW, y, statusW, 10, 2, 2, "F");
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255);
-  doc.text(statusText, pageWidth - 14 - statusW / 2, y + 7, { align: "center" });
-  doc.setTextColor(0);
-
-  y += 16;
-
-  // Invoice meta
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(80);
-  const leftMeta = [
-    `Invoice No: ${trackingId}`,
-    `Invoice Date: ${fmtDate(invoiceDate)}`,
-  ];
-  const rightMeta = [
-    `Booking ID: ${trackingId}`,
-    travelDate ? `Travel Date: ${fmtDate(travelDate)}` : "",
-  ].filter(Boolean);
-
-  leftMeta.forEach((t, i) => doc.text(t, 14, y + i * 5));
-  rightMeta.forEach((t, i) => doc.text(t, pageWidth / 2 + 10, y + i * 5));
-  doc.setTextColor(0);
-
-  return y + Math.max(leftMeta.length, rightMeta.length) * 5 + 4;
-}
-
-async function addCustomerSection(
-  doc: jsPDF, y: number, customer: InvoiceCustomer, moallemName?: string | null, totalMembers?: number, notes?: string | null
-): Promise<number> {
-  const pageWidth = doc.internal.pageSize.getWidth();
-
-  // Calculate box height based on content
-  let extraRows = 0;
-  if (customer.email) extraRows++;
-  if (moallemName || totalMembers) extraRows++;
-  if (notes) extraRows++;
-  const boxH = 26 + (extraRows * 6);
-
-  // Section header
-  doc.setFillColor(LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b);
-  doc.setDrawColor(220);
-  doc.rect(14, y, pageWidth - 28, boxH, "FD");
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text("BILL TO", 18, y + 6);
-
-  doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.setLineWidth(0.5);
-  doc.line(18, y + 8, 40, y + 8);
-  doc.setLineWidth(0.2);
-
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(50);
-
-  const col1 = 18;
-  const col2 = pageWidth / 2 + 5;
-  let row = y + 14;
-
-  // Row 1: Name & Phone
-  doc.setFont("helvetica", "bold");
-  doc.text("Name:", col1, row);
-  doc.setFont("helvetica", "normal");
-  const custName = customer.full_name || "N/A";
-  if (hasBengali(custName)) {
-    await addBengaliText(doc, custName, col1 + 18, row, { fontSize: 8 });
-  } else {
-    doc.text(custName, col1 + 18, row);
-  }
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Phone:", col2, row);
-  doc.setFont("helvetica", "normal");
-  doc.text(customer.phone || "N/A", col2 + 18, row);
-
-  // Row 2: Passport & Address
-  row += 6;
-  doc.setFont("helvetica", "bold");
-  doc.text("Passport:", col1, row);
-  doc.setFont("helvetica", "normal");
-  doc.text(customer.passport_number || "N/A", col1 + 18, row);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Address:", col2, row);
-  doc.setFont("helvetica", "normal");
-  const addr = customer.address || "N/A";
-  doc.text(addr.length > 40 ? addr.substring(0, 40) + "..." : addr, col2 + 18, row);
-
-  // Row 3: Email (if available)
-  if (customer.email) {
-    row += 6;
-    doc.setFont("helvetica", "bold");
-    doc.text("Email:", col1, row);
-    doc.setFont("helvetica", "normal");
-    doc.text(customer.email, col1 + 18, row);
-  }
-
-  // Row 4: Moallem & Members
-  if (moallemName || totalMembers) {
-    row += 6;
-    if (moallemName) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Moallem:", col1, row);
-      doc.setFont("helvetica", "normal");
-      doc.text(moallemName, col1 + 18, row);
-    }
-    if (totalMembers) {
-      doc.setFont("helvetica", "bold");
-      doc.text("Total Members:", col2, row);
-      doc.setFont("helvetica", "normal");
-      doc.text(String(totalMembers), col2 + 28, row);
-    }
-  }
-
-  // Row 5: Notes (if available)
-  if (notes) {
-    row += 6;
-    doc.setFont("helvetica", "bold");
-    doc.text("Notes:", col1, row);
-    doc.setFont("helvetica", "normal");
-    const noteText = notes.length > 80 ? notes.substring(0, 80) + "..." : notes;
-    doc.text(noteText, col1 + 18, row);
-  }
-
-  doc.setTextColor(0);
-  return y + boxH + 6;
-}
-
-function addSectionTitle(doc: jsPDF, y: number, title: string): number {
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(title, 14, y);
-  doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.setLineWidth(0.4);
-  doc.line(14, y + 1.5, 14 + doc.getTextWidth(title), y + 1.5);
-  doc.setLineWidth(0.2);
-  doc.setTextColor(0);
-  return y + 5;
+  y = addTitleBlock(doc, y, isFamily ? "FAMILY INVOICE" : "INVOICE", paymentStatus);
+  y = addMetaLine(doc, y,
+    [`Invoice No: ${trackingId}`, `Invoice Date: ${fmtDateLocal(invoiceDate)}`],
+    [`Booking ID: ${trackingId}`, travelDate ? `Travel Date: ${fmtDateLocal(travelDate)}` : ""].filter(Boolean)
+  );
+  return y;
 }
 
 function addFinancialSummary(
@@ -543,7 +265,6 @@ function addFinancialSummary(
   const boxX = pageWidth - 14 - 80;
   const boxW = 80;
 
-  // Summary box
   doc.setDrawColor(220);
   doc.setFillColor(LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b);
   doc.rect(boxX, y, boxW, 38, "FD");
@@ -564,8 +285,7 @@ function addFinancialSummary(
     doc.text(item.label, boxX + 4, iy);
     doc.text(item.value, boxX + boxW - 4, iy, { align: "right" });
     if (idx === 2) {
-      // Separator line before paid
-      doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
+      doc.setDrawColor(ORANGE.r, ORANGE.g, ORANGE.b);
       doc.setLineWidth(0.3);
       doc.line(boxX + 4, iy + 2, boxX + boxW - 4, iy + 2);
       doc.setLineWidth(0.2);
@@ -574,7 +294,6 @@ function addFinancialSummary(
     iy += 6;
   });
 
-  // Due highlight bar
   if (dueAmount > 0) {
     doc.setFillColor(255, 240, 230);
     doc.setDrawColor(220, 120, 20);
@@ -592,12 +311,8 @@ function addFinancialSummary(
 function addPaymentHistoryTable(doc: jsPDF, y: number, payments: InvoicePayment[]): number {
   y = addSectionTitle(doc, y, "PAYMENT HISTORY");
 
-  const completed = payments
-    .filter(p => p.status === "completed")
-    .sort((a, b) => new Date(a.paid_at || 0).getTime() - new Date(b.paid_at || 0).getTime());
-  const pending = payments
-    .filter(p => p.status === "pending")
-    .sort((a, b) => new Date(a.due_date || 0).getTime() - new Date(b.due_date || 0).getTime());
+  const completed = payments.filter(p => p.status === "completed").sort((a, b) => new Date(a.paid_at || 0).getTime() - new Date(b.paid_at || 0).getTime());
+  const pending = payments.filter(p => p.status === "pending").sort((a, b) => new Date(a.due_date || 0).getTime() - new Date(b.due_date || 0).getTime());
 
   if (completed.length === 0 && pending.length === 0) {
     doc.setFontSize(8);
@@ -612,40 +327,22 @@ function addPaymentHistoryTable(doc: jsPDF, y: number, payments: InvoicePayment[
 
   const bodyRows = [
     ...completed.map((p, i) => [
-      String(i + 1),
-      fmtDate(p.paid_at),
+      String(i + 1), fmtDateLocal(p.paid_at),
       (p.payment_method || "Manual").charAt(0).toUpperCase() + (p.payment_method || "manual").slice(1),
-      formatAmount(Number(p.amount)),
-      "Paid",
+      formatAmount(Number(p.amount)), "Paid",
     ]),
     ...pending.map((p, i) => [
       String(completed.length + i + 1),
-      p.due_date ? fmtDate(p.due_date) + " (Due)" : "—",
-      "—",
-      formatAmount(Number(p.amount)),
-      "Pending",
+      p.due_date ? fmtDateLocal(p.due_date) + " (Due)" : "—",
+      "—", formatAmount(Number(p.amount)), "Pending",
     ]),
   ];
 
-  autoTable(doc, {
+  return addRawTable(doc, {
     startY: y,
-    head: [["#", "Date", "Method", "Amount (BDT)", "Status"]],
+    head: ["#", "Date", "Method", "Amount (BDT)", "Status"],
     body: bodyRows,
     foot: completed.length > 0 ? [["", "", "Total Paid", formatAmount(totalPaid), ""]] : undefined,
-    styles: { fontSize: 7.5, cellPadding: 2.5, font: "NotoSansBengali" },
-    headStyles: {
-      fillColor: [DARK.r, DARK.g, DARK.b],
-      textColor: [255, 255, 255],
-      fontSize: 7.5,
-      fontStyle: "bold",
-    },
-    footStyles: {
-      fillColor: [LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b],
-      textColor: [DARK.r, DARK.g, DARK.b],
-      fontStyle: "bold",
-      fontSize: 8,
-    },
-    alternateRowStyles: { fillColor: [LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b] },
     columnStyles: {
       0: { cellWidth: 12, halign: "center" },
       3: { halign: "right", fontStyle: "bold" },
@@ -662,81 +359,7 @@ function addPaymentHistoryTable(doc: jsPDF, y: number, payments: InvoicePayment[
         }
       }
     },
-    margin: { left: 14, right: 14 },
-    didDrawCell: bengaliCellHook,
   });
-
-  return ((doc as any).lastAutoTable?.finalY || y + 20) + 6;
-}
-
-function addSignatureSection(doc: jsPDF, y: number, sig: SignatureData): number {
-  const pageWidth = doc.internal.pageSize.getWidth();
-
-  // Keep clear spacing from previous section and move to next page when needed.
-  let lineY = y + 8;
-  lineY = ensurePageSpace(doc, lineY, 16, 44);
-  if (lineY < 44) lineY = 44; // reserve top area for stamp/sign image
-
-  // Left: Customer signature
-  doc.setDrawColor(180);
-  doc.line(14, lineY, 80, lineY);
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(100);
-  doc.text("Customer Signature", 14, lineY + 5);
-
-  // Right: Authorized signature
-  const rightCenter = pageWidth - 47;
-
-  if (sig.stamp_base64) {
-    try { doc.addImage(sig.stamp_base64, "PNG", rightCenter - 14, lineY - 30, 28, 28); } catch { /* skip */ }
-  }
-  if (sig.signature_base64) {
-    try { doc.addImage(sig.signature_base64, "PNG", rightCenter - 12, lineY - 12, 24, 10); } catch { /* skip */ }
-  }
-
-  doc.setDrawColor(180);
-  doc.line(pageWidth - 80, lineY, pageWidth - 14, lineY);
-
-  if (sig.authorized_name) {
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(DARK.r, DARK.g, DARK.b);
-    doc.text(sig.authorized_name, rightCenter, lineY + 5, { align: "center" });
-  } else {
-    doc.setFontSize(7);
-    doc.text("Authorized Signature", pageWidth - 80, lineY + 5);
-  }
-
-  if (sig.designation) {
-    doc.setFontSize(6.5);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(100);
-    doc.text(sig.designation, rightCenter, lineY + 10, { align: "center" });
-  }
-
-  doc.setTextColor(0);
-  return lineY + 14;
-}
-
-function addFooter(doc: jsPDF, cfg: PdfCompanyConfig) {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-
-  // Bottom gold bar
-  doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.rect(0, pageHeight - 16, pageWidth, 16, "F");
-
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255);
-  doc.text(cfg.footer_text, pageWidth / 2, pageHeight - 10, { align: "center" });
-
-  doc.setFontSize(5.5);
-  doc.setFont("helvetica", "normal");
-  doc.text(cfg.footer_contact, pageWidth / 2, pageHeight - 5, { align: "center" });
-
-  doc.setTextColor(0);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -748,75 +371,48 @@ async function generateIndividualInvoice(
   payments: InvoicePayment[], logoBase64: string, sig: SignatureData,
   qrDataUrl: string, moallemName: string | null, cfg: PdfCompanyConfig
 ) {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  let y = await addHeader(doc, { name: cfg.company_name, phone: cfg.phone, email: cfg.email, address: cfg.address } as CompanyInfo, logoBase64);
+  let y = await addPdfHeader(doc, cfg, logoBase64, qrDataUrl);
 
-
-  // QR verification stamp (small, right side)
-  addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: booking.tracking_id, position: "top" });
-
-
-  // Payment watermark
   addPaymentWatermark(doc, getWatermarkStatus(Number(booking.paid_amount), Number(booking.due_amount || 0)));
 
-  // Invoice title block
   y = addInvoiceTitleBlock(doc, y, booking.tracking_id, new Date().toISOString(), booking.packages?.start_date || null, booking.status, false);
-
-  // Customer section
   y = await addCustomerSection(doc, y, customer, moallemName, undefined, booking.notes);
 
-  // Service table
   y = addSectionTitle(doc, y, "SERVICE DETAILS");
 
   const unitPrice = Number(booking.selling_price_per_person || 0) || Math.round(Number(booking.total_amount) / booking.num_travelers);
   const discount = Number(booking.discount || 0);
   const grossAmount = unitPrice * booking.num_travelers;
 
-  autoTable(doc, {
+  y = addRawTable(doc, {
     startY: y,
-    head: [["Package", "Qty", "Unit Price (BDT)", "Discount (BDT)", "Total (BDT)"]],
-    body: [
-      [
-        booking.packages?.name || "N/A",
-        String(booking.num_travelers),
-        formatAmount(unitPrice),
-        formatAmount(discount),
-        formatAmount(Number(booking.total_amount)),
-      ],
-    ],
-    styles: { fontSize: 8, cellPadding: 3, font: "NotoSansBengali" },
-    headStyles: {
-      fillColor: [DARK.r, DARK.g, DARK.b],
-      textColor: [255, 255, 255],
-      fontSize: 7.5,
-      fontStyle: "bold",
-    },
+    head: ["Package", "Qty", "Unit Price (BDT)", "Discount (BDT)", "Total (BDT)"],
+    body: [[
+      booking.packages?.name || "N/A",
+      String(booking.num_travelers),
+      formatAmount(unitPrice),
+      formatAmount(discount),
+      formatAmount(Number(booking.total_amount)),
+    ]],
     columnStyles: {
       1: { halign: "center", cellWidth: 15 },
       2: { halign: "right" },
       3: { halign: "right" },
       4: { halign: "right", fontStyle: "bold" },
     },
-    margin: { left: 14, right: 14 },
-    didDrawCell: bengaliCellHook,
+    fontSize: 8,
   });
 
-  y = ((doc as any).lastAutoTable?.finalY || y + 20) + 6;
-
-  // Financial summary (right-aligned)
   const netTotal = Number(booking.total_amount);
   const dueAmount = Number(booking.due_amount || 0);
-  y = ensurePageSpace(doc, y, dueAmount > 0 ? 54 : 44);
+  y = ensurePageSpaceLocal(doc, y, dueAmount > 0 ? 54 : 44);
   y = addFinancialSummary(doc, y, grossAmount, discount, netTotal, Number(booking.paid_amount), dueAmount);
 
-  // Payment history (below summary, full width)
-  y = ensurePageSpace(doc, y, 26);
+  y = ensurePageSpaceLocal(doc, y, 26);
   y = addPaymentHistoryTable(doc, y, payments);
 
-  // Signature
-  y = addSignatureSection(doc, y, sig);
-
-  addFooter(doc, cfg);
+  y = addSignatureBlock(doc, sig, y);
+  addPdfFooter(doc, cfg);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -828,89 +424,46 @@ async function generateFamilyInvoice(
   payments: InvoicePayment[], members: BookingMember[],
   logoBase64: string, sig: SignatureData, qrDataUrl: string, moallemName: string | null, cfg: PdfCompanyConfig
 ) {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  let y = await addHeader(doc, { name: cfg.company_name, phone: cfg.phone, email: cfg.email, address: cfg.address } as CompanyInfo, logoBase64);
+  let y = await addPdfHeader(doc, cfg, logoBase64, qrDataUrl);
 
-
-  addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: booking.tracking_id, position: "top" });
   addPaymentWatermark(doc, getWatermarkStatus(Number(booking.paid_amount), Number(booking.due_amount || 0)));
 
   y = addInvoiceTitleBlock(doc, y, booking.tracking_id, new Date().toISOString(), booking.packages?.start_date || null, booking.status, true);
-
   y = await addCustomerSection(doc, y, customer, moallemName, members.length || booking.num_travelers, booking.notes);
 
-  // Members table
   y = addSectionTitle(doc, y, "FAMILY MEMBERS");
 
   const totalGross = members.reduce((s, m) => s + Number(m.selling_price), 0) || Number(booking.total_amount) + Number(booking.discount || 0);
   const totalDiscount = members.reduce((s, m) => s + Number(m.discount), 0) || Number(booking.discount || 0);
   const totalFinal = members.reduce((s, m) => s + Number(m.final_price), 0) || Number(booking.total_amount);
 
-  autoTable(doc, {
+  y = addRawTable(doc, {
     startY: y,
-    head: [["SL", "Name", "Passport", "Package", "Price (BDT)", "Discount (BDT)", "Final (BDT)"]],
-    body: [
-      ...members.map((m, i) => {
-        const name = cleanText(m.full_name, i === 0 ? customer.full_name : "", "—");
-        const passport = cleanText(m.passport_number, i === 0 ? customer.passport_number : "", "—");
-        const pkg = toPackageShortLabel(cleanText(m.packages?.name, booking.packages?.name, "N/A"));
-
-        return [
-          String(i + 1),
-          name,
-          passport,
-          pkg,
-          formatAmount(Number(m.selling_price)),
-          formatAmount(Number(m.discount)),
-          formatAmount(Number(m.final_price)),
-        ];
-      }),
-    ],
-    foot: [[
-      "", "", "", "TOTAL",
-      formatAmount(totalGross),
-      formatAmount(totalDiscount),
-      formatAmount(totalFinal),
-    ]],
-    styles: { fontSize: 7.5, cellPadding: 2.5, font: "helvetica" },
-    headStyles: {
-      fillColor: [DARK.r, DARK.g, DARK.b],
-      textColor: [255, 255, 255],
-      fontSize: 7.5,
-      fontStyle: "bold",
-    },
-    footStyles: {
-      fillColor: [LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b],
-      textColor: [DARK.r, DARK.g, DARK.b],
-      fontStyle: "bold",
-      fontSize: 8,
-    },
-    alternateRowStyles: { fillColor: [LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b] },
+    head: ["SL", "Name", "Passport", "Package", "Price (BDT)", "Discount (BDT)", "Final (BDT)"],
+    body: members.map((m, i) => {
+      const name = cleanText(m.full_name, i === 0 ? customer.full_name : "", "—");
+      const passport = cleanText(m.passport_number, i === 0 ? customer.passport_number : "", "—");
+      const pkg = toPackageShortLabel(cleanText(m.packages?.name, booking.packages?.name, "N/A"));
+      return [String(i + 1), name, passport, pkg, formatAmount(Number(m.selling_price)), formatAmount(Number(m.discount)), formatAmount(Number(m.final_price))];
+    }),
+    foot: [["", "", "", "TOTAL", formatAmount(totalGross), formatAmount(totalDiscount), formatAmount(totalFinal)]],
     columnStyles: {
       0: { cellWidth: 12, halign: "center" },
       4: { halign: "right" },
       5: { halign: "right" },
       6: { halign: "right", fontStyle: "bold" },
     },
-    margin: { left: 14, right: 14 },
-    didDrawCell: bengaliCellHook,
   });
 
-  y = ((doc as any).lastAutoTable?.finalY || y + 20) + 6;
-
-  // Financial summary
   const familyDueAmount = Number(booking.due_amount || 0);
-  y = ensurePageSpace(doc, y, familyDueAmount > 0 ? 54 : 44);
+  y = ensurePageSpaceLocal(doc, y, familyDueAmount > 0 ? 54 : 44);
   y = addFinancialSummary(doc, y, totalGross, totalDiscount, totalFinal, Number(booking.paid_amount), familyDueAmount);
 
-  // Payment history (below summary, full width)
-  y = ensurePageSpace(doc, y, 26);
+  y = ensurePageSpaceLocal(doc, y, 26);
   y = addPaymentHistoryTable(doc, y, payments);
 
-  // Signature
-  y = addSignatureSection(doc, y, sig);
-
-  addFooter(doc, cfg);
+  y = addSignatureBlock(doc, sig, y);
+  addPdfFooter(doc, cfg);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -923,26 +476,18 @@ export interface GenerateInvoiceOptions {
 }
 
 export async function generateInvoice(
-  booking: InvoiceBooking,
-  customer: InvoiceCustomer,
-  payments: InvoicePayment[],
-  company: CompanyInfo,
+  booking: InvoiceBooking, customer: InvoiceCustomer,
+  payments: InvoicePayment[], company: CompanyInfo,
   options: GenerateInvoiceOptions = {}
 ) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
   const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
-    loadLogoBase64(),
-    getSignatureData(),
-    generateTrackingQr(booking.tracking_id),
-    getPdfCompanyConfig(),
+    loadLogoBase64(), getSignatureData(), generateTrackingQr(booking.tracking_id), getPdfCompanyConfig(),
   ]);
 
-  // Fetch moallem name if linked
   let moallemName: string | null = null;
-  if (booking.moallem_id) {
-    moallemName = await fetchMoallemName(booking.moallem_id);
-  }
+  if (booking.moallem_id) moallemName = await fetchMoallemName(booking.moallem_id);
 
   let fallbackPackageName = cleanText(booking.packages?.name);
   if (!fallbackPackageName && booking.package_id) {
@@ -952,46 +497,19 @@ export async function generateInvoice(
   fallbackPackageName = cleanText(fallbackPackageName, "N/A");
 
   const providedMembers = normalizeMembers(options.members || [], fallbackPackageName);
-  const dbMembers = providedMembers.length === 0 && booking.id
-    ? await fetchBookingMembers(booking.id, fallbackPackageName)
-    : [];
+  const dbMembers = providedMembers.length === 0 && booking.id ? await fetchBookingMembers(booking.id, fallbackPackageName) : [];
 
-  const travelerCount = Math.max(
-    Number(booking.num_travelers || 0),
-    providedMembers.length,
-    dbMembers.length,
-    1
-  );
-
-  const normalizedBooking: InvoiceBooking = {
-    ...booking,
-    num_travelers: travelerCount,
-  };
+  const travelerCount = Math.max(Number(booking.num_travelers || 0), providedMembers.length, dbMembers.length, 1);
+  const normalizedBooking: InvoiceBooking = { ...booking, num_travelers: travelerCount };
 
   const normalizedType = normalizeBookingType(normalizedBooking.booking_type);
-  const hasFamilySignal = Boolean(options.forceFamily)
-    || normalizedType.includes("family")
-    || travelerCount > 1
-    || providedMembers.length > 0
-    || dbMembers.length > 0;
+  const hasFamilySignal = Boolean(options.forceFamily) || normalizedType.includes("family") || travelerCount > 1 || providedMembers.length > 0 || dbMembers.length > 0;
 
-  const rawInvoiceMembersBase = providedMembers.length > 0
-    ? providedMembers
-    : dbMembers.length > 0
-      ? dbMembers
-      : (hasFamilySignal ? buildFallbackMembers(normalizedBooking, customer) : []);
-
+  const rawInvoiceMembersBase = providedMembers.length > 0 ? providedMembers : dbMembers.length > 0 ? dbMembers : (hasFamilySignal ? buildFallbackMembers(normalizedBooking, customer) : []);
   const fallbackMembers = hasFamilySignal ? buildFallbackMembers(normalizedBooking, customer) : [];
-  const rawInvoiceMembers = rawInvoiceMembersBase.length >= travelerCount
-    ? rawInvoiceMembersBase
-    : [
-        ...rawInvoiceMembersBase,
-        ...fallbackMembers.slice(rawInvoiceMembersBase.length, travelerCount),
-      ];
+  const rawInvoiceMembers = rawInvoiceMembersBase.length >= travelerCount ? rawInvoiceMembersBase : [...rawInvoiceMembersBase, ...fallbackMembers.slice(rawInvoiceMembersBase.length, travelerCount)];
 
-  const missingPackageIds = rawInvoiceMembers
-    .filter((m) => !cleanText(m.packages?.name) && Boolean(m.package_id))
-    .map((m) => m.package_id as string);
+  const missingPackageIds = rawInvoiceMembers.filter((m) => !cleanText(m.packages?.name) && Boolean(m.package_id)).map((m) => m.package_id as string);
   const packageNameMap = await fetchPackageNameMap(missingPackageIds);
 
   const customerName = cleanText(customer.full_name, "Primary Traveler");
@@ -999,65 +517,22 @@ export async function generateInvoice(
   let fallbackGuestNames = extractDelimitedValues(normalizedBooking.guest_name);
   let fallbackGuestPassports = extractDelimitedValues(normalizedBooking.guest_passport);
 
-  const hasAnyMeaningfulMemberName = rawInvoiceMembers.some((member) => {
-    const rawName = cleanText(
-      member.full_name,
-      (member as any)?.traveler_name,
-      (member as any)?.travelerName,
-      (member as any)?.member_name,
-      (member as any)?.memberName
-    );
-    return hasMeaningfulName(rawName);
-  });
+  const hasAnyMeaningfulMemberName = rawInvoiceMembers.some((member) => hasMeaningfulName(cleanText(member.full_name, (member as any)?.traveler_name, (member as any)?.travelerName, (member as any)?.member_name, (member as any)?.memberName)));
 
   if (hasFamilySignal && normalizedBooking.tracking_id && (!hasAnyMeaningfulMemberName || fallbackGuestNames.length < travelerCount)) {
     const latestGuestFallback = await fetchBookingGuestFallback(normalizedBooking.tracking_id);
     const latestGuestNames = extractDelimitedValues(latestGuestFallback?.guest_name);
     const latestGuestPassports = extractDelimitedValues(latestGuestFallback?.guest_passport);
-
     if (latestGuestNames.length > fallbackGuestNames.length) fallbackGuestNames = latestGuestNames;
     if (latestGuestPassports.length > fallbackGuestPassports.length) fallbackGuestPassports = latestGuestPassports;
   }
 
   const invoiceMembers = rawInvoiceMembers.map((member, index) => {
-    const resolvedPackageName = cleanText(
-      member.packages?.name,
-      member.package_id ? packageNameMap[member.package_id] : "",
-      fallbackPackageName,
-      "N/A"
-    );
-
-    const rawMemberName = cleanText(
-      member.full_name,
-      (member as any)?.traveler_name,
-      (member as any)?.travelerName,
-      (member as any)?.member_name,
-      (member as any)?.memberName
-    );
-
-    const resolvedName = cleanText(
-      hasMeaningfulName(rawMemberName) ? rawMemberName : "",
-      fallbackGuestNames[index],
-      index === 0 ? customerName : "",
-      "—"
-    );
-
-    const resolvedPassport = cleanText(
-      member.passport_number,
-      (member as any)?.traveler_passport,
-      (member as any)?.travelerPassport,
-      (member as any)?.member_passport,
-      (member as any)?.memberPassport,
-      fallbackGuestPassports[index],
-      index === 0 ? customerPassport : ""
-    );
-
-    return {
-      ...member,
-      full_name: resolvedName,
-      passport_number: resolvedPassport || null,
-      packages: { name: resolvedPackageName },
-    };
+    const resolvedPackageName = cleanText(member.packages?.name, member.package_id ? packageNameMap[member.package_id] : "", fallbackPackageName, "N/A");
+    const rawMemberName = cleanText(member.full_name, (member as any)?.traveler_name, (member as any)?.travelerName, (member as any)?.member_name, (member as any)?.memberName);
+    const resolvedName = cleanText(hasMeaningfulName(rawMemberName) ? rawMemberName : "", fallbackGuestNames[index], index === 0 ? customerName : "", "—");
+    const resolvedPassport = cleanText(member.passport_number, (member as any)?.traveler_passport, (member as any)?.travelerPassport, (member as any)?.member_passport, (member as any)?.memberPassport, fallbackGuestPassports[index], index === 0 ? customerPassport : "");
+    return { ...member, full_name: resolvedName, passport_number: resolvedPassport || null, packages: { name: resolvedPackageName } };
   });
 
   if (hasFamilySignal && invoiceMembers.length > 0) {
@@ -1070,97 +545,63 @@ export async function generateInvoice(
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RECEIPT (kept compatible)
+// RECEIPT
 // ═══════════════════════════════════════════════════════════════
 
 export async function generateReceipt(
-  payment: InvoicePayment,
-  booking: InvoiceBooking,
-  customer: InvoiceCustomer,
-  company: CompanyInfo,
+  payment: InvoicePayment, booking: InvoiceBooking,
+  customer: InvoiceCustomer, company: CompanyInfo,
   allPayments?: InvoicePayment[]
 ) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
   const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
-    loadLogoBase64(),
-    getSignatureData(),
-    generateTrackingQr(booking.tracking_id),
-    getPdfCompanyConfig(),
+    loadLogoBase64(), getSignatureData(), generateTrackingQr(booking.tracking_id), getPdfCompanyConfig(),
   ]);
-  const pageWidth = doc.internal.pageSize.getWidth();
-  let y = await addHeader(doc, company, logoBase64);
 
-
-  addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: booking.tracking_id, position: "top" });
+  let y = await addPdfHeader(doc, cfg, logoBase64, qrDataUrl);
   addPaymentWatermark(doc, "paid");
 
-  // Receipt title
-  doc.setFillColor(DARK.r, DARK.g, DARK.b);
-  doc.roundedRect(14, y, 65, 10, 2, 2, "F");
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255);
-  doc.text("PAYMENT RECEIPT", 16, y + 7);
-  doc.setTextColor(0);
-  y += 16;
+  y = addTitleBlock(doc, y, "PAYMENT RECEIPT", "paid");
 
   const receiptNum = `${booking.tracking_id}-${payment.installment_number || "P"}`;
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(80);
-  doc.text(`Receipt #: ${receiptNum}`, 14, y);
-  doc.text(`Date: ${fmtDate(payment.paid_at || new Date().toISOString())}`, pageWidth / 2 + 10, y);
-  doc.setTextColor(0);
-  y += 8;
+  y = addMetaLine(doc, y,
+    [`Receipt #: ${receiptNum}`, `Date: ${fmtDateLocal(payment.paid_at || new Date().toISOString())}`],
+    [`Booking ID: ${booking.tracking_id}`]
+  );
 
-  // Customer box
   y = await addCustomerSection(doc, y, customer);
 
-  // Payment details table
-  autoTable(doc, {
+  y = addRawTable(doc, {
     startY: y,
-    head: [["Description", "Details"]],
+    head: ["Description", "Details"],
     body: [
       ["Booking ID", booking.tracking_id],
       ["Package", booking.packages?.name || "N/A"],
       ["Installment #", String(payment.installment_number || "—")],
       ["Amount Paid", formatBDT(Number(payment.amount))],
-      ["Payment Date", fmtDate(payment.paid_at)],
+      ["Payment Date", fmtDateLocal(payment.paid_at)],
       ["Payment Method", (payment.payment_method || "Manual").charAt(0).toUpperCase() + (payment.payment_method || "manual").slice(1)],
     ],
-    styles: { fontSize: 8, cellPadding: 3, font: "NotoSansBengali" },
-    headStyles: { fillColor: [DARK.r, DARK.g, DARK.b], textColor: [255, 255, 255], fontSize: 7.5 },
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 50 } },
-    margin: { left: 14, right: 14 },
-    tableWidth: 120,
-    didDrawCell: bengaliCellHook,
+    fontSize: 8,
   });
 
-  y = ((doc as any).lastAutoTable?.finalY || y + 40) + 8;
-
-  // Running balance
   const paidPayments = (allPayments || []).filter(p => p.status === "completed");
   const totalPaidSoFar = paidPayments.reduce((s, p) => s + Number(p.amount), 0);
   const remaining = Math.max(0, Number(booking.total_amount) - totalPaidSoFar);
 
-  doc.setFillColor(DARK.r, DARK.g, DARK.b);
-  doc.roundedRect(14, y, pageWidth - 28, 14, 2, 2, "F");
-  doc.setTextColor(255);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(`Total Paid: ${formatBDT(totalPaidSoFar)}`, 20, y + 9);
-  doc.text(`Remaining Due: ${formatBDT(remaining)}`, pageWidth - 20, y + 9, { align: "right" });
-  doc.setTextColor(0);
-  y += 22;
-
-  y = addSignatureSection(doc, y, sig);
-  addFooter(doc, cfg);
+  y = addBalanceBar(doc, y, "Total Paid", formatBDT(totalPaidSoFar), "Remaining Due", formatBDT(remaining));
+  y = addSignatureBlock(doc, sig, y);
+  addPdfFooter(doc, cfg);
 
   doc.save(`Receipt-${receiptNum}.pdf`);
 }
 
-// ── Commission Receipt ──
+// ═══════════════════════════════════════════════════════════════
+// COMMISSION RECEIPT
+// ═══════════════════════════════════════════════════════════════
+
 export interface CommissionReceiptData {
   moallemName: string;
   moallemPhone?: string | null;
@@ -1177,60 +618,27 @@ export interface CommissionReceiptData {
   notes?: string | null;
 }
 
-export async function generateCommissionReceipt(
-  data: CommissionReceiptData,
-  company: CompanyInfo
-) {
+export async function generateCommissionReceipt(data: CommissionReceiptData, company: CompanyInfo) {
   const doc = new jsPDF();
   await registerBengaliFont(doc);
   const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
-    loadLogoBase64(),
-    getSignatureData(),
-    generateTrackingQr(data.bookingTrackingId),
-    getPdfCompanyConfig(),
+    loadLogoBase64(), getSignatureData(), generateTrackingQr(data.bookingTrackingId), getPdfCompanyConfig(),
   ]);
-  const pageWidth = doc.internal.pageSize.getWidth();
-  let y = await addHeader(doc, company, logoBase64);
 
-
-  addQrToDoc(doc, qrDataUrl, { size: 16, trackingId: data.bookingTrackingId, position: "top" });
+  let y = await addPdfHeader(doc, cfg, logoBase64, qrDataUrl);
   addPaymentWatermark(doc, getWatermarkStatus(data.commissionPaid, data.commissionDue));
 
-  doc.setFillColor(DARK.r, DARK.g, DARK.b);
-  doc.roundedRect(14, y, 90, 10, 2, 2, "F");
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255);
-  doc.text("COMMISSION PAYMENT RECEIPT", 16, y + 7);
-  doc.setTextColor(0);
-  y += 16;
+  y = addTitleBlock(doc, y, "COMMISSION PAYMENT RECEIPT", null);
+  y = addMetaLine(doc, y, [`Date: ${fmtDateLocal(data.paymentDate)}`], []);
 
-  doc.setFontSize(8);
-  doc.setTextColor(80);
-  doc.text(`Date: ${fmtDate(data.paymentDate)}`, pageWidth - 60, y);
-  doc.setTextColor(0);
-  y += 8;
+  y = await addInfoBox(doc, y, [
+    { label: "Moallem", value: data.moallemName },
+    { label: "Phone", value: data.moallemPhone || "N/A" },
+  ], "PAID TO (MOALLEM)");
 
-  // Moallem info box
-  doc.setFillColor(LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b);
-  doc.setDrawColor(220);
-  doc.rect(14, y, pageWidth - 28, 18, "FD");
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "bold");
-  doc.text("PAID TO (MOALLEM)", 18, y + 6);
-  doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.setLineWidth(0.5);
-  doc.line(18, y + 7.5, 60, y + 7.5);
-  doc.setLineWidth(0.2);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(50);
-  doc.text(`${data.moallemName}  |  Phone: ${data.moallemPhone || "N/A"}`, 18, y + 13);
-  doc.setTextColor(0);
-  y += 24;
-
-  autoTable(doc, {
+  y = addRawTable(doc, {
     startY: y,
-    head: [["Description", "Details"]],
+    head: ["Description", "Details"],
     body: [
       ["Booking ID", data.bookingTrackingId],
       ["Package", data.packageName],
@@ -1243,28 +651,13 @@ export async function generateCommissionReceipt(
       ["Commission Due", formatBDT(data.commissionDue)],
       ...(data.notes ? [["Notes", data.notes]] : []),
     ],
-    styles: { fontSize: 8, cellPadding: 3, font: "NotoSansBengali" },
-    headStyles: { fillColor: [DARK.r, DARK.g, DARK.b], textColor: [255, 255, 255], fontSize: 7.5 },
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 55 } },
-    margin: { left: 14, right: 14 },
-    tableWidth: 130,
-    didDrawCell: bengaliCellHook,
+    fontSize: 8,
   });
 
-  y = ((doc as any).lastAutoTable?.finalY || y + 40) + 8;
-
-  doc.setFillColor(DARK.r, DARK.g, DARK.b);
-  doc.roundedRect(14, y, pageWidth - 28, 14, 2, 2, "F");
-  doc.setTextColor(255);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(`Paid: ${formatBDT(data.paymentAmount)}`, 20, y + 9);
-  doc.text(`Remaining Due: ${formatBDT(Math.max(0, data.commissionDue))}`, pageWidth - 20, y + 9, { align: "right" });
-  doc.setTextColor(0);
-  y += 22;
-
-  y = addSignatureSection(doc, y, sig);
-  addFooter(doc, cfg);
+  y = addBalanceBar(doc, y, "Paid", formatBDT(data.paymentAmount), "Remaining Due", formatBDT(Math.max(0, data.commissionDue)));
+  y = addSignatureBlock(doc, sig, y);
+  addPdfFooter(doc, cfg);
 
   doc.save(`Commission_Receipt_${data.bookingTrackingId}.pdf`);
 }
