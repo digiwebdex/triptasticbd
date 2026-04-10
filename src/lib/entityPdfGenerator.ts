@@ -1,145 +1,18 @@
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import logoImg from "@/assets/logo-pdf.png";
-import QRCode from "qrcode";
+/**
+ * entityPdfGenerator.ts — Moallem, Supplier, Customer Profile PDFs
+ * Uses unified pdfCore design system.
+ */
 import { CompanyInfo } from "./invoiceGenerator";
-import { getSignatureData, SignatureData } from "./pdfSignature";
-import { generateTrackingQr, addQrToDoc, addPaymentWatermark, getWatermarkStatus } from "./pdfQrCode";
-import { registerBengaliFont, addBengaliText, hasBengali, bengaliCellHook } from "./pdfFontLoader";
-import { getPdfCompanyConfig, type PdfCompanyConfig } from "./pdfCompanyConfig";
+import {
+  initPdf, addPdfHeader, addPdfFooter, addTitleBlock, addSummaryCards,
+  addSectionTitle, addInfoBox, addTable, addRawTable, addSignatureBlock,
+  addWatermark, getWatermarkStatus, addTotalsBar, buildFileName,
+  fmtDate, fmtBDT, fmtAmount,
+  DARK, ORANGE, LIGHT_BG,
+  type SummaryCard, type InfoField,
+} from "./pdfCore";
+import { getPdfCompanyConfig } from "./pdfCompanyConfig";
 import { formatBDT } from "@/lib/utils";
-
-const GOLD = { r: 197, g: 165, b: 90 };
-const DARK = { r: 35, g: 40, b: 48 };
-
-const fmtDate = (d: string | null) =>
-  d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—";
-
-function loadLogoBase64(): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d")!;
-      ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/jpeg"));
-    };
-    img.onerror = () => resolve("");
-    img.src = logoImg;
-  });
-}
-
-async function generateCompanyQr(): Promise<string> {
-  const cfg = await getPdfCompanyConfig();
-  try {
-    return await QRCode.toDataURL(cfg.website, {
-      width: 200, margin: 1,
-      color: { dark: "#282E38", light: "#FFFFFF" },
-      errorCorrectionLevel: "M",
-    });
-  } catch { return ""; }
-}
-
-async function addHeader(doc: jsPDF, company: CompanyInfo, logoBase64: string, qrDataUrl: string, cfg: PdfCompanyConfig): Promise<number> {
-  const pageWidth = doc.internal.pageSize.getWidth();
-
-  // Top gold accent bar
-  doc.setFillColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.rect(0, 0, pageWidth, 3, "F");
-
-  // Logo
-  if (logoBase64) {
-    try { doc.addImage(logoBase64, "PNG", 14, 8, 28, 14); } catch { /* skip */ }
-  }
-
-  // QR code top-right (always present)
-  if (qrDataUrl) {
-    try { doc.addImage(qrDataUrl, "PNG", pageWidth - 30, 10, 16, 16); } catch { /* skip */ }
-  }
-
-  const textX = logoBase64 ? 46 : 14;
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(company.name || cfg.company_name, textX, 16);
-
-  // Tagline
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 21);
-
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(100);
-  const contactParts: string[] = [];
-  if (company.phone) contactParts.push(`Tel: ${company.phone}`);
-  if (company.email) contactParts.push(`Email: ${company.email}`);
-  if (contactParts.length) doc.text(contactParts.join("  |  "), textX, 26);
-  if (company.address) {
-    if (hasBengali(company.address)) {
-      await addBengaliText(doc, company.address, textX, 31, { fontSize: 7, color: "#646464" });
-    } else {
-      doc.text(company.address, textX, 31);
-    }
-  }
-
-  // Gold accent line
-  doc.setDrawColor(GOLD.r, GOLD.g, GOLD.b);
-  doc.setLineWidth(0.8);
-  doc.line(14, 38, pageWidth - 14, 38);
-  doc.setLineWidth(0.2);
-  doc.setTextColor(0);
-
-  return 44;
-}
-
-function addSignatureAndFooter(doc: jsPDF, sig: SignatureData, cfg: PdfCompanyConfig) {
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  let y = pageHeight - 40;
-  const rightCenter = pageWidth - 47;
-
-  // Stamp & signature images
-  if (sig.stamp_base64) {
-    try { doc.addImage(sig.stamp_base64, "PNG", rightCenter - 18, y - 46, 36, 36); } catch { /* skip */ }
-  }
-  if (sig.signature_base64) {
-    try { doc.addImage(sig.signature_base64, "PNG", rightCenter - 14, y - 16, 28, 12); } catch { /* skip */ }
-  }
-
-  doc.setDrawColor(180);
-  doc.line(14, y, 80, y);
-  doc.line(pageWidth - 80, y, pageWidth - 14, y);
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.text("Customer Signature", 14, y + 5);
-
-  if (sig.authorized_name) {
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.text(sig.authorized_name, rightCenter, y + 5, { align: "center" });
-  } else {
-    doc.text("Authorized Signature", pageWidth - 80, y + 5);
-  }
-
-  if (sig.designation) {
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "normal");
-    doc.text(sig.designation, rightCenter, y + 10, { align: "center" });
-  } else {
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "italic");
-    doc.text("Company Seal", rightCenter, y + 10, { align: "center" });
-  }
-
-  doc.setTextColor(150);
-  doc.text(cfg.footer_contact, pageWidth / 2, pageHeight - 10, { align: "center" });
-  doc.setTextColor(0);
-}
 
 // ── Moallem Profile PDF ──
 export interface MoallemPdfData {
@@ -156,108 +29,80 @@ export interface MoallemPdfData {
   summary: { totalBookings: number; totalTravelers: number; totalAmount: number; totalPaid: number; totalDue: number; totalDeposit: number; totalCommission: number; commissionPaid: number; commissionDue: number };
 }
 
-export async function generateMoallemPdf(data: MoallemPdfData, company: CompanyInfo) {
-  const doc = new jsPDF();
-  await registerBengaliFont(doc);
-  const [logoBase64, sig, companyQr, cfg] = await Promise.all([
-    loadLogoBase64(),
-    getSignatureData(),
-    generateCompanyQr(),
-    getPdfCompanyConfig(),
+export async function generateMoallemPdf(data: MoallemPdfData, _company: CompanyInfo) {
+  const { doc, logoBase64, sig, qrDataUrl, cfg } = await initPdf();
+
+  let y = await addPdfHeader(doc, cfg, logoBase64, qrDataUrl);
+
+  // Watermark
+  const wmStatus = getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue);
+  addWatermark(doc, wmStatus);
+
+  // Title
+  y = addTitleBlock(doc, y, "Moallem Profile Report", data.status);
+
+  // Info box
+  const fields: InfoField[] = [
+    { label: "Name", value: data.name },
+    { label: "Phone", value: data.phone || "N/A" },
+    { label: "NID", value: data.nid_number || "N/A" },
+    { label: "Contract Date", value: fmtDate(data.contract_date) },
+    { label: "Address", value: data.address || "N/A" },
+    { label: "Status", value: data.status },
+  ];
+  y = await addInfoBox(doc, y, fields, "Moallem Details");
+
+  // Summary cards
+  const cards: SummaryCard[] = [
+    { label: "Total Bookings", value: String(data.summary.totalBookings) },
+    { label: "Total Amount", value: fmtBDT(data.summary.totalAmount) },
+    { label: "Paid", value: fmtBDT(data.summary.totalPaid) },
+    { label: "Due", value: fmtBDT(data.summary.totalDue), highlight: data.summary.totalDue > 0 },
+  ];
+  y = addSummaryCards(doc, y, cards);
+
+  // Deposit & Commission summary bar
+  y = addTotalsBar(doc, y, [
+    `Deposit: ${fmtBDT(data.summary.totalDeposit)}`,
+    `Commission: ${fmtBDT(data.summary.totalCommission)}`,
+    `Comm. Paid: ${fmtBDT(data.summary.commissionPaid)}`,
+    `Comm. Due: ${fmtBDT(data.summary.commissionDue)}`,
   ]);
-  let y = await addHeader(doc, company, logoBase64, companyQr, cfg);
-  const pw = doc.internal.pageSize.getWidth();
 
-  // Watermark based on moallem summary
-  addPaymentWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));
-
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text("MOALLEM PROFILE REPORT", 14, y);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${fmtDate(new Date().toISOString())}`, pw - 14 - 60, y + 6);
-  y += 14;
-
-  doc.setFillColor(248, 248, 248);
-  doc.rect(14, y, pw - 28, 24, "F");
-  doc.setFontSize(10);
-  await addBengaliText(doc, data.name, 18, y + 6, { fontSize: 10, fontWeight: "bold" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Phone: ${data.phone || "N/A"} | NID: ${data.nid_number || "N/A"}`, 18, y + 12);
-  doc.text(`Address: ${data.address || "N/A"} | Status: ${data.status}`, 18, y + 18);
-  y += 30;
-
-  doc.setFillColor(40, 46, 56);
-  doc.rect(14, y, pw - 28, 18, "F");
-  doc.setTextColor(255);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(`Bookings: ${data.summary.totalBookings}`, 18, y + 7);
-  doc.text(`Total: ${formatBDT(data.summary.totalAmount)}`, 60, y + 7);
-  doc.text(`Paid: ${formatBDT(data.summary.totalPaid)}`, 110, y + 7);
-  doc.text(`Due: ${formatBDT(data.summary.totalDue)}`, 155, y + 7);
-  doc.text(`Deposit: ${formatBDT(data.summary.totalDeposit)}`, 18, y + 14);
-  doc.text(`Commission: ${formatBDT(data.summary.totalCommission)}`, 70, y + 14);
-  doc.text(`Comm. Due: ${formatBDT(data.summary.commissionDue)}`, 130, y + 14);
-  doc.setTextColor(0);
-  y += 24;
-
+  // Bookings table
   if (data.bookings.length > 0) {
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("BOOKINGS", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Bookings");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["Tracking ID", "Guest", "Package", "Total", "Paid", "Due", "Status"]],
+      head: ["Tracking ID", "Guest", "Package", "Total", "Paid", "Due", "Status"],
       body: data.bookings.map(b => [b.tracking_id, b.guest_name, b.package_name, formatBDT(b.total), formatBDT(b.paid), formatBDT(b.due), b.status]),
-      styles: { fontSize: 7, font: "helvetica" },
-      headStyles: { fillColor: [40, 46, 56] },
-      margin: { left: 14, right: 14 },
-      didDrawCell: bengaliCellHook,
     });
-    y = (doc as any).lastAutoTable?.finalY + 8 || y + 20;
   }
 
+  // Moallem Payments
   if (data.moallemPayments.length > 0) {
-    if (y > 240) { doc.addPage(); y = 20; }
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("MOALLEM PAYMENTS (DEPOSITS)", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Moallem Payments (Deposits)");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["Amount", "Date", "Method", "Notes"]],
+      head: ["Amount", "Date", "Method", "Notes"],
       body: data.moallemPayments.map(p => [formatBDT(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
-      styles: { fontSize: 7, font: "helvetica" },
-      headStyles: { fillColor: [60, 70, 85] },
-      margin: { left: 14, right: 14 },
-      didDrawCell: bengaliCellHook,
     });
-    y = (doc as any).lastAutoTable?.finalY + 8 || y + 20;
   }
 
+  // Commission Payments
   if (data.commissionPayments.length > 0) {
-    if (y > 240) { doc.addPage(); y = 20; }
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("COMMISSION PAYMENTS", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Commission Payments");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["Amount", "Date", "Method", "Notes"]],
+      head: ["Amount", "Date", "Method", "Notes"],
       body: data.commissionPayments.map(p => [formatBDT(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
-      styles: { fontSize: 7, font: "helvetica" },
-      headStyles: { fillColor: [60, 70, 85] },
-      margin: { left: 14, right: 14 },
-      didDrawCell: bengaliCellHook,
     });
   }
 
-  addSignatureAndFooter(doc, sig, cfg);
-  doc.save(`Moallem-${data.name.replace(/\s+/g, "_")}.pdf`);
+  // Signature & Footer
+  addSignatureBlock(doc, sig, y);
+  addPdfFooter(doc, cfg, { showPageNumbers: true });
+  doc.save(buildFileName("Moallem", data.name));
 }
 
 // ── Supplier Agent Profile PDF ──
@@ -276,156 +121,91 @@ export interface SupplierPdfData {
   summary: { totalBookings: number; totalTravelers: number; contractedHajji: number; totalPaid: number; totalDue: number; totalBilled: number };
 }
 
-export async function generateSupplierPdf(data: SupplierPdfData, company: CompanyInfo) {
-  const doc = new jsPDF();
-  await registerBengaliFont(doc);
-  const [logoBase64, sig, companyQr, cfg] = await Promise.all([
-    loadLogoBase64(),
-    getSignatureData(),
-    generateCompanyQr(),
-    getPdfCompanyConfig(),
-  ]);
-  let y = await addHeader(doc, company, logoBase64, companyQr, cfg);
-  const pw = doc.internal.pageSize.getWidth();
+export async function generateSupplierPdf(data: SupplierPdfData, _company: CompanyInfo) {
+  const { doc, logoBase64, sig, qrDataUrl, cfg } = await initPdf();
 
-  // Watermark based on supplier summary
-  addPaymentWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));
+  let y = await addPdfHeader(doc, cfg, logoBase64, qrDataUrl);
+  addWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));
 
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text("SUPPLIER AGENT REPORT", 14, y);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${fmtDate(new Date().toISOString())}`, pw - 14 - 60, y + 6);
-  y += 14;
+  y = addTitleBlock(doc, y, "Supplier Agent Report", data.status);
 
-  doc.setFillColor(248, 248, 248);
-  doc.rect(14, y, pw - 28, 18, "F");
-  doc.setFontSize(10);
-  await addBengaliText(doc, data.agent_name, 18, y + 6, { fontSize: 10, fontWeight: "bold" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Company: ${data.company_name || "N/A"} | Phone: ${data.phone || "N/A"} | Status: ${data.status}`, 18, y + 12);
-  y += 24;
+  // Info box
+  const fields: InfoField[] = [
+    { label: "Agent Name", value: data.agent_name },
+    { label: "Company", value: data.company_name || "N/A" },
+    { label: "Phone", value: data.phone || "N/A" },
+    { label: "Status", value: data.status },
+    { label: "Address", value: data.address || "N/A" },
+  ];
+  y = await addInfoBox(doc, y, fields, "Supplier Details");
 
-  doc.setFillColor(40, 46, 56);
-  doc.rect(14, y, pw - 28, 12, "F");
-  doc.setTextColor(255);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(`Contracted Hajji: ${data.summary.contractedHajji} | Billed: ${formatBDT(data.summary.totalBilled)} | Paid: ${formatBDT(data.summary.totalPaid)} | Due: ${formatBDT(data.summary.totalDue)}`, 18, y + 8);
-  doc.setTextColor(0);
-  y += 18;
+  // Summary cards
+  const cards: SummaryCard[] = [
+    { label: "Contracted Hajji", value: String(data.summary.contractedHajji) },
+    { label: "Total Billed", value: fmtBDT(data.summary.totalBilled) },
+    { label: "Total Paid", value: fmtBDT(data.summary.totalPaid) },
+    { label: "Total Due", value: fmtBDT(data.summary.totalDue), highlight: data.summary.totalDue > 0 },
+  ];
+  y = addSummaryCards(doc, y, cards);
 
   // Service Items
   if (data.items && data.items.length > 0) {
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("SERVICE ITEMS", 14, y);
-    y += 4;
+    y = addSectionTitle(doc, y, "Service Items");
     const itemsTotal = data.items.reduce((s, i) => s + i.total_amount, 0);
-    autoTable(doc, {
+    y = addRawTable(doc, {
       startY: y,
-      head: [["SL", "Description", "Qty", "Unit Price", "Total"]],
+      head: ["SL", "Description", "Qty", "Unit Price", "Total"],
       body: [
         ...data.items.map((item, i) => [String(i + 1), item.description, String(item.quantity), formatBDT(item.unit_price), formatBDT(item.total_amount)]),
-        ["", "", "", "Grand Total", formatBDT(itemsTotal)],
       ],
-      styles: { fontSize: 7, font: "helvetica" },
-      headStyles: { fillColor: [40, 46, 56] },
-      margin: { left: 14, right: 14 },
-      didParseCell: (hookData: any) => {
-        if (hookData.row.index === data.items!.length && hookData.section === 'body') {
-          hookData.cell.styles.fontStyle = 'bold';
-          hookData.cell.styles.fillColor = [245, 245, 245];
-        }
-      },
-      didDrawCell: bengaliCellHook,
+      foot: [["", "", "", "Grand Total", formatBDT(itemsTotal)]],
     });
-    y = (doc as any).lastAutoTable?.finalY + 8 || y + 20;
   }
 
+  // Bookings
   if (data.bookings.length > 0) {
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("BOOKINGS", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Bookings");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["Tracking ID", "Guest", "Package", "Total", "Cost", "Paid", "Due", "Status"]],
+      head: ["Tracking ID", "Guest", "Package", "Total", "Cost", "Paid", "Due", "Status"],
       body: data.bookings.map(b => [b.tracking_id, b.guest_name, b.package_name, formatBDT(b.total), formatBDT(b.cost), formatBDT(b.paid_to_supplier), formatBDT(b.supplier_due), b.status]),
-      styles: { fontSize: 7, font: "helvetica", cellPadding: 2, overflow: 'linebreak' },
-      headStyles: { fillColor: [40, 46, 56] },
-      margin: { left: 14, right: 14 },
-      didDrawCell: bengaliCellHook,
+      fontSize: 6.5,
     });
-    y = (doc as any).lastAutoTable?.finalY + 8 || y + 20;
   }
 
+  // Payments
   if (data.agentPayments.length > 0) {
-    if (y > 240) { doc.addPage(); y = 20; }
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("PAYMENTS TO SUPPLIER", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Payments to Supplier");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["Category", "Amount", "Date", "Method", "Notes"]],
+      head: ["Category", "Amount", "Date", "Method", "Notes"],
       body: data.agentPayments.map(p => [p.category || "—", formatBDT(p.amount), fmtDate(p.date), p.method, p.notes || "—"]),
-      styles: { fontSize: 7, font: "helvetica", cellPadding: 2 },
-      headStyles: { fillColor: [60, 70, 85] },
-      margin: { left: 14, right: 14 },
-      columnStyles: {
-        0: { cellWidth: 25 },
-        1: { cellWidth: 30 },
-        2: { cellWidth: 28 },
-        3: { cellWidth: 22 },
-        4: { cellWidth: 'auto' },
-      },
-      didDrawCell: bengaliCellHook,
     });
-    y = (doc as any).lastAutoTable?.finalY + 8 || y + 20;
   }
 
   // Contracts
   if (data.contracts && data.contracts.length > 0) {
-    if (y > 240) { doc.addPage(); y = 20; }
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("CONTRACTS", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Contracts");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["Date", "Pilgrim Count", "Contract Amount", "Paid", "Due"]],
+      head: ["Date", "Pilgrim Count", "Contract Amount", "Paid", "Due"],
       body: data.contracts.map(c => [fmtDate(c.created_at), String(c.pilgrim_count), formatBDT(c.contract_amount), formatBDT(c.total_paid), formatBDT(c.total_due)]),
-      styles: { fontSize: 7, font: "helvetica" },
-      headStyles: { fillColor: [40, 46, 56] },
-      margin: { left: 14, right: 14 },
-      didDrawCell: bengaliCellHook,
     });
-    y = (doc as any).lastAutoTable?.finalY + 8 || y + 20;
   }
 
   // Contract Payments
   if (data.contractPayments && data.contractPayments.length > 0) {
-    if (y > 240) { doc.addPage(); y = 20; }
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("CONTRACT PAYMENTS", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Contract Payments");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["Amount", "Date", "Method", "Note"]],
+      head: ["Amount", "Date", "Method", "Note"],
       body: data.contractPayments.map(p => [formatBDT(p.amount), fmtDate(p.payment_date), p.payment_method || "cash", p.note || "—"]),
-      styles: { fontSize: 7, font: "helvetica" },
-      headStyles: { fillColor: [60, 70, 85] },
-      margin: { left: 14, right: 14 },
-      didDrawCell: bengaliCellHook,
     });
   }
 
-  addSignatureAndFooter(doc, sig, cfg);
-  doc.save(`Supplier-${data.agent_name.replace(/\s+/g, "_")}.pdf`);
+  addSignatureBlock(doc, sig, y);
+  addPdfFooter(doc, cfg, { showPageNumbers: true });
+  doc.save(buildFileName("Supplier", data.agent_name));
 }
 
 // ── Customer Profile PDF ──
@@ -443,84 +223,63 @@ export interface CustomerPdfData {
   summary: { totalBookings: number; totalAmount: number; totalPaid: number; totalDue: number; totalExpenses: number; profit: number };
 }
 
-export async function generateCustomerPdf(data: CustomerPdfData, company: CompanyInfo) {
-  const doc = new jsPDF();
-  await registerBengaliFont(doc);
-  const [logoBase64, sig, companyQr, cfg] = await Promise.all([
-    loadLogoBase64(),
-    getSignatureData(),
-    generateCompanyQr(),
-    getPdfCompanyConfig(),
+export async function generateCustomerPdf(data: CustomerPdfData, _company: CompanyInfo) {
+  const { doc, logoBase64, sig, qrDataUrl, cfg } = await initPdf();
+
+  let y = await addPdfHeader(doc, cfg, logoBase64, qrDataUrl);
+  addWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));
+
+  y = addTitleBlock(doc, y, "Customer Profile Report");
+
+  // Info box
+  const fields: InfoField[] = [
+    { label: "Name", value: data.full_name || "N/A" },
+    { label: "Phone", value: data.phone || "N/A" },
+    { label: "Email", value: data.email || "N/A" },
+    { label: "Passport", value: data.passport_number || "N/A" },
+    { label: "NID", value: data.nid_number || "N/A" },
+    { label: "Address", value: data.address || "N/A" },
+  ];
+  y = await addInfoBox(doc, y, fields, "Customer Details");
+
+  // Summary cards
+  const cards: SummaryCard[] = [
+    { label: "Bookings", value: String(data.summary.totalBookings) },
+    { label: "Total Amount", value: fmtBDT(data.summary.totalAmount) },
+    { label: "Total Paid", value: fmtBDT(data.summary.totalPaid) },
+    { label: "Due", value: fmtBDT(data.summary.totalDue), highlight: data.summary.totalDue > 0 },
+  ];
+  y = addSummaryCards(doc, y, cards);
+
+  // Profit bar
+  y = addTotalsBar(doc, y, [
+    `Expenses: ${fmtBDT(data.summary.totalExpenses)}`,
+    `Net Profit: ${fmtBDT(data.summary.profit)}`,
   ]);
-  let y = await addHeader(doc, company, logoBase64, companyQr, cfg);
-  const pw = doc.internal.pageSize.getWidth();
 
-  // Watermark based on customer summary
-  addPaymentWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));
-
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text("CUSTOMER PROFILE REPORT", 14, y);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${fmtDate(new Date().toISOString())}`, pw - 14 - 60, y + 6);
-  y += 14;
-
-  doc.setFillColor(248, 248, 248);
-  doc.rect(14, y, pw - 28, 24, "F");
-  doc.setFontSize(10);
-  await addBengaliText(doc, data.full_name || "N/A", 18, y + 6, { fontSize: 10, fontWeight: "bold" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Phone: ${data.phone || "N/A"} | Email: ${data.email || "N/A"}`, 18, y + 12);
-  doc.text(`Passport: ${data.passport_number || "N/A"} | NID: ${data.nid_number || "N/A"} | Address: ${data.address || "N/A"}`, 18, y + 18);
-  y += 30;
-
-  doc.setFillColor(40, 46, 56);
-  doc.rect(14, y, pw - 28, 12, "F");
-  doc.setTextColor(255);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.text(`Bookings: ${data.summary.totalBookings} | Total: ${formatBDT(data.summary.totalAmount)} | Paid: ${formatBDT(data.summary.totalPaid)} | Due: ${formatBDT(data.summary.totalDue)} | Profit: ${formatBDT(data.summary.profit)}`, 18, y + 8);
-  doc.setTextColor(0);
-  y += 18;
-
+  // Bookings table
   if (data.bookings.length > 0) {
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("BOOKINGS", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Bookings");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["Tracking ID", "Package", "Date", "Total", "Paid", "Due", "Status"]],
+      head: ["Tracking ID", "Package", "Date", "Total", "Paid", "Due", "Status"],
       body: data.bookings.map(b => [b.tracking_id, b.package_name, fmtDate(b.date), formatBDT(b.total), formatBDT(b.paid), formatBDT(b.due), b.status]),
-      styles: { fontSize: 7, font: "helvetica" },
-      headStyles: { fillColor: [40, 46, 56] },
-      margin: { left: 14, right: 14 },
-      didDrawCell: bengaliCellHook,
     });
-    y = (doc as any).lastAutoTable?.finalY + 8 || y + 20;
   }
 
+  // Payments table
   if (data.payments.length > 0) {
-    if (y > 240) { doc.addPage(); y = 20; }
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("PAYMENT HISTORY", 14, y);
-    y += 4;
-    autoTable(doc, {
+    y = addSectionTitle(doc, y, "Payment History");
+    y = addRawTable(doc, {
       startY: y,
-      head: [["#", "Booking", "Amount", "Date", "Method", "Status"]],
-      body: data.payments.map(p => [p.installment || "—", p.tracking_id, formatBDT(p.amount), fmtDate(p.date), p.method || "—", p.status]),
-      styles: { fontSize: 7, font: "helvetica" },
-      headStyles: { fillColor: [60, 70, 85] },
-      margin: { left: 14, right: 14 },
-      didDrawCell: bengaliCellHook,
+      head: ["#", "Booking", "Amount", "Date", "Method", "Status"],
+      body: data.payments.map(p => [String(p.installment || "—"), p.tracking_id, formatBDT(p.amount), fmtDate(p.date), p.method || "—", p.status]),
     });
   }
 
-  addSignatureAndFooter(doc, sig, cfg);
-  doc.save(`Customer-${(data.full_name || "Unknown").replace(/\s+/g, "_")}.pdf`);
+  addSignatureBlock(doc, sig, y);
+  addPdfFooter(doc, cfg, { showPageNumbers: true });
+  doc.save(buildFileName("Customer", data.full_name || "Unknown"));
 }
 
 // ── Get company info from CMS ──
