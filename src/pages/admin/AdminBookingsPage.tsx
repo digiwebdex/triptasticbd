@@ -367,6 +367,14 @@ export default function AdminBookingsPage() {
     fetchBookings();
   };
 
+  // Close inline status dropdown on outside click
+  useEffect(() => {
+    if (!inlineStatusId) return;
+    const handler = () => setInlineStatusId(null);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [inlineStatusId]);
+
   useEffect(() => {
     fetchBookings();
     fetchAllPayments();
