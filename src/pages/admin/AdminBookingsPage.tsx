@@ -1077,7 +1077,7 @@ export default function AdminBookingsPage() {
                         </div>
                       )}
                     </td>
-                    <td className="py-3 px-2 text-center" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-3 px-2 text-center" onClick={(e) => { e.stopPropagation(); setDocReviewBooking(b); }}>
                       {(() => {
                         const docs = bookingDocs[b.id] || [];
                         const requiredTypes = ["passport", "nid", "photo"];
@@ -1086,7 +1086,7 @@ export default function AdminBookingsPage() {
                         const isComplete = completedCount === requiredTypes.length;
                         const hasAny = completedCount > 0;
                         return (
-                          <div className="flex flex-col items-center gap-0.5">
+                          <div className="flex flex-col items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity">
                             <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full ${isComplete ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : hasAny ? "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400" : "bg-secondary text-muted-foreground"}`}>
                               {isComplete ? <FileCheck className="h-3 w-3" /> : hasAny ? <FileMinus className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
                               {completedCount}/{requiredTypes.length}
