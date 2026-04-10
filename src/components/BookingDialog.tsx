@@ -65,6 +65,10 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({ fullName: "", phone: "", passportNumber: "", address: "" });
   const [uploadedDocs, setUploadedDocs] = useState<UploadedDoc[]>([]);
   const [createdBooking, setCreatedBooking] = useState<{ id: string; tracking_id: string } | null>(null);
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [paymentScreenshotPreview, setPaymentScreenshotPreview] = useState<string | null>(null);
+  const [transferAmount, setTransferAmount] = useState<string>("");
+  const screenshotInputRef = useRef<HTMLInputElement>(null);
 
   const normalizePaymentMethods = (value: unknown) => {
     let methods: unknown = value;
