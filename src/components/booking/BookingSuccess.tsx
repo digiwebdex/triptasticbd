@@ -1,8 +1,5 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/lib/api";
-import { CheckCircle, FileText, ArrowRight } from "lucide-react";
-import DocumentUpload from "@/components/DocumentUpload";
+import { CheckCircle, ArrowRight } from "lucide-react";
 
 interface Props {
   bookingId: string;
@@ -11,20 +8,6 @@ interface Props {
 }
 
 const BookingSuccess = ({ bookingId, trackingId, userId }: Props) => {
-  const [documents, setDocuments] = useState<any[]>([]);
-
-  const fetchDocs = async () => {
-    const { data } = await supabase
-      .from("booking_documents")
-      .select("*")
-      .eq("booking_id", bookingId);
-    setDocuments(data || []);
-  };
-
-  useEffect(() => {
-    fetchDocs();
-  }, [bookingId]);
-
   return (
     <div className="space-y-6">
       {/* Success Banner */}
@@ -38,22 +21,6 @@ const BookingSuccess = ({ bookingId, trackingId, userId }: Props) => {
         <p className="text-sm text-muted-foreground">
           Save this ID to track your booking status anytime.
         </p>
-      </div>
-
-      {/* Document Upload */}
-      <div className="bg-card border border-border rounded-xl p-6">
-        <h2 className="font-heading text-lg font-bold mb-2 flex items-center gap-2">
-          <FileText className="h-5 w-5 text-primary" /> Upload Documents
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Please upload your required documents to proceed with visa processing.
-        </p>
-        <DocumentUpload
-          bookingId={bookingId}
-          userId={userId}
-          documents={documents}
-          onUploaded={fetchDocs}
-        />
       </div>
 
       {/* Actions */}
