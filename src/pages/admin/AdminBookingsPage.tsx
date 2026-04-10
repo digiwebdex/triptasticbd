@@ -637,55 +637,7 @@ export default function AdminBookingsPage() {
 
     // Auto-create customer profile when booking is confirmed
     if (statusChangeVal === "confirmed" && booking) {
-      try {
-        const guestName = booking.guest_name || "";
-        const guestPhone = booking.guest_phone || "";
-        const guestEmail = booking.guest_email || "";
-        const guestPassport = booking.guest_passport || "";
-        const guestAddress = booking.guest_address || "";
-        const userId = booking.user_id;
-
-        if (guestName && userId) {
-          // Check if profile already exists for this user
-          const { data: existingProfile } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("user_id", userId)
-            .limit(1);
-
-          if (!existingProfile || existingProfile.length === 0) {
-            await supabase.from("profiles").insert({
-              user_id: userId,
-              full_name: guestName,
-              phone: guestPhone,
-              email: guestEmail,
-              passport_number: guestPassport,
-              address: guestAddress,
-            });
-            toast.success(`Customer "${guestName}" added to Customer Management`);
-          }
-        } else if (guestName && !userId) {
-          // Guest booking without auth — check by phone to avoid duplicates
-          const { data: existingByPhone } = guestPhone
-            ? await supabase.from("profiles").select("id").eq("phone", guestPhone).limit(1)
-            : { data: [] };
-
-          if (!existingByPhone || existingByPhone.length === 0) {
-            // Create profile with a placeholder user_id (booking id as reference)
-            await supabase.from("profiles").insert({
-              user_id: booking.id, // use booking id as reference for guest profiles
-              full_name: guestName,
-              phone: guestPhone,
-              email: guestEmail,
-              passport_number: guestPassport,
-              address: guestAddress,
-            });
-            toast.success(`Customer "${guestName}" added to Customer Management`);
-          }
-        }
-      } catch (profileErr: any) {
-        console.error("Auto-create customer failed:", profileErr);
-      }
+      await autoCreateCustomer(booking);
     }
 
     // Auto-send notification to customer
