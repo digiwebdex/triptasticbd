@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/api";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { ArrowRight, Package, Users, CreditCard, Check, User, FileText, Upload, X } from "lucide-react";
+import { ArrowRight, Package, Users, CreditCard, Check, User, FileText, Upload, X, Camera, ImageIcon } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import bkashLogo from "@/assets/payment/bkash.png";
 import nagadLogo from "@/assets/payment/nagad.png";
@@ -19,6 +19,8 @@ const PAYMENT_LOGOS: Record<string, string> = {
   nagad: nagadLogo,
   bank_transfer: bankTransferLogo,
   bank: bankTransferLogo,
+  bank_shahjalal: bankTransferLogo,
+  bank_alarafah: bankTransferLogo,
   sslcommerz: sslcommerzLogo,
   aamarpay: sslcommerzLogo,
 };
@@ -26,7 +28,8 @@ const PAYMENT_LOGOS: Record<string, string> = {
 const FALLBACK_PAYMENT_METHODS = [
   { id: "bkash", name: "bKash", name_bn: "বিকাশ", icon: "🟣", category: "mfs", enabled: true, account_name: "", account_number: "", instructions: "Send money to our bKash number", instructions_bn: "আমাদের বিকাশ নম্বরে টাকা পাঠান", charge_percent: 0 },
   { id: "nagad", name: "Nagad", name_bn: "নগদ", icon: "🟠", category: "mfs", enabled: true, account_name: "", account_number: "", instructions: "Send money to our Nagad number", instructions_bn: "আমাদের নগদ নম্বরে টাকা পাঠান", charge_percent: 0 },
-  { id: "bank_transfer", name: "Bank Transfer", name_bn: "ব্যাংক ট্রান্সফার", icon: "🏦", category: "bank", enabled: true, account_name: "", account_number: "", instructions: "Transfer to our bank account and share receipt", instructions_bn: "আমাদের ব্যাংক একাউন্টে ট্রান্সফার করে রসিদ শেয়ার করুন", charge_percent: 0 },
+  { id: "bank_shahjalal", name: "Shahjalal Islami Bank", name_bn: "শাহজালাল ইসলামী ব্যাংক", icon: "🏦", category: "bank", enabled: true, account_name: "Manasik Travel Hub", account_number: "9036-1111005012911", instructions: "Transfer to Shahjalal Islami Bank, Tangail Branch. Routing No: 190932291", instructions_bn: "শাহজালাল ইসলামী ব্যাংক, টাঙ্গাইল শাখায় ট্রান্সফার করুন। রাউটিং নং: 190932291", charge_percent: 0 },
+  { id: "bank_alarafah", name: "Al-Arafah Islami Bank", name_bn: "আল-আরাফাহ ইসলামী ব্যাংক", icon: "🏦", category: "bank", enabled: true, account_name: "Manasik Travel Hub", account_number: "1121020006204", instructions: "Transfer to Al-Arafah Islami Bank (AIB), Tangail Branch. Al-Wadiah Current Account.", instructions_bn: "আল-আরাফাহ ইসলামী ব্যাংক, টাঙ্গাইল শাখায় ট্রান্সফার করুন। আল-ওয়াদিয়াহ চলতি হিসাব।", charge_percent: 0 },
   { id: "cod", name: "Cash / Office", name_bn: "ক্যাশ / অফিস", icon: "💵", category: "cod", enabled: true, account_name: "", account_number: "", instructions: "Pay at office or later", instructions_bn: "অফিসে বা পরে পেমেন্ট করুন", charge_percent: 0 },
 ];
 
@@ -62,6 +65,10 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({ fullName: "", phone: "", passportNumber: "", address: "" });
   const [uploadedDocs, setUploadedDocs] = useState<UploadedDoc[]>([]);
   const [createdBooking, setCreatedBooking] = useState<{ id: string; tracking_id: string } | null>(null);
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [paymentScreenshotPreview, setPaymentScreenshotPreview] = useState<string | null>(null);
+  const [transferAmount, setTransferAmount] = useState<string>("");
+  const screenshotInputRef = useRef<HTMLInputElement>(null);
 
   const normalizePaymentMethods = (value: unknown) => {
     let methods: unknown = value;
@@ -134,17 +141,32 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
   const nextStep = () => { if (validateStep()) setStep((s) => Math.min(s + 1, STEPS.length - 1)); };
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
+  const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("ফাইল সাইজ ৫MB এর কম হতে হবে"); return; }
+    setPaymentScreenshot(file);
+    const reader = new FileReader();
+    reader.onload = () => setPaymentScreenshotPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async () => {
     if (!pkg) return;
     setSubmitting(true);
     try {
       const selectedMethod = paymentMethods.find(m => m.id === selectedPaymentMethod);
+      const isBankMethod = selectedMethod?.category === 'bank';
+      const paymentNote = isBankMethod && transferAmount
+        ? `${selectedMethod?.name || selectedPaymentMethod} — ৳${transferAmount} transferred`
+        : undefined;
       const response = await supabase.functions.invoke("create-guest-booking", {
         body: {
           fullName: personalInfo.fullName.trim(), phone: personalInfo.phone.trim(),
           email: email.trim() || null, address: personalInfo.address.trim() || null,
           passportNumber: personalInfo.passportNumber.trim() || null, packageId: pkg.id,
-          numTravelers, notes: notes.trim() || null, installmentPlanId: selectedPlan || null,
+          numTravelers, notes: [notes.trim(), paymentNote].filter(Boolean).join(" | ") || null,
+          installmentPlanId: selectedPlan || null,
           paymentMethod: selectedMethod?.name || selectedPaymentMethod || null,
         },
       });
@@ -152,8 +174,10 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
       const result = response.data;
       if (!result?.success) throw new Error(result?.error || "Booking failed");
 
+      const userId = user?.id || result.user_id || "guest";
+
+      // Upload documents
       if (uploadedDocs.length > 0 && result.booking_id) {
-        const userId = user?.id || result.user_id || "guest";
         for (const doc of uploadedDocs) {
           const ext = doc.file.name.split(".").pop();
           const filePath = `${userId}/${result.booking_id}/${doc.type}_${Date.now()}.${ext}`;
@@ -161,6 +185,15 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
           await supabase.from("booking_documents").insert({ booking_id: result.booking_id, user_id: userId, document_type: doc.type, file_name: doc.file.name, file_path: filePath, file_size: doc.file.size });
         }
       }
+
+      // Upload payment screenshot
+      if (paymentScreenshot && result.booking_id) {
+        const ext = paymentScreenshot.name.split(".").pop();
+        const filePath = `${userId}/${result.booking_id}/payment_receipt_${Date.now()}.${ext}`;
+        await supabase.storage.from("booking-documents").upload(filePath, paymentScreenshot);
+        await supabase.from("booking_documents").insert({ booking_id: result.booking_id, user_id: userId, document_type: "payment_receipt", file_name: paymentScreenshot.name, file_path: filePath, file_size: paymentScreenshot.size });
+      }
+
       setCreatedBooking({ id: result.booking_id, tracking_id: result.tracking_id });
       toast.success(`Booking created! Tracking ID: ${result.tracking_id}`);
     } catch (err: any) {
@@ -308,6 +341,43 @@ const BookingDialog = ({ open, onOpenChange, packageId }: BookingDialogProps) =>
                       })()}
                     </div>
                   )}
+
+                  {/* Bank Transfer: Amount + Screenshot Upload */}
+                  {selectedPaymentMethod && (() => {
+                    const m = paymentMethods.find((pm: any) => pm.id === selectedPaymentMethod);
+                    if (!m || m.category !== 'bank') return null;
+                    return (
+                      <div className="bg-card border-2 border-dashed border-primary/30 rounded-xl p-6 space-y-4">
+                        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                          <CreditCard className="h-4 w-4 text-primary" />
+                          {"ট্রান্সফার তথ্য জমা দিন"}
+                        </h3>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1 block">{"ট্রান্সফারকৃত পরিমাণ (৳)"}</label>
+                          <input type="number" min={0} placeholder="যেমন: 50000" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} className={inputClass} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-2 block">{"পেমেন্ট স্ক্রিনশট / রসিদ আপলোড করুন"}</label>
+                          <input ref={screenshotInputRef} type="file" accept="image/*" className="hidden" onChange={handleScreenshotChange} />
+                          {!paymentScreenshotPreview ? (
+                            <button type="button" onClick={() => screenshotInputRef.current?.click()} className="w-full border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-2 hover:border-primary/40 hover:bg-secondary/50 transition-all">
+                              <Camera className="h-8 w-8 text-muted-foreground/50" />
+                              <span className="text-sm text-muted-foreground">{"ক্লিক করে স্ক্রিনশট আপলোড করুন"}</span>
+                              <span className="text-xs text-muted-foreground/60">{"JPG, PNG — সর্বোচ্চ ৫MB"}</span>
+                            </button>
+                          ) : (
+                            <div className="relative">
+                              <img src={paymentScreenshotPreview} alt="Payment receipt" className="w-full max-h-48 object-contain rounded-lg border border-border" />
+                              <button type="button" onClick={() => { setPaymentScreenshot(null); setPaymentScreenshotPreview(null); if (screenshotInputRef.current) screenshotInputRef.current.value = ""; }} className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:opacity-80">
+                                <X className="h-4 w-4" />
+                              </button>
+                              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1"><ImageIcon className="h-3 w-3" /> {paymentScreenshot?.name}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   <div>
                     <textarea placeholder={t("booking.specialRequests")} maxLength={500} rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} className={`${inputClass} resize-none`} />
