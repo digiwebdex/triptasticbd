@@ -731,7 +731,8 @@ export default function AdminBookingsPage() {
 
   const filtered = useMemo(() => bookings.filter((b) => {
     const q = search.toLowerCase();
-    const matchesSearch = !search || (b.tracking_id?.toLowerCase().includes(q) || b.guest_name?.toLowerCase()?.includes(q) || b.guest_passport?.toLowerCase()?.includes(q) || b.packages?.name?.toLowerCase().includes(q) || b.status?.toLowerCase().includes(q));
+    const matchesSearch = !search || (b.tracking_id?.toLowerCase().includes(q) || b.guest_name?.toLowerCase()?.includes(q) || b.guest_email?.toLowerCase()?.includes(q) || b.guest_phone?.toLowerCase()?.includes(q) || b.guest_passport?.toLowerCase()?.includes(q) || b.packages?.name?.toLowerCase().includes(q) || b.status?.toLowerCase().includes(q));
+    const matchesStatus = statusFilter === "all" || b.status === statusFilter;
     const bookingDate = new Date(b.created_at);
     let matchesFrom = true;
     if (dateFrom) {
@@ -745,8 +746,21 @@ export default function AdminBookingsPage() {
       to.setHours(23, 59, 59, 999);
       matchesTo = bookingDate <= to;
     }
-    return matchesSearch && matchesFrom && matchesTo;
-  }), [bookings, search, dateFrom, dateTo]);
+    return matchesSearch && matchesStatus && matchesFrom && matchesTo;
+  }), [bookings, search, statusFilter, dateFrom, dateTo]);
+
+  // KPI calculations
+  const kpiStats = useMemo(() => {
+    const total = bookings.length;
+    const pending = bookings.filter(b => b.status === "pending").length;
+    const confirmed = bookings.filter(b => b.status === "confirmed").length;
+    const completed = bookings.filter(b => b.status === "completed").length;
+    const cancelled = bookings.filter(b => b.status === "cancelled").length;
+    const totalRevenue = bookings.filter(b => b.status !== "cancelled").reduce((s, b) => s + Number(b.total_amount || 0), 0);
+    const totalPaid = bookings.filter(b => b.status !== "cancelled").reduce((s, b) => s + Number(b.paid_amount || 0), 0);
+    const totalDue = bookings.filter(b => b.status !== "cancelled").reduce((s, b) => s + Number(b.due_amount || 0), 0);
+    return { total, pending, confirmed, completed, cancelled, totalRevenue, totalPaid, totalDue };
+  }, [bookings]);
 
   const getBookingActions = (b: any): ActionItem[] => [
     { label: "View Details", icon: <Eye className="h-3.5 w-3.5" />, onClick: () => setViewBooking(b) },
