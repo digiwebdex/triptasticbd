@@ -39,7 +39,7 @@ const HeroSection = () => {
   return (
     <section
       id="hero"
-      className="relative w-full overflow-hidden"
+      className="relative w-full overflow-hidden pt-24 sm:pt-24"
     >
       {/* Background Images with Ken Burns effect */}
       <AnimatePresence mode="wait">
