@@ -1196,8 +1196,16 @@ app.post('/api/send-otp', async (req, res) => {
         return res.status(500).json({ error: 'SMS service not configured' });
       }
 
-      const message = `Your Manasik Travel Hub verification code is: ${otpCode}. Valid for 5 minutes.`;
-      const smsUrl = `http://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(sanitizedPhone)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
+      // Ensure phone has 88 country code for BulkSMSBD
+      let smsNumber = sanitizedPhone;
+      if (smsNumber.startsWith('0')) {
+        smsNumber = '88' + smsNumber;
+      } else if (!smsNumber.startsWith('88')) {
+        smsNumber = '88' + smsNumber;
+      }
+
+      const message = `Manasik Travel Hub OTP is ${otpCode}`;
+      const smsUrl = `http://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(smsNumber)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
       const smsRes = await fetch(smsUrl);
       console.log('SMS result:', await smsRes.text());
 
