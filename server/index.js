@@ -505,7 +505,7 @@ app.use('/api/supplier-agent-items', createCrudRoutes('supplier_agent_items', { 
 app.use('/api/supplier-contracts', createCrudRoutes('supplier_contracts', { adminOnly: true }));
 app.use('/api/supplier-contract-payments', createCrudRoutes('supplier_contract_payments', { adminOnly: true }));
 app.use('/api/booking-members', createCrudRoutes('booking_members', { adminOnly: true }));
-app.use('/api/booking-documents', createCrudRoutes('booking_documents'));
+app.use('/api/booking-documents', createCrudRoutes('booking_documents', { readAuth: true, writeAuth: false }));
 app.use('/api/hotel-bookings', createCrudRoutes('hotel_bookings'));
 app.use('/api/notification-logs', createCrudRoutes('notification_logs', { adminOnly: true }));
 app.use('/api/notification-settings', createCrudRoutes('notification_settings', { adminOnly: true, orderBy: 'event_key ASC' }));
@@ -786,7 +786,7 @@ const sanitizeStoragePath = (input = '') =>
 const uploadsRoot = path.join(__dirname, 'uploads');
 
 // File upload
-app.post('/api/upload', authenticate, upload.single('file'), async (req, res) => {
+app.post('/api/upload', optionalAuth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
