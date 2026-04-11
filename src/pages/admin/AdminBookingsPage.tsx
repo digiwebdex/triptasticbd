@@ -28,6 +28,13 @@ const STATUSES = ["pending", "confirmed", "visa_processing", "ticket_issued", "c
 const normalizeBookingType = (value?: string | null) => (value || "").trim().toLowerCase();
 const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBookingType(value).includes("family") || memberCount > 0;
 const toMoney = (value: any) => Math.max(0, Number(value || 0));
+const formatTrackingId = (value?: string | null) => {
+  const normalized = (value || "").trim().toUpperCase();
+  if (!normalized) return "";
+  if (normalized.startsWith("MTH-")) return normalized;
+  if (normalized.startsWith("RK-")) return `MTH-${normalized.slice(3)}`;
+  return normalized;
+};
 const REQUIRED_DOCUMENT_TYPES = ["passport", "nid", "photo"] as const;
 const DOCUMENT_TYPE_ALIASES: Record<string, (typeof REQUIRED_DOCUMENT_TYPES)[number] | string> = {
   passport: "passport",
@@ -962,7 +969,7 @@ export default function AdminBookingsPage() {
                     <td colSpan={11} className="py-4 px-2">
                       <div className="space-y-3 bg-secondary/30 rounded-lg p-4" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-between items-center">
-                          <p className="font-mono font-bold text-primary text-sm">{b.tracking_id}</p>
+                          <p className="font-mono font-bold text-primary text-sm">{formatTrackingId(b.tracking_id)}</p>
                           <div className="flex gap-2">
                             <button onClick={saveEdit} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-md flex items-center gap-1"><Save className="h-3 w-3" /> Save</button>
                             <button onClick={() => { setEditingId(null); setEditMembers([]); }} className="text-xs bg-secondary text-foreground px-3 py-1.5 rounded-md flex items-center gap-1"><X className="h-3 w-3" /> Cancel</button>
@@ -1043,7 +1050,7 @@ export default function AdminBookingsPage() {
                       <span className="text-xs text-muted-foreground">{new Date(b.created_at).toLocaleDateString("en-GB", { month: "short", day: "2-digit", year: "numeric" })}</span>
                     </td>
                     <td className="py-3 px-2">
-                      <span className="font-mono text-xs font-bold text-primary">{b.tracking_id?.slice(-8) || b.id?.slice(0, 8)}</span>
+                      <span className="font-mono text-xs font-bold text-primary">{formatTrackingId(b.tracking_id)?.slice(-8) || b.id?.slice(0, 8)}</span>
                     </td>
                     <td className="py-3 px-2">
                       <div className="min-w-[120px]">
@@ -1139,7 +1146,7 @@ export default function AdminBookingsPage() {
       <Dialog open={!!viewBooking} onOpenChange={(o) => { if (!o) setViewBooking(null); }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-heading">Booking Details — {viewBooking?.tracking_id}</DialogTitle>
+            <DialogTitle className="font-heading">Booking Details — {formatTrackingId(viewBooking?.tracking_id)}</DialogTitle>
           </DialogHeader>
           {viewBooking && (
             <div className="space-y-4">
