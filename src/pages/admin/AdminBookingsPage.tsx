@@ -437,7 +437,7 @@ export default function AdminBookingsPage() {
       guest_address: b.guest_address || "",
       guest_passport: b.guest_passport || "",
       user_id: b.user_id || null,
-      moallem_id: b.moallem_id || "",
+      moallem_id: b.moallem_id || (moallems.find((m: any) => m.name === "Manasik Travel Hub")?.id || ""),
       booking_type: normalizedType,
     });
 
