@@ -229,7 +229,7 @@ export async function generateCustomerPdf(data: CustomerPdfData, _company: Compa
   let y = await addPdfHeader(doc, cfg, logoBase64, qrDataUrl);
   addWatermark(doc, getWatermarkStatus(data.summary.totalPaid, data.summary.totalDue));
 
-  y = addTitleBlock(doc, y, "Customer Profile Report");
+  y = addTitleBlock(doc, y, "Customer Report");
 
   // Info box
   const fields: InfoField[] = [
@@ -251,11 +251,6 @@ export async function generateCustomerPdf(data: CustomerPdfData, _company: Compa
   ];
   y = addSummaryCards(doc, y, cards);
 
-  // Profit bar
-  y = addTotalsBar(doc, y, [
-    `Expenses: ${fmtBDT(data.summary.totalExpenses)}`,
-    `Net Profit: ${fmtBDT(data.summary.profit)}`,
-  ]);
 
   // Bookings table
   if (data.bookings.length > 0) {
