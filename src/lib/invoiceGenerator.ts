@@ -129,6 +129,14 @@ const cleanText = (...values: unknown[]): string => {
   return "";
 };
 
+const toPublicTrackingId = (value?: string | null): string => {
+  const normalized = cleanText(value).toUpperCase();
+  if (!normalized) return "";
+  if (normalized.startsWith("MTH-")) return normalized;
+  if (normalized.startsWith("RK-")) return `MTH-${normalized.slice(3)}`;
+  return normalized;
+};
+
 const resolvePackageName = (value: unknown): string => {
   if (Array.isArray(value)) {
     return cleanText(value[0]?.name, value[0]?.title, value[0]?.package_name, value[0]?.packageName);
