@@ -5,24 +5,23 @@ import { useIsViewer } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import AdminActionMenu, { ActionItem } from "@/components/admin/AdminActionMenu";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Eye, Search, Truck, ChevronLeft, ChevronRight, FileDown, FileSpreadsheet, Package, Wallet, CreditCard } from "lucide-react";
+import {
+  Plus, Pencil, Trash2, Eye, Search, Truck, ChevronLeft, ChevronRight,
+  FileDown, FileSpreadsheet, Package, Wallet, Phone, Building2, Users2,
+  TrendingUp, TrendingDown, CalendarDays
+} from "lucide-react";
 import { exportPDF, exportExcel } from "@/lib/reportExport";
 import { normalizePhone, getPhoneError, handlePhoneChange } from "@/lib/phoneValidation";
 import { format } from "date-fns";
-import { formatBDT } from "@/lib/utils";
+import { formatBDT, cn } from "@/lib/utils";
 
 const PAGE_SIZE = 15;
 
@@ -149,271 +148,283 @@ export default function AdminSupplierAgentsPage() {
     return { totalContracted, totalPaid, totalDue };
   }, [filtered, supplierStats]);
 
-  // Agent name lookup
   const agentNameMap = useMemo(() => {
     const map: Record<string, string> = {};
     agents.forEach(a => { map[a.id] = a.agent_name; });
     return map;
   }, [agents]);
 
-  // Items with agent names
-  const itemsWithNames = useMemo(() => {
-    return allItems.map(item => ({
-      ...item,
-      agent_name: agentNameMap[item.supplier_agent_id] || "—",
-    }));
-  }, [allItems, agentNameMap]);
-
+  const itemsWithNames = useMemo(() => allItems.map(item => ({ ...item, agent_name: agentNameMap[item.supplier_agent_id] || "—" })), [allItems, agentNameMap]);
   const itemsGrandTotal = useMemo(() => allItems.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0), [allItems]);
 
-  // Payments with agent names
-  const paymentsWithNames = useMemo(() => {
-    return allPaymentsDetailed.map(p => ({
-      ...p,
-      agent_name: agentNameMap[p.supplier_agent_id] || "—",
-    }));
-  }, [allPaymentsDetailed, agentNameMap]);
-
+  const paymentsWithNames = useMemo(() => allPaymentsDetailed.map(p => ({ ...p, agent_name: agentNameMap[p.supplier_agent_id] || "—" })), [allPaymentsDetailed, agentNameMap]);
   const paymentsGrandTotal = useMemo(() => allPaymentsDetailed.reduce((s: number, p: any) => s + Number(p.amount || 0), 0), [allPaymentsDetailed]);
 
+  const inputClass = "w-full bg-secondary border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40";
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Truck className="h-6 w-6 text-primary" /> Supplier Agents
           </h1>
-          <p className="text-muted-foreground text-sm">Total {agents.length} Suppliers</p>
+          <p className="text-muted-foreground text-sm mt-0.5">
+            {agents.length} {agents.length === 1 ? "supplier" : "suppliers"} registered
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(a => { const s = getStats(a); return [a.agent_name, a.phone || "—", Number(a.contracted_hajji || 0), s.contractedAmount, s.totalPaid, s.totalDue]; }); exportPDF({ title: "Supplier Agents Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${totals.totalDue.toLocaleString("en-IN")}`] }); }}><FileDown className="h-4 w-4 mr-1" />PDF</Button>
-          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(a => { const s = getStats(a); return [a.agent_name, a.phone || "—", Number(a.contracted_hajji || 0), s.contractedAmount, s.totalPaid, s.totalDue]; }); exportExcel({ title: "Supplier Agents Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${totals.totalDue.toLocaleString("en-IN")}`] }); }}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(a => { const s = getStats(a); return [a.agent_name, a.phone || "—", Number(a.contracted_hajji || 0), s.contractedAmount, s.totalPaid, s.totalDue]; }); exportPDF({ title: "Supplier Agents Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${totals.totalDue.toLocaleString("en-IN")}`] }); }}>
+            <FileDown className="h-4 w-4 mr-1" />PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => { const rows = filtered.map(a => { const s = getStats(a); return [a.agent_name, a.phone || "—", Number(a.contracted_hajji || 0), s.contractedAmount, s.totalPaid, s.totalDue]; }); exportExcel({ title: "Supplier Agents Report", columns: ["Name", "Phone", "Pilgrim Count", "Contract Amount", "Total Paid", "Total Due"], rows, summary: [`Total Paid: BDT ${totals.totalPaid.toLocaleString("en-IN")}`, `Total Due: BDT ${totals.totalDue.toLocaleString("en-IN")}`] }); }}>
+            <FileSpreadsheet className="h-4 w-4 mr-1" />Excel
+          </Button>
           {!isViewer && (
-            <Button onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }}>
+            <Button onClick={() => { setForm(emptyForm); setEditId(null); setShowForm(true); }} className="bg-primary hover:bg-primary/90">
               <Plus className="h-4 w-4 mr-1" /> New Agent
             </Button>
           )}
         </div>
       </div>
 
-      {/* KPI Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Agents</p>
-          <p className="text-lg font-bold text-foreground">{agents.length}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Contracted Amount</p>
-          <p className="text-lg font-bold text-foreground">{formatBDT(totals.totalContracted)}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Paid</p>
-          <p className="text-lg font-bold text-emerald-600">{formatBDT(totals.totalPaid)}</p>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Total Due</p>
-          <p className="text-lg font-bold text-destructive">{formatBDT(totals.totalDue)}</p>
-        </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Total Agents", value: String(agents.length), icon: <Users2 className="h-5 w-5" />, color: "text-primary" },
+          { label: "Contracted Amount", value: formatBDT(totals.totalContracted), icon: <Building2 className="h-5 w-5" />, color: "text-foreground" },
+          { label: "Total Paid", value: formatBDT(totals.totalPaid), icon: <TrendingUp className="h-5 w-5" />, color: "text-emerald-600" },
+          { label: "Total Due", value: formatBDT(totals.totalDue), icon: <TrendingDown className="h-5 w-5" />, color: "text-destructive" },
+        ].map((kpi, i) => (
+          <div key={i} className="bg-card border border-border rounded-xl p-5 flex items-start justify-between">
+            <div>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{kpi.label}</p>
+              <p className={cn("text-xl font-bold mt-1", kpi.color)}>{kpi.value}</p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-primary/10 text-primary">{kpi.icon}</div>
+          </div>
+        ))}
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search by name, company or phone..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
-      </div>
+      {/* Agents Table */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="font-heading text-lg font-bold">All Agents ({filtered.length})</h2>
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input className={inputClass + " pl-9"} placeholder="Search by name, company or phone..." value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+        </div>
 
-      {/* Table */}
-      {loading ? (
-        <div className="flex justify-center py-12"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
-      ) : filtered.length === 0 ? (
-        <p className="text-center text-muted-foreground py-12">No supplier agents found</p>
-      ) : (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
+        {loading ? (
+          <div className="flex justify-center py-16"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+        ) : filtered.length === 0 ? (
+          <p className="text-center text-muted-foreground py-16">No supplier agents found</p>
+        ) : (
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/40">
-                  <TableHead className="w-12 text-center">SL</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead className="text-right">Pilgrim Count</TableHead>
-                  <TableHead className="text-right">Contracted Amount</TableHead>
-                  <TableHead className="text-right">Total Paid</TableHead>
-                  <TableHead className="text-right">Total Due</TableHead>
-                  <TableHead className="text-center w-24">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginated.map((a, i) => {
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Agent</th>
+                  <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone</th>
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pilgrims</th>
+                  <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contract</th>
+                  <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Paid</th>
+                  <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Due</th>
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {paginated.map((a) => {
                   const stats = getStats(a);
+                  const isPaidFull = stats.totalDue <= 0 && stats.contractedAmount > 0;
                   return (
-                    <TableRow key={a.id} className="cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => navigate(`/admin/supplier-agents/${a.id}`)}>
-                      <TableCell className="text-center text-muted-foreground text-xs">{(page - 1) * PAGE_SIZE + i + 1}</TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{a.agent_name}</p>
-                          {a.company_name && <p className="text-[11px] text-muted-foreground">{a.company_name}</p>}
+                    <tr key={a.id} className="hover:bg-secondary/30 transition-colors cursor-pointer group" onClick={() => navigate(`/admin/supplier-agents/${a.id}`)}>
+                      <td className="py-3 px-3">
+                        <div className="min-w-[140px]">
+                          <p className="font-semibold text-sm leading-tight">{a.agent_name}</p>
+                          {a.company_name && <p className="text-[11px] text-muted-foreground mt-0.5">{a.company_name}</p>}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{a.phone || "—"}</TableCell>
-                      <TableCell className="text-right font-medium">{a.contracted_hajji || 0}</TableCell>
-                      <TableCell className="text-right font-medium">{formatBDT(stats.contractedAmount)}</TableCell>
-                      <TableCell className="text-right font-medium text-emerald-600">{formatBDT(stats.totalPaid)}</TableCell>
-                      <TableCell className="text-right font-medium text-destructive">{formatBDT(stats.totalDue)}</TableCell>
-                      <TableCell className="text-center" onClick={e => e.stopPropagation()}>
-                        <AdminActionMenu actions={getActions(a)} inlineCount={1} />
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className="text-sm text-muted-foreground">{a.phone || "—"}</span>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <span className="text-sm font-medium">{a.contracted_hajji || 0}</span>
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <span className="text-sm font-bold">৳{Number(stats.contractedAmount).toLocaleString("en-IN")}</span>
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <span className="text-sm font-semibold text-emerald-600">৳{Number(stats.totalPaid).toLocaleString("en-IN")}</span>
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        <span className={cn("text-sm font-semibold", stats.totalDue > 0 ? "text-destructive" : "text-muted-foreground")}>
+                          ৳{Number(stats.totalDue).toLocaleString("en-IN")}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <span className={cn(
+                          "inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full border capitalize",
+                          a.status === "active"
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
+                            : "bg-secondary text-muted-foreground border-border"
+                        )}>
+                          <span className={cn("w-1.5 h-1.5 rounded-full", a.status === "active" ? "bg-emerald-500" : "bg-muted-foreground")} />
+                          {a.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-center" onClick={e => e.stopPropagation()}>
+                        <AdminActionMenu actions={getActions(a)} inlineCount={0} />
+                      </td>
+                    </tr>
                   );
                 })}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
+        )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-border">
-              <p className="text-xs text-muted-foreground">
-                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
-              </p>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-xs text-muted-foreground px-2">{page} / {totalPages}</span>
-                <Button variant="ghost" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border">
+            <p className="text-xs text-muted-foreground">
+              Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
+            </p>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground px-2">{page} / {totalPages}</span>
+              <Button variant="ghost" size="sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-          )}
+          </div>
+        )}
+      </div>
+
+      {/* Service Items Card */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between">
+          <h2 className="font-heading text-base font-bold flex items-center gap-2">
+            <Package className="h-4 w-4 text-primary" /> All Service / Items ({itemsWithNames.length})
+          </h2>
+          <span className="text-sm font-bold text-primary">Total: {formatBDT(itemsGrandTotal)}</span>
         </div>
-      )}
-
-      {/* All Service / Items Summary */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Package className="h-4 w-4 text-primary" /> All Service / Items ({itemsWithNames.length})
-            </CardTitle>
-            <span className="text-sm font-bold">Total: {formatBDT(itemsGrandTotal)}</span>
+        {itemsWithNames.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">No service items recorded</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase w-10">SL</th>
+                  <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Description</th>
+                  <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Agent</th>
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Qty</th>
+                  <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Rate</th>
+                  <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Total</th>
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {itemsWithNames.map((item: any, i: number) => (
+                  <tr key={item.id} className="hover:bg-secondary/20 transition-colors">
+                    <td className="text-center py-2.5 px-3 text-muted-foreground text-xs">{i + 1}</td>
+                    <td className="py-2.5 px-3 font-medium">{item.description}</td>
+                    <td className="py-2.5 px-3 text-primary text-sm font-medium">{item.agent_name}</td>
+                    <td className="text-center py-2.5 px-3">{item.quantity}</td>
+                    <td className="text-right py-2.5 px-3">{formatBDT(item.unit_price)}</td>
+                    <td className="text-right py-2.5 px-3 font-bold">{formatBDT(item.total_amount)}</td>
+                    <td className="text-center py-2.5 px-3 text-xs text-muted-foreground">{item.created_at ? format(new Date(item.created_at), "dd MMM yyyy") : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-muted/40 font-bold border-t border-border">
+                  <td colSpan={5} className="text-right py-3 px-3 text-sm">Grand Total</td>
+                  <td className="text-right py-3 px-3 text-primary text-sm">{formatBDT(itemsGrandTotal)}</td>
+                  <td />
+                </tr>
+              </tfoot>
+            </table>
           </div>
-        </CardHeader>
-        <CardContent>
-          {itemsWithNames.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No service items</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/40">
-                    <TableHead className="w-10 text-center">SL</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Agent</TableHead>
-                    <TableHead className="text-right">Qty</TableHead>
-                    <TableHead className="text-right">Rate (BDT)</TableHead>
-                    <TableHead className="text-right">Total (BDT)</TableHead>
-                    <TableHead className="text-center">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {itemsWithNames.map((item: any, i: number) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="text-center text-muted-foreground text-xs">{i + 1}</TableCell>
-                      <TableCell className="font-medium">{item.description}</TableCell>
-                      <TableCell className="text-primary text-sm">{item.agent_name}</TableCell>
-                      <TableCell className="text-right">{item.quantity}</TableCell>
-                      <TableCell className="text-right">{formatBDT(item.unit_price)}</TableCell>
-                      <TableCell className="text-right font-bold">{formatBDT(item.total_amount)}</TableCell>
-                      <TableCell className="text-center text-xs text-muted-foreground">{item.created_at ? format(new Date(item.created_at), "dd MMM yyyy") : "—"}</TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow className="bg-muted/60 font-bold">
-                    <TableCell colSpan={5} className="text-right">Total =</TableCell>
-                    <TableCell className="text-right text-primary">{formatBDT(itemsGrandTotal)}</TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
-      {/* All Payment History */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-primary" /> All Payment History ({paymentsWithNames.length})
-            </CardTitle>
-            <span className="text-sm font-bold">Total Paid: {formatBDT(paymentsGrandTotal)}</span>
+      {/* Payment History Card */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between">
+          <h2 className="font-heading text-base font-bold flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-primary" /> All Payment History ({paymentsWithNames.length})
+          </h2>
+          <span className="text-sm font-bold text-emerald-600">Total Paid: {formatBDT(paymentsGrandTotal)}</span>
+        </div>
+        {paymentsWithNames.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">No payments recorded</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase w-10">SL</th>
+                  <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Agent</th>
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Date</th>
+                  <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Amount</th>
+                  <th className="text-center py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Method</th>
+                  <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase">Notes</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {paymentsWithNames.map((p: any, i: number) => (
+                  <tr key={p.id} className="hover:bg-secondary/20 transition-colors">
+                    <td className="text-center py-2.5 px-3 text-muted-foreground text-xs">{i + 1}</td>
+                    <td className="py-2.5 px-3 font-medium text-primary">{p.agent_name}</td>
+                    <td className="text-center py-2.5 px-3 text-sm">{p.date ? format(new Date(p.date), "dd MMM yyyy") : "—"}</td>
+                    <td className="text-right py-2.5 px-3 font-bold text-emerald-600">{formatBDT(p.amount)}</td>
+                    <td className="text-center py-2.5 px-3">
+                      <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-foreground capitalize">{p.payment_method || "—"}</span>
+                    </td>
+                    <td className="py-2.5 px-3 text-xs text-muted-foreground max-w-[200px] truncate">{p.notes || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-muted/40 font-bold border-t border-border">
+                  <td colSpan={3} className="text-right py-3 px-3 text-sm">Grand Total</td>
+                  <td className="text-right py-3 px-3 text-emerald-600 text-sm">{formatBDT(paymentsGrandTotal)}</td>
+                  <td colSpan={2} />
+                </tr>
+              </tfoot>
+            </table>
           </div>
-        </CardHeader>
-        <CardContent>
-          {paymentsWithNames.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No payments yet</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/40">
-                    <TableHead className="w-10 text-center">SL</TableHead>
-                    <TableHead>Agent Name</TableHead>
-                    <TableHead className="text-center">Date</TableHead>
-                    <TableHead className="text-right">Amount (BDT)</TableHead>
-                    <TableHead className="text-center">Method</TableHead>
-                    <TableHead>Notes</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paymentsWithNames.map((p: any, i: number) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="text-center text-muted-foreground text-xs">{i + 1}</TableCell>
-                      <TableCell className="font-medium text-primary">{p.agent_name}</TableCell>
-                      <TableCell className="text-center text-sm">{p.date ? format(new Date(p.date), "dd/MM/yyyy") : "—"}</TableCell>
-                      <TableCell className="text-right font-bold text-emerald-500">{formatBDT(p.amount)}</TableCell>
-                      <TableCell className="text-center capitalize text-xs">{p.payment_method || "—"}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{p.notes || "—"}</TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow className="bg-muted/60 font-bold">
-                    <TableCell colSpan={3} className="text-right">Total Paid =</TableCell>
-                    <TableCell className="text-right text-emerald-500">{formatBDT(paymentsGrandTotal)}</TableCell>
-                    <TableCell colSpan={2} />
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
-      {/* Summary */}
-      <Card className="border-primary/30">
-        <CardContent className="pt-4 pb-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            <div>
-              <p className="text-xs text-muted-foreground uppercase">Service Total</p>
-              <p className="text-lg font-bold">{formatBDT(itemsGrandTotal)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground uppercase">Total Paid</p>
-              <p className="text-lg font-bold text-emerald-500">{formatBDT(paymentsGrandTotal)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground uppercase">Total Due</p>
-              <p className="text-lg font-bold text-destructive">{formatBDT(Math.max(0, itemsGrandTotal - paymentsGrandTotal))}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground uppercase">Total Agents</p>
-              <p className="text-lg font-bold">{agents.length}</p>
-            </div>
+      {/* Summary Footer */}
+      <div className="bg-card border-2 border-primary/20 rounded-xl p-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 text-center">
+          <div>
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Service Billed</p>
+            <p className="text-xl font-bold mt-1">{formatBDT(itemsGrandTotal)}</p>
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Total Paid</p>
+            <p className="text-xl font-bold text-emerald-600 mt-1">{formatBDT(paymentsGrandTotal)}</p>
+          </div>
+          <div>
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding Due</p>
+            <p className="text-xl font-bold text-destructive mt-1">{formatBDT(Math.max(0, itemsGrandTotal - paymentsGrandTotal))}</p>
+          </div>
+          <div>
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Active Agents</p>
+            <p className="text-xl font-bold mt-1">{agents.filter(a => a.status === "active").length}</p>
+          </div>
+        </div>
+      </div>
 
       {/* Create / Edit Dialog */}
       <Dialog open={showForm} onOpenChange={o => { if (!o) { setShowForm(false); setEditId(null); } }}>
