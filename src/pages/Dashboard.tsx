@@ -334,8 +334,8 @@ const Dashboard = () => {
                           <Package className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <Link to={`/track?id=${b.tracking_id}`} className="font-mono font-bold text-primary hover:underline text-sm">
-                            {b.tracking_id}
+                          <Link to={`/track?id=${formatTrackingId(b.tracking_id)}`} className="font-mono font-bold text-primary hover:underline text-sm">
+                            {formatTrackingId(b.tracking_id)}
                           </Link>
                           <p className="text-sm text-muted-foreground">{b.packages?.name || "N/A"} • {b.num_travelers} {b.num_travelers > 1 ? t("dashboard.travelers") : t("dashboard.traveler")}</p>
                         </div>
@@ -464,8 +464,8 @@ const Dashboard = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                       <div>
                         <p className="text-xs text-muted-foreground">{t("dashboard.trackingId")}</p>
-                        <Link to={`/track?id=${b.tracking_id}`} className="font-mono font-bold text-primary hover:underline">
-                          {b.tracking_id}
+                        <Link to={`/track?id=${formatTrackingId(b.tracking_id)}`} className="font-mono font-bold text-primary hover:underline">
+                          {formatTrackingId(b.tracking_id)}
                         </Link>
                       </div>
                       <span className={`text-xs font-semibold px-3 py-1 rounded-full capitalize ${statusColor(b.status)}`}>
@@ -674,8 +674,8 @@ const Dashboard = () => {
                         {booking?.packages?.name || "Booking"} • Due: {p.due_date ? new Date(p.due_date).toLocaleDateString() : "N/A"}
                       </p>
                       {booking && (
-                        <Link to={`/track?id=${booking.tracking_id}`} className="text-xs text-primary hover:underline mt-1 inline-block">
-                          Track: {booking.tracking_id}
+                        <Link to={`/track?id=${formatTrackingId(booking.tracking_id)}`} className="text-xs text-primary hover:underline mt-1 inline-block">
+                          Track: {formatTrackingId(booking.tracking_id)}
                         </Link>
                       )}
                     </div>
