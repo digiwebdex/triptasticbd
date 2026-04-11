@@ -180,26 +180,27 @@ export async function addPdfHeader(
     (doc as any).setCharSpace(0);
   }
 
-  // Company name
+  // Company name — centered below logo
+  const textStartY = logoY + logoRenderH + 4;
   doc.setFontSize(15);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
-  doc.text(cfg.company_name, textX, 13);
+  doc.text(cfg.company_name, centerX, textStartY, { align: "center" });
 
   // Tagline
   doc.setFontSize(7.5);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(ORANGE.r, ORANGE.g, ORANGE.b);
-  doc.text(cfg.tagline || "Hajj & Umrah Services", textX, 17.5, { maxWidth: contactMaxWidth });
+  doc.text(cfg.tagline || "Hajj & Umrah Services", centerX, textStartY + 4.5, { align: "center", maxWidth: contactMaxWidth });
 
-  // Contact lines — regular spacing
+  // Contact lines
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
-  doc.text(`Phone: ${phoneLine}`, textX, 22.5, { maxWidth: contactMaxWidth });
+  doc.text(`Phone: ${phoneLine}`, centerX, textStartY + 10, { align: "center", maxWidth: contactMaxWidth });
 
   if (emailLine) {
-    doc.text(emailLine, textX, 26.5, { maxWidth: contactMaxWidth });
+    doc.text(emailLine, centerX, textStartY + 14, { align: "center", maxWidth: contactMaxWidth });
   }
 
   // Address
@@ -207,10 +208,10 @@ export async function addPdfHeader(
     doc.setFontSize(6);
     doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
     if (hasBengali(cfg.address)) {
-      await addBengaliText(doc, cfg.address, textX, 30.5, { fontSize: 5.5, color: "#787878", maxWidth: contactMaxWidth });
+      await addBengaliText(doc, cfg.address, centerX, textStartY + 18, { fontSize: 5.5, color: "#787878", maxWidth: contactMaxWidth, align: "center" });
     } else {
       const addr = cfg.address.length > 100 ? cfg.address.substring(0, 100) + "..." : cfg.address;
-      doc.text(addr, textX, 30.5, { maxWidth: contactMaxWidth });
+      doc.text(addr, centerX, textStartY + 18, { align: "center", maxWidth: contactMaxWidth });
     }
   }
 
@@ -224,8 +225,8 @@ export async function addPdfHeader(
     } catch { /* skip */ }
   }
 
-  // ── Bottom separator — thin dark + orange accent ──
-  const lineY = 34;
+  // ── Bottom separator ──
+  const lineY = textStartY + 22;
   doc.setDrawColor(DARK.r, DARK.g, DARK.b);
   doc.setLineWidth(0.6);
   doc.line(14, lineY, pw - 14, lineY);
