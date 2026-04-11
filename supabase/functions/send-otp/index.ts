@@ -5,6 +5,31 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const toLocalPhone = (value = "") => {
+  const digits = String(value).replace(/\D/g, "");
+  if (digits.startsWith("880") && digits.length >= 12) return `0${digits.slice(2)}`;
+  if (digits.startsWith("0")) return digits;
+  if (digits.startsWith("1") && digits.length === 10) return `0${digits}`;
+  return digits;
+};
+
+const toSmsPhone = (value = "") => {
+  const digits = String(value).replace(/\D/g, "");
+  if (digits.startsWith("880")) return digits;
+
+  const local = toLocalPhone(value);
+  if (local.startsWith("0")) return `88${local}`;
+
+  return digits.startsWith("88") ? digits : `88${digits}`;
+};
+
+const isSmsAccepted = (responseText = "") => {
+  const text = String(responseText).trim().toLowerCase();
+  if (!text) return false;
+
+  return !/(invalid|failed|error|unauthorized|denied|rejected|sender|number|insufficient|balance)/i.test(text);
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -14,14 +39,29 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { phone, action, code } = body;
 
-    if (!phone || typeof phone !== "string" || phone.length < 10 || phone.length > 15) {
+    if (!phone || typeof phone !== "string") {
       return new Response(JSON.stringify({ error: "Invalid phone number" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const sanitizedPhone = phone.replace(/[^\d+]/g, "");
+    const sanitizedPhone = toLocalPhone(phone);
+    const smsNumber = toSmsPhone(phone);
+    const phoneCandidates = Array.from(new Set([
+      sanitizedPhone,
+      smsNumber,
+      String(phone).replace(/\D/g, ""),
+      `+${smsNumber}`,
+    ].filter(Boolean)));
+
+    if (sanitizedPhone.length < 10 || sanitizedPhone.length > 15) {
+      return new Response(JSON.stringify({ error: "Invalid phone number" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
@@ -31,14 +71,14 @@ Deno.serve(async (req) => {
       const { data: profileCheck } = await supabase
         .from("profiles")
         .select("user_id")
-        .eq("phone", sanitizedPhone)
+        .in("phone", phoneCandidates)
         .limit(1)
         .maybeSingle();
 
       const { data: bookingCheck } = await supabase
         .from("bookings")
         .select("id")
-        .eq("guest_phone", sanitizedPhone)
+        .in("guest_phone", phoneCandidates)
         .limit(1)
         .maybeSingle();
 
@@ -67,15 +107,9 @@ Deno.serve(async (req) => {
       const otpCode = String(Math.floor(100000 + Math.random() * 900000));
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-      await supabase.from("otp_codes").insert({
-        phone: sanitizedPhone,
-        code: otpCode,
-        expires_at: expiresAt,
-      });
-
       // Send SMS
       const smsApiKey = Deno.env.get("BULKSMSBD_API_KEY");
-      const smsSenderId = Deno.env.get("BULKSMSBD_SENDER_ID");
+      const smsSenderId = Deno.env.get("BULKSMSBD_SENDER_ID") || "8809617618686";
 
       if (!smsApiKey) {
         return new Response(JSON.stringify({ error: "SMS service not configured" }), {
@@ -84,19 +118,26 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Ensure phone has 88 country code for BulkSMSBD
-      let smsNumber = sanitizedPhone;
-      if (smsNumber.startsWith("0")) {
-        smsNumber = "88" + smsNumber;
-      } else if (!smsNumber.startsWith("88")) {
-        smsNumber = "88" + smsNumber;
-      }
-
       const message = `Manasik Travel Hub OTP is ${otpCode}`;
-      const smsUrl = `http://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(smsNumber)}&senderid=${encodeURIComponent(smsSenderId || "")}&message=${encodeURIComponent(message)}`;
+      const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(smsNumber)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
 
       const smsRes = await fetch(smsUrl);
-      console.log("SMS result:", await smsRes.text());
+      const smsText = await smsRes.text();
+      console.log("SMS result:", smsText);
+
+      if (!smsRes.ok || !isSmsAccepted(smsText)) {
+        console.error("OTP SMS failed:", { smsNumber, status: smsRes.status, smsText });
+        return new Response(JSON.stringify({ error: "SMS delivery failed. Please check SMS configuration." }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      await supabase.from("otp_codes").insert({
+        phone: sanitizedPhone,
+        code: otpCode,
+        expires_at: expiresAt,
+      });
 
       return new Response(JSON.stringify({ success: true, message: "OTP sent successfully" }), {
         status: 200,
@@ -137,7 +178,7 @@ Deno.serve(async (req) => {
       const { data: profile } = await supabase
         .from("profiles")
         .select("user_id")
-        .eq("phone", sanitizedPhone)
+        .in("phone", phoneCandidates)
         .maybeSingle();
 
       let userId = profile?.user_id;
@@ -148,7 +189,7 @@ Deno.serve(async (req) => {
         const { data: guestBooking } = await supabase
           .from("bookings")
           .select("id, guest_name, guest_phone, guest_email, guest_address, guest_passport")
-          .eq("guest_phone", sanitizedPhone)
+          .in("guest_phone", phoneCandidates)
           .order("created_at", { ascending: false })
           .limit(1)
           .single();
@@ -265,7 +306,7 @@ Deno.serve(async (req) => {
       }
 
       // Generate magic link tokens
-      const { data: magicLink, error: magicError } = await supabase.auth.admin.generateLink({
+        const { data: magicLink, error: magicError } = await supabase.auth.admin.generateLink({
         type: "magiclink",
         email: authUser.user.email,
       });
@@ -278,10 +319,12 @@ Deno.serve(async (req) => {
         });
       }
 
+      const linkProperties = magicLink.properties as { access_token?: string; refresh_token?: string } | undefined;
+
       return new Response(JSON.stringify({
         success: true,
-        access_token: magicLink.properties?.access_token,
-        refresh_token: magicLink.properties?.refresh_token,
+        access_token: linkProperties?.access_token,
+        refresh_token: linkProperties?.refresh_token,
         user_id: userId,
       }), {
         status: 200,
@@ -295,7 +338,8 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("OTP error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

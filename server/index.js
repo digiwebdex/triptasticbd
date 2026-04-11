@@ -24,6 +24,31 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
+const toLocalPhone = (value = '') => {
+  const digits = String(value).replace(/\D/g, '');
+  if (digits.startsWith('880') && digits.length >= 12) return `0${digits.slice(2)}`;
+  if (digits.startsWith('0')) return digits;
+  if (digits.startsWith('1') && digits.length === 10) return `0${digits}`;
+  return digits;
+};
+
+const toSmsPhone = (value = '') => {
+  const digits = String(value).replace(/\D/g, '');
+  if (digits.startsWith('880')) return digits;
+
+  const local = toLocalPhone(value);
+  if (local.startsWith('0')) return `88${local}`;
+
+  return digits.startsWith('88') ? digits : `88${digits}`;
+};
+
+const isSmsAccepted = (responseText = '') => {
+  const text = String(responseText).trim().toLowerCase();
+  if (!text) return false;
+
+  return !/(invalid|failed|error|unauthorized|denied|rejected|sender|number|insufficient|balance)/i.test(text);
+};
+
 // =============================================
 // AUTH ROUTES
 // =============================================
@@ -1160,15 +1185,26 @@ app.post('/api/contact', async (req, res) => {
 app.post('/api/send-otp', async (req, res) => {
   try {
     const { phone, action, code } = req.body;
-    if (!phone || typeof phone !== 'string' || phone.length < 10 || phone.length > 15) {
+    if (!phone || typeof phone !== 'string') {
       return res.status(400).json({ error: 'Invalid phone number' });
     }
-    const sanitizedPhone = phone.replace(/[^\d+]/g, '');
+    const sanitizedPhone = toLocalPhone(phone);
+    const smsNumber = toSmsPhone(phone);
+    const phoneCandidates = Array.from(new Set([
+      sanitizedPhone,
+      smsNumber,
+      String(phone).replace(/\D/g, ''),
+      `+${smsNumber}`,
+    ].filter(Boolean)));
+
+    if (sanitizedPhone.length < 10 || sanitizedPhone.length > 15) {
+      return res.status(400).json({ error: 'Invalid phone number' });
+    }
 
     if (action === 'send') {
       // Check if there's a profile or guest booking with this phone
-      const profileCheck = await query('SELECT user_id FROM profiles WHERE phone = $1 LIMIT 1', [sanitizedPhone]);
-      const bookingCheck = await query('SELECT id FROM bookings WHERE guest_phone = $1 LIMIT 1', [sanitizedPhone]);
+      const profileCheck = await query('SELECT user_id FROM profiles WHERE phone = ANY($1::text[]) LIMIT 1', [phoneCandidates]);
+      const bookingCheck = await query('SELECT id FROM bookings WHERE guest_phone = ANY($1::text[]) LIMIT 1', [phoneCandidates]);
 
       if (!profileCheck.rows[0] && !bookingCheck.rows[0]) {
         return res.status(404).json({ error: 'এই নম্বরে কোনো বুকিং পাওয়া যায়নি। আগে বুকিং করুন।' });
@@ -1187,27 +1223,25 @@ app.post('/api/send-otp', async (req, res) => {
       const otpCode = String(Math.floor(100000 + Math.random() * 900000));
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-      await query('INSERT INTO otp_codes (phone, code, expires_at) VALUES ($1, $2, $3)', [sanitizedPhone, otpCode, expiresAt]);
-
       // Send SMS
       const smsApiKey = process.env.BULKSMSBD_API_KEY;
-      const smsSenderId = process.env.BULKSMSBD_SENDER_ID || 'MANASIK';
+      const smsSenderId = process.env.BULKSMSBD_SENDER_ID || '8809617618686';
       if (!smsApiKey) {
         return res.status(500).json({ error: 'SMS service not configured' });
       }
 
-      // Ensure phone has 88 country code for BulkSMSBD
-      let smsNumber = sanitizedPhone;
-      if (smsNumber.startsWith('0')) {
-        smsNumber = '88' + smsNumber;
-      } else if (!smsNumber.startsWith('88')) {
-        smsNumber = '88' + smsNumber;
+      const message = `Manasik Travel Hub OTP is ${otpCode}`;
+      const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(smsNumber)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
+      const smsRes = await fetch(smsUrl);
+      const smsText = await smsRes.text();
+      console.log('SMS result:', smsText);
+
+      if (!smsRes.ok || !isSmsAccepted(smsText)) {
+        console.error('OTP SMS failed:', { smsNumber, status: smsRes.status, smsText });
+        return res.status(502).json({ error: 'SMS delivery failed. Please check SMS configuration.' });
       }
 
-      const message = `Manasik Travel Hub OTP is ${otpCode}`;
-      const smsUrl = `http://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(smsNumber)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
-      const smsRes = await fetch(smsUrl);
-      console.log('SMS result:', await smsRes.text());
+      await query('INSERT INTO otp_codes (phone, code, expires_at) VALUES ($1, $2, $3)', [sanitizedPhone, otpCode, expiresAt]);
 
       return res.json({ success: true, message: 'OTP sent successfully' });
 
@@ -1229,14 +1263,14 @@ app.post('/api/send-otp', async (req, res) => {
       await query('UPDATE otp_codes SET verified = true WHERE id = $1', [otpResult.rows[0].id]);
 
       // Find user by phone in profiles
-      const profileResult = await query('SELECT user_id FROM profiles WHERE phone = $1 LIMIT 1', [sanitizedPhone]);
+      const profileResult = await query('SELECT user_id FROM profiles WHERE phone = ANY($1::text[]) LIMIT 1', [phoneCandidates]);
       let userId = profileResult.rows[0]?.user_id;
 
       // If no profile found, auto-create from guest booking
       if (!userId) {
         const guestResult = await query(
-          'SELECT id, guest_name, guest_phone, guest_email, guest_address, guest_passport FROM bookings WHERE guest_phone = $1 ORDER BY created_at DESC LIMIT 1',
-          [sanitizedPhone]
+          'SELECT id, guest_name, guest_phone, guest_email, guest_address, guest_passport FROM bookings WHERE guest_phone = ANY($1::text[]) ORDER BY created_at DESC LIMIT 1',
+          [phoneCandidates]
         );
 
         if (!guestResult.rows[0]) {
