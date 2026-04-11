@@ -5,7 +5,7 @@ import { supabase } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import logoEn from "@/assets/logo-nobg.png";
 import logoBn from "@/assets/logo-bangla.png";
-import { useSiteContent } from "@/hooks/useSiteContent";
+import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useMenuVisibility } from "@/components/admin/MenuVisibilityManager";
 
@@ -14,7 +14,7 @@ const Navbar = () => {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const { data: content } = useSiteContent("navbar");
+  const { data: content } = useBulkSiteContent("navbar");
   const { language, setLanguage, t } = useLanguage();
   const { visibility: menuVisibility } = useMenuVisibility();
 

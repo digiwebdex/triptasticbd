@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { Plane, Building2, Bus, MapPin, BookOpen, CreditCard, Globe, Users, SendHorizonal, FileText, Wallet, Hotel, Landmark, BadgeDollarSign, Luggage } from "lucide-react";
-import { useSiteContent } from "@/hooks/useSiteContent";
+import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const iconMap: Record<string, any> = { BookOpen, Globe, CreditCard, Plane, Building2, Bus, MapPin, Users, SendHorizonal, FileText, Wallet, Hotel, Landmark, BadgeDollarSign, Luggage };
 
 const ServicesSection = () => {
-  const { data: content } = useSiteContent("services");
+  const { data: content } = useBulkSiteContent("services");
   const { t, language } = useLanguage();
 
   const lc = content?.[language];

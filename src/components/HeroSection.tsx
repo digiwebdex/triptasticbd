@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import heroBanner1 from "@/assets/hero-banner-1.jpg";
-import { useSiteContent } from "@/hooks/useSiteContent";
+import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const defaultSlides = [
@@ -10,7 +10,7 @@ const defaultSlides = [
 ];
 
 const HeroSection = () => {
-  const { data: content } = useSiteContent("hero");
+  const { data: content } = useBulkSiteContent("hero");
   const { language } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
 

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Shield, Headphones, Hotel, Car, BookOpen, Users, Plane, CreditCard, Heart } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { useSiteContent } from "@/hooks/useSiteContent";
+import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
 
 const iconMap: Record<string, any> = { Shield, Headphones, Hotel, Car, BookOpen, Users, Plane, CreditCard, Heart };
 
@@ -31,7 +31,7 @@ const defaultFacilitiesEn = [
 
 const FacilitiesSection = () => {
   const { t, language } = useLanguage();
-  const { data: content } = useSiteContent("facilities");
+  const { data: content } = useBulkSiteContent("facilities");
   const bn = language === "bn";
   const lc = content?.[language];
 
