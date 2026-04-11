@@ -711,7 +711,8 @@ const functions = {
         if (!res.ok) {
           const err = await res.json().catch(() => ({ error: 'Request failed' }));
           vpsErrorMessage = err.error || 'Request failed';
-          if (!allowEdgeFallback) {
+          // For business-logic errors (4xx), don't fallback — return VPS error directly
+          if (!allowEdgeFallback || (res.status >= 400 && res.status < 500)) {
             return { data: null, error: { message: vpsErrorMessage } };
           }
         } else {
