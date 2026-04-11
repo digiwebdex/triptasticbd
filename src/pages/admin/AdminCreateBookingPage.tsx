@@ -77,9 +77,15 @@ export default function AdminCreateBookingPage() {
       supabase.from("supplier_agents").select("id, agent_name, company_name, phone, status").eq("status", "active").order("agent_name"),
     ]).then(([pkgRes, moaRes, walletRes, supRes]) => {
       setPackages(pkgRes.data || []);
-      setMoallems(moaRes.data || []);
+      const moallemsList = moaRes.data || [];
+      setMoallems(moallemsList);
       setWalletAccounts((walletRes.data as any[]) || []);
       setSuppliers(supRes.data || []);
+      // Auto-assign default Moallem "Manasik Travel Hub"
+      const defaultMoallem = moallemsList.find((m: any) => m.name === "Manasik Travel Hub");
+      if (defaultMoallem) {
+        setForm((prev) => ({ ...prev, moallem_id: defaultMoallem.id }));
+      }
     });
   }, []);
 
