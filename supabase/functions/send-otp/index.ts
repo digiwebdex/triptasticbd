@@ -32,11 +32,15 @@ const isSmsAccepted = (responseText = "") => {
     if (parsed && typeof parsed === "object") {
       const responseCode = Number((parsed as Record<string, unknown>).response_code ?? (parsed as Record<string, unknown>).status_code ?? (parsed as Record<string, unknown>).code);
       const successMessage = String((parsed as Record<string, unknown>).success_message ?? (parsed as Record<string, unknown>).message ?? "").trim().toLowerCase();
-      const errorMessage = String((parsed as Record<string, unknown>).error_message ?? (parsed as Record<string, unknown>).error ?? "").trim().toLowerCase();
+      const errorMessage = String((parsed as Record<string, unknown>).error_message ?? "").trim().toLowerCase();
+      const errorField = String((parsed as Record<string, unknown>).error ?? "").trim().toLowerCase();
 
       if ([200, 202].includes(responseCode)) return true;
-      if (errorMessage) return false;
+      if (responseCode >= 200 && responseCode < 300) return true;
+      if (errorMessage && errorMessage !== "no error" && errorMessage !== "none" && errorMessage !== "null") return false;
+      if (errorField && errorField !== "no error" && errorField !== "none" && errorField !== "null") return false;
       if (/(submitted successfully|sent successfully|accepted|queued|success)/i.test(successMessage)) return true;
+      if (!errorMessage && !errorField && responseCode === 0) return true;
     }
   } catch (_error) {
     // Non-JSON response; fall back to text pattern checks.
@@ -45,7 +49,7 @@ const isSmsAccepted = (responseText = "") => {
   const text = rawText.toLowerCase();
   if (/(submitted successfully|sent successfully|accepted|queued|success)/i.test(text)) return true;
 
-  return !/(invalid|failed|error|unauthorized|denied|rejected|sender|number|insufficient|balance)/i.test(text);
+  return !/(invalid|failed|error|unauthorized|denied|rejected|insufficient|balance)/i.test(text);
 };
 
 Deno.serve(async (req) => {

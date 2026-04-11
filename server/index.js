@@ -70,7 +70,7 @@ const isSmsAccepted = (responseText = '') => {
   const text = rawText.toLowerCase();
   if (/(submitted successfully|sent successfully|accepted|queued|success)/i.test(text)) return true;
 
-  return !/(invalid|failed|error|unauthorized|denied|rejected|sender|number|insufficient|balance)/i.test(text);
+  return !/(invalid|failed|error|unauthorized|denied|rejected|insufficient|balance)/i.test(text);
 };
 
 // =============================================

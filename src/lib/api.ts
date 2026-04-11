@@ -691,6 +691,8 @@ const functions = {
     // Edge functions that have VPS equivalents — try VPS first
     const vpsRoutes = ['track-booking', 'verify-invoice', 'create-guest-booking', 'send-notification', 'send-reminder', 'booking-notifications', 'send-otp', 'upload-booking-document'];
     const isVpsRoute = name.startsWith('auth/') || vpsRoutes.includes(name);
+    const allowEdgeFallback = name === 'send-otp';
+    let vpsErrorMessage: string | null = null;
 
     if (isVpsRoute) {
       try {
@@ -708,12 +710,19 @@ const functions = {
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({ error: 'Request failed' }));
-          return { data: null, error: { message: err.error || 'Request failed' } };
+          vpsErrorMessage = err.error || 'Request failed';
+          if (!allowEdgeFallback) {
+            return { data: null, error: { message: vpsErrorMessage } };
+          }
+        } else {
+          const data = await res.json().catch(() => ({}));
+          return { data, error: null };
         }
-        const data = await res.json().catch(() => ({}));
-        return { data, error: null };
       } catch (err: any) {
-        return { data: null, error: { message: err.message || 'VPS unreachable' } };
+        vpsErrorMessage = err.message || 'VPS unreachable';
+        if (!allowEdgeFallback) {
+          return { data: null, error: { message: vpsErrorMessage } };
+        }
       }
     }
 
@@ -746,13 +755,17 @@ const functions = {
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({ error: 'Edge function error' }));
-          return { data: null, error: { message: err.error || 'Edge function error' } };
+          return { data: null, error: { message: err.error || vpsErrorMessage || 'Edge function error' } };
         }
         const data = await res.json();
         return { data, error: null };
       } catch (err: any) {
-        return { data: null, error: { message: err.message } };
+        return { data: null, error: { message: err.message || vpsErrorMessage || 'Edge function error' } };
       }
+    }
+
+    if (vpsErrorMessage) {
+      return { data: null, error: { message: vpsErrorMessage } };
     }
 
     // Last resort: try VPS /functions/ path for non-VPS routes
