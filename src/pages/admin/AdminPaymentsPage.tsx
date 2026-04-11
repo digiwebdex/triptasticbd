@@ -168,14 +168,13 @@ export default function AdminPaymentsPage() {
     // Filter by entity when selected
     if (paymentType === "moallem" && addForm.moallem_id) {
       filtered = filtered.filter(b => b.moallem_id === addForm.moallem_id);
-    } else if (paymentType === "supplier" && addForm.supplier_id) {
-      filtered = filtered.filter(b => b.supplier_agent_id === addForm.supplier_id);
     } else if (paymentType === "customer" && addForm.customer_id) {
       filtered = filtered.filter(b => 
         b.user_id === addForm.customer_id || 
         (b.guest_phone && b.guest_phone === allBookings.find(bk => bk.user_id === addForm.customer_id)?.guest_phone)
       );
     }
+    // For supplier: show all bookings (supplier_agent_id may not be set on bookings)
 
     // Search filter
     if (bookingSearch.trim()) {
