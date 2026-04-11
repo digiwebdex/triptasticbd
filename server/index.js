@@ -51,11 +51,17 @@ const isSmsAccepted = (responseText = '') => {
     if (parsed && typeof parsed === 'object') {
       const responseCode = Number(parsed.response_code ?? parsed.status_code ?? parsed.code);
       const successMessage = String(parsed.success_message ?? parsed.message ?? '').trim().toLowerCase();
-      const errorMessage = String(parsed.error_message ?? parsed.error ?? '').trim().toLowerCase();
+      const errorMessage = String(parsed.error_message ?? '').trim().toLowerCase();
+      const errorField = String(parsed.error ?? '').trim().toLowerCase();
 
       if ([200, 202].includes(responseCode)) return true;
-      if (errorMessage) return false;
+      if (responseCode >= 200 && responseCode < 300) return true;
+      // Only reject if there's a meaningful error message (not empty, not "no error")
+      if (errorMessage && errorMessage !== 'no error' && errorMessage !== 'none' && errorMessage !== 'null') return false;
+      if (errorField && errorField !== 'no error' && errorField !== 'none' && errorField !== 'null') return false;
       if (/(submitted successfully|sent successfully|accepted|queued|success)/i.test(successMessage)) return true;
+      // If we got a parseable JSON with no clear error, assume success
+      if (!errorMessage && !errorField && responseCode === 0) return true;
     }
   } catch (_error) {
     // Non-JSON response; fall back to text pattern checks.
@@ -1250,12 +1256,20 @@ app.post('/api/send-otp', async (req, res) => {
 
       const message = `Manasik Travel Hub OTP is ${otpCode}`;
       const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(smsNumber)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
-      const smsRes = await fetch(smsUrl);
-      const smsText = await smsRes.text();
-      console.log('SMS result:', smsText);
+      let smsText = '';
+      let smsHttpStatus = 0;
+      try {
+        const smsRes = await fetch(smsUrl);
+        smsHttpStatus = smsRes.status;
+        smsText = await smsRes.text();
+      } catch (fetchErr) {
+        console.error('OTP SMS fetch error:', fetchErr.message);
+        return res.status(502).json({ error: 'SMS service unreachable. Please try again.' });
+      }
+      console.log('SMS result:', { status: smsHttpStatus, body: smsText });
 
-      if (!smsRes.ok || !isSmsAccepted(smsText)) {
-        console.error('OTP SMS failed:', { smsNumber, status: smsRes.status, smsText });
+      if (!isSmsAccepted(smsText)) {
+        console.error('OTP SMS failed:', { smsNumber, httpStatus: smsHttpStatus, smsText });
         return res.status(502).json({ error: 'SMS delivery failed. Please check SMS configuration.' });
       }
 
