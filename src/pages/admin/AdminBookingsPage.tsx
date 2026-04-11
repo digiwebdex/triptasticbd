@@ -28,6 +28,13 @@ const STATUSES = ["pending", "confirmed", "visa_processing", "ticket_issued", "c
 const normalizeBookingType = (value?: string | null) => (value || "").trim().toLowerCase();
 const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBookingType(value).includes("family") || memberCount > 0;
 const toMoney = (value: any) => Math.max(0, Number(value || 0));
+const formatTrackingId = (value?: string | null) => {
+  const normalized = (value || "").trim().toUpperCase();
+  if (!normalized) return "";
+  if (normalized.startsWith("MTH-")) return normalized;
+  if (normalized.startsWith("RK-")) return `MTH-${normalized.slice(3)}`;
+  return normalized;
+};
 const REQUIRED_DOCUMENT_TYPES = ["passport", "nid", "photo"] as const;
 const DOCUMENT_TYPE_ALIASES: Record<string, (typeof REQUIRED_DOCUMENT_TYPES)[number] | string> = {
   passport: "passport",
