@@ -373,7 +373,7 @@ export default function AdminPaymentsPage() {
       _type: "customer" as PaymentType,
       _sortDate: p.paid_at || p.due_date || p.created_at,
       _displayName: p.profiles?.full_name || p.bookings?.guest_name || "—",
-      _trackingId: p.bookings?.tracking_id || "—",
+      _trackingId: formatTrackingId(p.bookings?.tracking_id) || "—",
       _amount: Number(p.amount),
     }));
     const moallemItems = moallemPayments.map(p => ({
@@ -381,7 +381,7 @@ export default function AdminPaymentsPage() {
       _type: "moallem" as PaymentType,
       _sortDate: p.date || p.created_at,
       _displayName: p.moallems?.name || "—",
-      _trackingId: p.bookings?.tracking_id || "—",
+      _trackingId: formatTrackingId(p.bookings?.tracking_id) || "—",
       _amount: Number(p.amount),
     }));
     const supplierItems = supplierPayments.map(p => ({
@@ -389,7 +389,7 @@ export default function AdminPaymentsPage() {
       _type: "supplier" as PaymentType,
       _sortDate: p.date || p.created_at,
       _displayName: p.supplier_agents?.agent_name || "—",
-      _trackingId: p.bookings?.tracking_id || "—",
+      _trackingId: formatTrackingId(p.bookings?.tracking_id) || "—",
       _amount: Number(p.amount),
     }));
     let combined: any[] = [];
@@ -550,7 +550,7 @@ export default function AdminPaymentsPage() {
                         return (
                         <tr key={p.id} className="border-b border-border/30 hover:bg-secondary/20">
                           <td className="py-2.5 px-4 text-xs text-muted-foreground">{i + 1}</td>
-                          <td className="py-2.5 px-4 font-mono text-xs">{p.bookings?.tracking_id || "—"}</td>
+                          <td className="py-2.5 px-4 font-mono text-xs">{formatTrackingId(p.bookings?.tracking_id) || "—"}</td>
                           <td className="py-2.5 px-4 font-medium">{formatBDT(p.amount)}</td>
                           <td className="py-2.5 px-4 capitalize text-xs">{p.payment_method || "—"}</td>
                           <td className="py-2.5 px-4 text-xs">{serviceLabel || "—"}</td>
