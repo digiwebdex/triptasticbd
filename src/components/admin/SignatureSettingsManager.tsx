@@ -90,17 +90,35 @@ export default function SignatureSettingsManager() {
     setSaving(true);
     const toSave = data || settings;
     const { data: session } = await supabase.auth.getSession();
-    const { error } = await supabase
+    const userId = session?.session?.user?.id || null;
+
+    // Try update first
+    const { data: updateResult, error: updateError } = await supabase
       .from("company_settings")
       .update({
         setting_value: toSave as any,
         updated_at: new Date().toISOString(),
-        updated_by: session?.session?.user?.id || null,
+        updated_by: userId,
       })
-      .eq("setting_key", "signature");
+      .eq("setting_key", "signature")
+      .select();
 
-    if (error) toast.error(error.message);
-    else if (!data) toast.success("Settings saved");
+    // If no rows updated, insert
+    if (!updateError && (!updateResult || (updateResult as any[]).length === 0)) {
+      const { error: insertError } = await supabase
+        .from("company_settings")
+        .insert({
+          setting_key: "signature",
+          setting_value: toSave as any,
+          updated_by: userId,
+        });
+      if (insertError) toast.error(insertError.message);
+      else if (!data) toast.success("Settings saved");
+    } else if (updateError) {
+      toast.error(updateError.message);
+    } else if (!data) {
+      toast.success("Settings saved");
+    }
     setSaving(false);
   };
 
