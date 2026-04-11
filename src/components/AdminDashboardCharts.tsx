@@ -71,10 +71,14 @@ const AdminDashboardCharts = ({
       .reduce((s, e) => s + Number(e.amount || 0), 0);
     const netProfit = bookingProfit - generalExpenses - cashbookExpense;
 
-    const cashAccount = accounts.find(
-      (a) => a.type === "asset" && String(a.name || "").trim().toLowerCase() === "cash"
-    );
-    const cashBalance = Number(cashAccount?.balance || 0);
+    const getWalletBalance = (name: string) => {
+      const acc = accounts.find(a => a.type === "asset" && String(a.name || "").trim().toLowerCase() === name.toLowerCase());
+      return Number(acc?.balance || 0);
+    };
+    const cashBalance = getWalletBalance("Cash");
+    const bankBalance = getWalletBalance("Bank");
+    const bkashBalance = getWalletBalance("bKash");
+    const nagadBalance = getWalletBalance("Nagad");
 
     const moallemDue = moallems.reduce((s, m) => s + Number(m.total_due || 0), 0);
     const customerDue = activeBookings.reduce((s, b) => s + Number(b.due_amount || 0), 0);
@@ -87,7 +91,7 @@ const AdminDashboardCharts = ({
     const totalPayable = supplierDue + commissionDue;
 
     return {
-      totalSales, totalHajji, totalIncomeReceived, netProfit, cashBalance,
+      totalSales, totalHajji, totalIncomeReceived, netProfit, cashBalance, bankBalance, bkashBalance, nagadBalance,
       moallemDue, customerDue, totalReceivable, supplierDue, commissionDue, totalPayable,
     };
   }, [bookings, payments, expenses, accounts, moallemPayments, supplierPayments, commissionPayments, supplierContractPayments, supplierContracts, moallems, dailyCashbook]);
@@ -116,7 +120,10 @@ const AdminDashboardCharts = ({
       cards.push({ label: "Net Profit", value: formatBDT(financials.netProfit), icon: TrendingUp, color: financials.netProfit >= 0 ? "text-emerald-500" : "text-destructive", onClick: () => navigate("/admin/accounting") });
     }
     cards.push(
-      { label: "Cash Balance", value: formatBDT(financials.cashBalance), icon: Wallet, color: financials.cashBalance >= 0 ? "text-primary" : "text-destructive", onClick: () => navigate("/admin/accounting") },
+      { label: "Cash", value: formatBDT(financials.cashBalance), icon: Wallet, color: financials.cashBalance >= 0 ? "text-primary" : "text-destructive", onClick: () => navigate("/admin/accounting") },
+      { label: "Bank", value: formatBDT(financials.bankBalance), icon: Wallet, color: financials.bankBalance >= 0 ? "text-primary" : "text-destructive", onClick: () => navigate("/admin/accounting") },
+      { label: "bKash", value: formatBDT(financials.bkashBalance), icon: Wallet, color: financials.bkashBalance >= 0 ? "text-primary" : "text-destructive", onClick: () => navigate("/admin/accounting") },
+      { label: "Nagad", value: formatBDT(financials.nagadBalance), icon: Wallet, color: financials.nagadBalance >= 0 ? "text-primary" : "text-destructive", onClick: () => navigate("/admin/accounting") },
       { label: "Total Bookings", value: bookings.filter(b => b.status !== "cancelled").length, icon: Package, color: "text-foreground", onClick: () => navigate("/admin/bookings") },
       { label: "Total Hajji", value: financials.totalHajji, icon: Users, color: "text-foreground", onClick: () => navigate("/admin/customers") },
       { label: "Customer Due", value: formatBDT(financials.customerDue), icon: UserCheck, color: financials.customerDue > 0 ? "text-yellow-500" : "text-emerald-500", onClick: () => setShowDueCustomers(true) },
@@ -130,7 +137,7 @@ const AdminDashboardCharts = ({
   return (
     <div className="space-y-5">
       {/* ═══ KPI CARDS ═══ */}
-      <div className={`grid grid-cols-2 sm:grid-cols-4 ${canSeeProfit ? "lg:grid-cols-7" : "lg:grid-cols-6"} gap-3`}>
+      <div className={`grid grid-cols-2 sm:grid-cols-4 ${canSeeProfit ? "lg:grid-cols-5 xl:grid-cols-10" : "lg:grid-cols-5 xl:grid-cols-9"} gap-3`}>
         {kpiCards.map(k => (
           <div
             key={k.label}
