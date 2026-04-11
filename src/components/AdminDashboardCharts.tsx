@@ -153,6 +153,18 @@ const AdminDashboardCharts = ({
         ))}
       </div>
 
+      {/* ═══ TOTAL WALLET BALANCE ═══ */}
+      <div className="bg-card border border-border rounded-xl p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-primary" /> Total Wallet Balance
+          </h3>
+          <p className={`text-xl font-body font-bold tabular-nums ${(financials.cashBalance + financials.bankBalance + financials.bkashBalance + financials.nagadBalance) >= 0 ? "text-primary" : "text-destructive"}`}>
+            {formatBDT(financials.cashBalance + financials.bankBalance + financials.bkashBalance + financials.nagadBalance)}
+          </p>
+        </div>
+      </div>
+
       {/* ═══ RECEIVABLE & PAYABLE ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-xl p-4">
