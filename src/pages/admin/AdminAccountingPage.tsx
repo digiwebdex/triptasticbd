@@ -298,7 +298,7 @@ export default function AdminAccountingPage() {
       }
 
       if (tab === "expenses") exportExcel({ title: "Expenses Report", columns: ["Title", "Type", "Category", "Amount", "Date"], rows: filtered.map((e) => [e.title, e.expense_type, e.category, Number(e.amount), normalizeDate(e.date)]) });
-      else if (tab === "booking") exportExcel({ title: "Booking Profit Report", columns: ["Tracking ID", "Customer", "Package", "Revenue", "Expenses", "Profit"], rows: bookingProfit.map((b: any) => [b.tracking_id || "—", b.guest_name || "—", b.package_name || "—", Number(b.total_payments || 0), Number(b.total_expenses || 0), Number(b.profit_amount || 0)]) });
+      else if (tab === "booking") exportExcel({ title: "Booking Profit Report", columns: ["Tracking ID", "Customer", "Package", "Revenue", "Expenses", "Profit"], rows: bookingProfit.map((b: any) => [formatTrackingId(b.tracking_id) || "—", b.guest_name || "—", b.package_name || "—", Number(b.total_payments || 0), Number(b.total_expenses || 0), Number(b.profit_amount || 0)]) });
       else if (tab === "package") exportExcel({ title: "Package Profit Report", columns: ["Package", "Type", "Bookings", "Revenue", "Expenses", "Profit"], rows: packageProfit.map((p: any) => [p.package_name || "—", p.package_type || "—", Number(p.total_bookings || 0), Number(p.total_revenue || 0), Number(p.total_expenses || 0), Number(p.profit || 0)]) });
       else if (tab === "customer") exportExcel({ title: "Customer Profit Report", columns: ["Customer", "Phone", "Bookings", "Payments", "Expenses", "Profit"], rows: customerProfit.map((c: any) => [c.full_name || "—", c.phone || "—", Number(c.total_bookings || 0), Number(c.total_payments || 0), Number(c.total_expenses || 0), Number(c.profit || 0)]) });
     } catch (error) {
@@ -307,7 +307,7 @@ export default function AdminAccountingPage() {
     }
   };
 
-  const getBookingLabel = (id: string) => { const b = bookings.find((bk: any) => bk.id === id); return b ? `${b.tracking_id} — ${b.guest_name || "N/A"}` : id?.slice(0, 8); };
+  const getBookingLabel = (id: string) => { const b = bookings.find((bk: any) => bk.id === id); return b ? `${formatTrackingId(b.tracking_id)} — ${b.guest_name || "N/A"}` : id?.slice(0, 8); };
   const getCustomerLabel = (id: string) => { const c = customers.find((cu: any) => cu.user_id === id); return c ? `${c.full_name || "N/A"} (${c.phone || ""})` : id?.slice(0, 8); };
   const getPackageLabel = (id: string) => { const p = packages.find((pk: any) => pk.id === id); return p ? p.name : id?.slice(0, 8); };
 
