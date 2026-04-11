@@ -105,7 +105,7 @@ export default function CustomerFinancialReport({ customer, open, onOpenChange }
       // Also fetch bookings by guest_phone if customer has a phone
       let byPhone: any[] = [];
       if (customerPhone) {
-        const { data: phoneBookings } = await supabase.from("bookings").select("*, packages(name, type, price, duration_days, start_date)").or(`guest_phone.ilike.%${customerPhone}`);
+        const { data: phoneBookings } = await supabase.from("bookings").select("*, packages(name, type, price, duration_days, start_date)").ilike("guest_phone", `%${customerPhone}`);
         byPhone = phoneBookings || [];
       }
 
