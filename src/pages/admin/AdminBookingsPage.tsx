@@ -28,6 +28,28 @@ const STATUSES = ["pending", "confirmed", "visa_processing", "ticket_issued", "c
 const normalizeBookingType = (value?: string | null) => (value || "").trim().toLowerCase();
 const isFamilyBooking = (value?: string | null, memberCount = 0) => normalizeBookingType(value).includes("family") || memberCount > 0;
 const toMoney = (value: any) => Math.max(0, Number(value || 0));
+const REQUIRED_DOCUMENT_TYPES = ["passport", "nid", "photo"] as const;
+const DOCUMENT_TYPE_ALIASES: Record<string, (typeof REQUIRED_DOCUMENT_TYPES)[number] | string> = {
+  passport: "passport",
+  passport_copy: "passport",
+  nid: "nid",
+  nid_copy: "nid",
+  national_id: "nid",
+  national_id_copy: "nid",
+  photo: "photo",
+  passport_photo: "photo",
+  passport_size_photo: "photo",
+  passport_size: "photo",
+};
+
+const normalizeDocumentType = (value?: string | null) => {
+  const normalized = (value || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return DOCUMENT_TYPE_ALIASES[normalized] || normalized;
+};
+
+const getUploadedDocumentTypes = (docs: any[]) => new Set(docs.map((doc: any) => normalizeDocumentType(doc.document_type)).filter(Boolean));
+const getMissingRequiredDocuments = (docs: any[]) => REQUIRED_DOCUMENT_TYPES.filter((type) => !getUploadedDocumentTypes(docs).has(type));
+const getCompletedRequiredDocumentsCount = (docs: any[]) => REQUIRED_DOCUMENT_TYPES.filter((type) => getUploadedDocumentTypes(docs).has(type)).length;
 
 function BookingDetail({ bookingId }: { bookingId: string }) {
   const [booking, setBooking] = useState<any>(null);
@@ -203,9 +225,7 @@ function BookingDetail({ bookingId }: { bookingId: string }) {
         )}
         {/* Document completeness check */}
         {documents.length > 0 && (() => {
-          const uploaded = documents.map((d: any) => d.document_type);
-          const required = ["passport", "nid", "photo"];
-          const missing = required.filter(r => !uploaded.includes(r));
+          const missing = getMissingRequiredDocuments(documents);
           return missing.length > 0 ? (
             <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2 mt-2">
               <p className="text-[10px] text-yellow-700 dark:text-yellow-400 font-medium">
@@ -1080,16 +1100,14 @@ export default function AdminBookingsPage() {
                     <td className="py-3 px-2 text-center" onClick={(e) => { e.stopPropagation(); setDocReviewBooking(b); }}>
                       {(() => {
                         const docs = bookingDocs[b.id] || [];
-                        const requiredTypes = ["passport", "nid", "photo"];
-                        const uploadedTypes = docs.map((d: any) => d.document_type);
-                        const completedCount = requiredTypes.filter(t => uploadedTypes.includes(t)).length;
-                        const isComplete = completedCount === requiredTypes.length;
+                        const completedCount = getCompletedRequiredDocumentsCount(docs);
+                        const isComplete = completedCount === REQUIRED_DOCUMENT_TYPES.length;
                         const hasAny = completedCount > 0;
                         return (
                           <div className="flex flex-col items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity">
                             <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full ${isComplete ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : hasAny ? "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400" : "bg-secondary text-muted-foreground"}`}>
                               {isComplete ? <FileCheck className="h-3 w-3" /> : hasAny ? <FileMinus className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
-                              {completedCount}/{requiredTypes.length}
+                              {completedCount}/{REQUIRED_DOCUMENT_TYPES.length}
                             </span>
                             <span className="text-[9px] text-muted-foreground">
                               {isComplete ? "Complete" : hasAny ? "Partial" : "Missing"}
@@ -1265,9 +1283,7 @@ export default function AdminBookingsPage() {
 
                 {/* Missing documents warning */}
                 {docs.length > 0 && (() => {
-                  const uploaded = docs.map((d: any) => d.document_type);
-                  const required = ["passport", "nid", "photo"];
-                  const missing = required.filter(r => !uploaded.includes(r));
+                  const missing = getMissingRequiredDocuments(docs);
                   return missing.length > 0 ? (
                     <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
                       <p className="text-xs text-yellow-700 dark:text-yellow-400 font-medium">

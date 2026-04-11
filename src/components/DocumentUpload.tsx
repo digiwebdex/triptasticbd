@@ -16,12 +16,30 @@ const DOC_TYPES = [
   { key: "photo", label: "Passport Photo", required: true },
 ] as const;
 
+const DOC_TYPE_ALIASES: Record<string, string> = {
+  passport: "passport",
+  passport_copy: "passport",
+  nid: "nid",
+  nid_copy: "nid",
+  national_id: "nid",
+  national_id_copy: "nid",
+  photo: "photo",
+  passport_photo: "photo",
+  passport_size_photo: "photo",
+  passport_size: "photo",
+};
+
+const normalizeDocType = (value?: string | null) => {
+  const normalized = (value || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return DOC_TYPE_ALIASES[normalized] || normalized;
+};
+
 const DocumentUpload = ({ bookingId, userId, documents, onUploaded }: Props) => {
   const [uploading, setUploading] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeType, setActiveType] = useState<string>("");
 
-  const getDocForType = (type: string) => documents.find((d) => d.document_type === type);
+  const getDocForType = (type: string) => documents.find((d) => normalizeDocType(d.document_type) === normalizeDocType(type));
 
   const handleUpload = async (file: File, docType: string) => {
     if (!file) return;
