@@ -19,7 +19,7 @@ const DEFAULT_CONFIG: PdfCompanyConfig = {
   phone: "+880 1711-999910",
   phone2: "+880 1711-999920",
   email: "manasiktravelhub.info@gmail.com",
-  address: "595/1, Milk Vita Road, Tin Rastar Mor Songlogno, Deola, Tangail Sadar, Tangail",
+  address: "Corporate Office: Manasik Travel Hub, 595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail",
   website: "https://manasiktravelhub.com",
   footer_text: "Thank you for choosing Manasik Travel Hub!",
   footer_contact: "This is a computer-generated document. For queries: +880 1711-999910, +880 1711-999920 | manasiktravelhub.info@gmail.com",
