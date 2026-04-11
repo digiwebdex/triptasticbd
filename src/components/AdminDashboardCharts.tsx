@@ -91,7 +91,7 @@ const AdminDashboardCharts = ({
     const totalPayable = supplierDue + commissionDue;
 
     return {
-      totalSales, totalHajji, totalIncomeReceived, netProfit, cashBalance,
+      totalSales, totalHajji, totalIncomeReceived, netProfit, cashBalance, bankBalance, bkashBalance, nagadBalance,
       moallemDue, customerDue, totalReceivable, supplierDue, commissionDue, totalPayable,
     };
   }, [bookings, payments, expenses, accounts, moallemPayments, supplierPayments, commissionPayments, supplierContractPayments, supplierContracts, moallems, dailyCashbook]);
