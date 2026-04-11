@@ -269,10 +269,11 @@ function addInvoiceTitleBlock(
   doc: jsPDF, y: number, trackingId: string, invoiceDate: string,
   travelDate: string | null, paymentStatus: string, isFamily: boolean
 ): number {
+  const publicTrackingId = toPublicTrackingId(trackingId);
   y = addTitleBlock(doc, y, isFamily ? "FAMILY INVOICE" : "INVOICE", paymentStatus);
   y = addMetaLine(doc, y,
-    [`Invoice No: ${trackingId}`, `Invoice Date: ${fmtDateLocal(invoiceDate)}`],
-    [`Booking ID: ${trackingId}`, travelDate ? `Travel Date: ${fmtDateLocal(travelDate)}` : ""].filter(Boolean)
+    [`Invoice No: ${publicTrackingId}`, `Invoice Date: ${fmtDateLocal(invoiceDate)}`],
+    [`Booking ID: ${publicTrackingId}`, travelDate ? `Travel Date: ${fmtDateLocal(travelDate)}` : ""].filter(Boolean)
   );
   return y;
 }
