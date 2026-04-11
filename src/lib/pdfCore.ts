@@ -114,7 +114,7 @@ export interface PdfInitResult {
 }
 
 export async function initPdf(options?: { orientation?: "portrait" | "landscape"; qrUrl?: string }): Promise<PdfInitResult> {
-  const doc = new jsPDF({ orientation: options?.orientation || "portrait" });
+  const doc = new jsPDF({ orientation: options?.orientation || "portrait", unit: "mm", format: "a4" });
   await registerBengaliFont(doc);
   const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
     loadLogoBase64(),

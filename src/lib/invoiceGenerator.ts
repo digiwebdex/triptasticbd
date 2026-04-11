@@ -508,7 +508,7 @@ export async function generateInvoice(
   payments: InvoicePayment[], company: CompanyInfo,
   options: GenerateInvoiceOptions = {}
 ) {
-  const doc = new jsPDF();
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
   await registerBengaliFont(doc);
   const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
     loadLogoBase64(), getSignatureData(), generateTrackingQr(booking.tracking_id), getPdfCompanyConfig(),
@@ -591,7 +591,7 @@ export async function generateReceipt(
   customer: InvoiceCustomer, company: CompanyInfo,
   allPayments?: InvoicePayment[]
 ) {
-  const doc = new jsPDF();
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
   await registerBengaliFont(doc);
   const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
     loadLogoBase64(), getSignatureData(), generateTrackingQr(booking.tracking_id), getPdfCompanyConfig(),
@@ -658,7 +658,7 @@ export interface CommissionReceiptData {
 }
 
 export async function generateCommissionReceipt(data: CommissionReceiptData, company: CompanyInfo) {
-  const doc = new jsPDF();
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
   await registerBengaliFont(doc);
   const [logoBase64, sig, qrDataUrl, cfg] = await Promise.all([
     loadLogoBase64(), getSignatureData(), generateTrackingQr(data.bookingTrackingId), getPdfCompanyConfig(),
