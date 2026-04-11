@@ -205,6 +205,7 @@ export default function AdminPaymentsPage() {
 
   const handleAddPayment = async () => {
     if (!addForm.amount || parseFloat(addForm.amount) <= 0) { toast.error("Enter a valid amount"); return; }
+    if (!addForm.wallet_account_id) { toast.error("Please select a wallet account"); return; }
     
     // Build combined notes with service type
     const serviceLabel = SERVICE_TYPES.find(s => s.value === addForm.service_type)?.label || "";
@@ -907,7 +908,7 @@ export default function AdminPaymentsPage() {
               <div>
                 <label className="text-xs text-muted-foreground block mb-1">Wallet Account</label>
                 <select className={inputClass} value={addForm.wallet_account_id} onChange={(e) => setAddForm({ ...addForm, wallet_account_id: e.target.value })}>
-                  <option value="">Auto (based on method)</option>
+                  <option value="">-- Select Wallet * --</option>
                   {walletAccounts.map((w: any) => (
                     <option key={w.id} value={w.id}>{w.name} — {formatBDT(Number(w.balance || 0))}</option>
                   ))}

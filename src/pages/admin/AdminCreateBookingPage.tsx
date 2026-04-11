@@ -564,7 +564,7 @@ export default function AdminCreateBookingPage() {
           <div>
             <label className="text-xs text-muted-foreground block mb-1">Wallet Account</label>
             <select className={inputClass} value={form.wallet_account_id} onChange={(e) => setForm({ ...form, wallet_account_id: e.target.value })}>
-              <option value="">Auto (based on method)</option>
+              <option value="">-- Select Wallet * --</option>
               {walletAccounts.map((w: any) => (
                 <option key={w.id} value={w.id}>{w.name} — BDT {Number(w.balance || 0).toLocaleString("en-IN")}</option>
               ))}
