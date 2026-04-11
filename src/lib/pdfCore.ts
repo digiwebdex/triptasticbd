@@ -140,9 +140,9 @@ export async function addPdfHeader(
   doc.setFillColor(ORANGE.r, ORANGE.g, ORANGE.b);
   doc.rect(0, 2.5, pw, 1, "F");
 
-  // ── Logo — left side, larger for new horizontal logo ──
-  const logoW = 42;
-  const logoH = 18;
+  // ── Logo — left side, wider for horizontal logo ──
+  const logoW = 48;
+  const logoH = 14;
   if (logoBase64) {
     try {
       doc.addImage(logoBase64, "PNG", 14, 6, logoW, logoH);
@@ -168,7 +168,7 @@ export async function addPdfHeader(
   doc.setFontSize(6.5);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(MUTED.r, MUTED.g, MUTED.b);
-  doc.text(`\u260E ${cfg.phone}  |  ${phone2}  |  \u2709 ${cfg.email}`, textX, 23);
+  doc.text(`\u260E ${cfg.phone} | ${phone2} | \u2709 ${cfg.email}`, textX, 23);
 
   // Address
   if (cfg.address) {

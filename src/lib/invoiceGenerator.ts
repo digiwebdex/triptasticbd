@@ -502,7 +502,13 @@ export async function generateInvoice(
   const dbMembers = providedMembers.length === 0 && booking.id ? await fetchBookingMembers(booking.id, fallbackPackageName) : [];
 
   const travelerCount = Math.max(Number(booking.num_travelers || 0), providedMembers.length, dbMembers.length, 1);
-  const normalizedBooking: InvoiceBooking = { ...booking, num_travelers: travelerCount };
+  const normalizedBooking: InvoiceBooking = {
+    ...booking,
+    num_travelers: travelerCount,
+    packages: booking.packages
+      ? { ...booking.packages, name: booking.packages.name || fallbackPackageName }
+      : { name: fallbackPackageName },
+  };
 
   const normalizedType = normalizeBookingType(normalizedBooking.booking_type);
   const hasFamilySignal = Boolean(options.forceFamily) || normalizedType.includes("family") || travelerCount > 1 || providedMembers.length > 0 || dbMembers.length > 0;
