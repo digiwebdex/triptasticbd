@@ -134,9 +134,9 @@ export async function addPdfHeader(
   const pw = getPageWidth(doc);
   const phone2 = (cfg as any).phone2 || "+880 1711-999920";
   const logoBoxX = 14;
-  const logoBoxY = 6;
-  const logoMaxW = 56;
-  const logoMaxH = 32;
+  const logoBoxY = 5;
+  const logoMaxW = 28;
+  const logoMaxH = 28;
   let logoRenderW = logoMaxW;
   let logoRenderH = logoMaxH;
 
