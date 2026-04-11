@@ -226,7 +226,7 @@ export default function AdminMoallemsPage() {
                       <TableCell className="text-center text-muted-foreground text-xs">{(page - 1) * PAGE_SIZE + i + 1}</TableCell>
                       <TableCell className="font-medium">{m.name}</TableCell>
                       <TableCell className="text-muted-foreground">{m.phone || "—"}</TableCell>
-                      <TableCell className="text-right font-medium">{m.contracted_hajji || 0}</TableCell>
+                      <TableCell className="text-right font-medium">{stats.hajji}</TableCell>
                       <TableCell className="text-right font-medium">{formatBDT(m.contracted_amount || 0)}</TableCell>
                       <TableCell className="text-right font-medium text-emerald-600">{formatBDT(stats.received)}</TableCell>
                       <TableCell className="text-right font-medium text-destructive">{formatBDT(stats.due)}</TableCell>
