@@ -64,16 +64,21 @@ export default function AdminMoallemsPage() {
   // Aggregate booking data per moallem — use trigger-maintained values for accuracy
   const moallemStats = useMemo(() => {
     const map: Record<string, { hajji: number; received: number; due: number; contractDue: number }> = {};
+    // Count actual booked pilgrims per moallem from bookings
+    const pilgrimCount: Record<string, number> = {};
+    bookings.forEach(b => {
+      if (b.moallem_id) {
+        pilgrimCount[b.moallem_id] = (pilgrimCount[b.moallem_id] || 0) + (Number(b.num_travelers) || 0);
+      }
+    });
     moallems.forEach(m => {
       const received = Number(m.total_deposit || 0);
-      // total_due is trigger-maintained from actual bookings (SUM booking amounts - SUM paid)
       const bookingDue = Number(m.total_due || 0);
-      // contractDue = contracted_amount - deposits (for contract tracking)
       const contractDue = Math.max(0, Number(m.contracted_amount || 0) - received);
-      map[m.id] = { hajji: m.contracted_hajji || 0, received, due: bookingDue, contractDue };
+      map[m.id] = { hajji: pilgrimCount[m.id] || 0, received, due: bookingDue, contractDue };
     });
     return map;
-  }, [moallems]);
+  }, [moallems, bookings]);
 
   const handleSave = async () => {
     if (!form.name.trim()) { toast({ title: "Name is required.", variant: "destructive" }); return; }
