@@ -1,8 +1,7 @@
 /**
- * pdfDocuments.ts — New PDF Document Types
+ * pdfDocuments.ts — PDF Document Types (Receipts, Vouchers, Statements, Cashbook, Reports)
  * 
- * Payment Receipts, Expense Vouchers, Statements, Daily Cashbook,
- * and specialized report PDFs using pdfCore.
+ * Clean A4 design matching the Manasik Travel Hub invoice template.
  */
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -10,13 +9,15 @@ import {
   initPdf, addPdfHeader, addPdfFooter, addTitleBlock, addMetaLine,
   addSectionTitle, addSummaryCards, addInfoBox, addFinancialBox,
   addBalanceBar, addSignatureBlock, addWatermark, addRawTable,
-  addDueHighlight, addTotalsBar, addFilterSummary,
+  addDueHighlight, addTotalsBar, addFilterSummary, addBillToAndMeta,
   getWatermarkStatus, ensurePageSpace, buildFileName,
   fmtDate, fmtBDT, fmtAmount, bengaliCellHook,
-  GOLD, DARK, LIGHT_BG,
+  DARK, LIGHT_BG, TABLE_HEADER, MUTED,
   type SummaryCard, type FilterItem, type InfoField,
 } from "./pdfCore";
 import { generateTrackingQr, addQrToDoc } from "./pdfQrCode";
+
+const MARGIN = 16;
 
 // ═══════════════════════════════════════════════════════════════
 // 1. CUSTOMER PAYMENT RECEIPT
@@ -46,22 +47,24 @@ export async function generatePaymentReceipt(data: PaymentReceiptData) {
   let y = await addPdfHeader(doc, cfg, logoBase64, qr);
   addWatermark(doc, "paid");
 
-  y = addTitleBlock(doc, y, "PAYMENT RECEIPT", "paid");
+  y = addTitleBlock(doc, y, "PAYMENT RECEIPT");
 
   const receiptNum = `${data.bookingTrackingId}-${data.installmentNumber || "P"}`;
-  y = addMetaLine(doc, y,
-    [`Receipt #: ${receiptNum}`, `Date: ${fmtDate(data.paymentDate)}`],
-    [`Booking ID: ${data.bookingTrackingId}`]
+
+  y = addBillToAndMeta(doc, y,
+    [
+      { label: "Name", value: data.customerName },
+      { label: "Phone", value: data.customerPhone || "N/A" },
+      { label: "Passport", value: data.passport || "N/A" },
+      { label: "Package", value: data.packageName },
+    ],
+    [
+      { label: "Receipt #", value: receiptNum },
+      { label: "Date", value: fmtDate(data.paymentDate) },
+      { label: "Booking ID", value: data.bookingTrackingId },
+    ]
   );
 
-  y = await addInfoBox(doc, y, [
-    { label: "Name", value: data.customerName },
-    { label: "Phone", value: data.customerPhone || "N/A" },
-    { label: "Passport", value: data.passport || "N/A" },
-    { label: "Package", value: data.packageName },
-  ], "RECEIVED FROM");
-
-  // Payment details
   y = addSectionTitle(doc, y, "PAYMENT DETAILS");
   y = addRawTable(doc, {
     startY: y,
@@ -74,11 +77,10 @@ export async function generatePaymentReceipt(data: PaymentReceiptData) {
       ...(data.notes ? [["Notes", data.notes]] : []),
     ],
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 50 } },
+    fontSize: 9,
   });
 
-  // Balance summary
   y = addBalanceBar(doc, y, "Total Paid", fmtBDT(data.totalPaidSoFar), "Remaining Due", fmtBDT(data.remainingDue));
-
   y = addSignatureBlock(doc, sig, y);
   addPdfFooter(doc, cfg);
   doc.save(buildFileName("Receipt", receiptNum));
@@ -106,17 +108,19 @@ export async function generateMoallemReceipt(data: MoallemReceiptData) {
   let y = await addPdfHeader(doc, cfg, logoBase64);
   addWatermark(doc, "paid");
 
-  y = addTitleBlock(doc, y, "MOALLEM PAYMENT RECEIPT", "paid");
-  y = addMetaLine(doc, y,
-    [`Date: ${fmtDate(data.paymentDate)}`],
-    data.bookingTrackingId ? [`Booking: ${data.bookingTrackingId}`] : []
-  );
+  y = addTitleBlock(doc, y, "MOALLEM RECEIPT");
 
-  y = await addInfoBox(doc, y, [
-    { label: "Moallem", value: data.moallemName },
-    { label: "Phone", value: data.moallemPhone || "N/A" },
-    ...(data.packageName ? [{ label: "Package", value: data.packageName }] : []),
-  ], "RECEIVED FROM");
+  y = addBillToAndMeta(doc, y,
+    [
+      { label: "Moallem", value: data.moallemName },
+      { label: "Phone", value: data.moallemPhone || "N/A" },
+      ...(data.packageName ? [{ label: "Package", value: data.packageName }] : []),
+    ],
+    [
+      { label: "Date", value: fmtDate(data.paymentDate) },
+      ...(data.bookingTrackingId ? [{ label: "Booking", value: data.bookingTrackingId }] : []),
+    ]
+  );
 
   y = addSectionTitle(doc, y, "PAYMENT DETAILS");
   y = addRawTable(doc, {
@@ -129,6 +133,7 @@ export async function generateMoallemReceipt(data: MoallemReceiptData) {
       ...(data.notes ? [["Notes", data.notes]] : []),
     ],
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 50 } },
+    fontSize: 9,
   });
 
   y = addBalanceBar(doc, y, "Total Deposits", fmtBDT(data.totalDeposit), "Outstanding Due", fmtBDT(data.totalDue));
@@ -158,17 +163,19 @@ export async function generateSupplierVoucher(data: SupplierVoucherData) {
 
   let y = await addPdfHeader(doc, cfg, logoBase64);
 
-  y = addTitleBlock(doc, y, "PAYMENT VOUCHER", null);
-  y = addMetaLine(doc, y,
-    [`Voucher Date: ${fmtDate(data.paymentDate)}`],
-    data.bookingTrackingId ? [`Booking: ${data.bookingTrackingId}`] : []
-  );
+  y = addTitleBlock(doc, y, "PAYMENT VOUCHER");
 
-  y = await addInfoBox(doc, y, [
-    { label: "Supplier", value: data.supplierName },
-    { label: "Company", value: data.companyName || "N/A" },
-    { label: "Phone", value: data.supplierPhone || "N/A" },
-  ], "PAID TO");
+  y = addBillToAndMeta(doc, y,
+    [
+      { label: "Supplier", value: data.supplierName },
+      { label: "Company", value: data.companyName || "N/A" },
+      { label: "Phone", value: data.supplierPhone || "N/A" },
+    ],
+    [
+      { label: "Voucher Date", value: fmtDate(data.paymentDate) },
+      ...(data.bookingTrackingId ? [{ label: "Booking", value: data.bookingTrackingId }] : []),
+    ]
+  );
 
   y = addSectionTitle(doc, y, "PAYMENT DETAILS");
   y = addRawTable(doc, {
@@ -181,6 +188,7 @@ export async function generateSupplierVoucher(data: SupplierVoucherData) {
       ...(data.notes ? [["Notes", data.notes]] : []),
     ],
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 50 } },
+    fontSize: 9,
   });
 
   y = addBalanceBar(doc, y, "Total Paid", fmtBDT(data.totalPaid), "Outstanding Due", fmtBDT(data.totalDue));
@@ -209,7 +217,7 @@ export async function generateExpenseVoucher(data: ExpenseVoucherData) {
 
   let y = await addPdfHeader(doc, cfg, logoBase64);
 
-  y = addTitleBlock(doc, y, "EXPENSE VOUCHER", null);
+  y = addTitleBlock(doc, y, "EXPENSE VOUCHER");
   y = addMetaLine(doc, y,
     [`Date: ${fmtDate(data.date)}`],
     [`Category: ${data.category}`]
@@ -231,6 +239,7 @@ export async function generateExpenseVoucher(data: ExpenseVoucherData) {
       ...(data.notes ? [["Notes", data.notes]] : []),
     ],
     columnStyles: { 0: { fontStyle: "bold", cellWidth: 50 } },
+    fontSize: 9,
   });
 
   y = addSignatureBlock(doc, sig, y);
@@ -257,20 +266,21 @@ export async function generateCustomerStatement(data: CustomerStatementData) {
 
   let y = await addPdfHeader(doc, cfg, logoBase64);
 
-  y = addTitleBlock(doc, y, "CUSTOMER STATEMENT", null);
-  y = addMetaLine(doc, y,
-    [`Generated: ${fmtDate(new Date().toISOString())}`, data.statementPeriod ? `Period: ${data.statementPeriod}` : ""],
-    []
+  y = addTitleBlock(doc, y, "CUSTOMER STATEMENT");
+
+  y = addBillToAndMeta(doc, y,
+    [
+      { label: "Name", value: data.customerName },
+      { label: "Phone", value: data.customerPhone || "N/A" },
+      { label: "Email", value: data.email || "N/A" },
+      { label: "Address", value: data.address || "N/A" },
+    ],
+    [
+      { label: "Generated", value: fmtDate(new Date().toISOString()) },
+      ...(data.statementPeriod ? [{ label: "Period", value: data.statementPeriod }] : []),
+    ]
   );
 
-  y = await addInfoBox(doc, y, [
-    { label: "Name", value: data.customerName },
-    { label: "Phone", value: data.customerPhone || "N/A" },
-    { label: "Email", value: data.email || "N/A" },
-    { label: "Address", value: data.address || "N/A" },
-  ], "CUSTOMER DETAILS");
-
-  // Summary cards
   y = addSummaryCards(doc, y, [
     { label: "Bookings", value: String(data.summary.totalBookings) },
     { label: "Total Amount", value: fmtBDT(data.summary.totalAmount) },
@@ -278,7 +288,6 @@ export async function generateCustomerStatement(data: CustomerStatementData) {
     { label: "Total Due", value: fmtBDT(data.summary.totalDue), highlight: data.summary.totalDue > 0 },
   ]);
 
-  // Bookings
   if (data.bookings.length > 0) {
     y = addSectionTitle(doc, y, "BOOKINGS");
     y = addRawTable(doc, {
@@ -292,7 +301,6 @@ export async function generateCustomerStatement(data: CustomerStatementData) {
     });
   }
 
-  // Payments
   if (data.payments.length > 0) {
     y = ensurePageSpace(doc, y, 30);
     y = addSectionTitle(doc, y, "PAYMENT HISTORY");
@@ -330,15 +338,19 @@ export async function generateMoallemStatement(data: MoallemStatementData) {
 
   let y = await addPdfHeader(doc, cfg, logoBase64);
 
-  y = addTitleBlock(doc, y, "MOALLEM STATEMENT", null);
-  y = addMetaLine(doc, y, [`Generated: ${fmtDate(new Date().toISOString())}`], []);
+  y = addTitleBlock(doc, y, "MOALLEM STATEMENT");
 
-  y = await addInfoBox(doc, y, [
-    { label: "Name", value: data.moallemName },
-    { label: "Phone", value: data.phone || "N/A" },
-    { label: "NID", value: data.nidNumber || "N/A" },
-    { label: "Address", value: data.address || "N/A" },
-  ], "MOALLEM DETAILS");
+  y = addBillToAndMeta(doc, y,
+    [
+      { label: "Name", value: data.moallemName },
+      { label: "Phone", value: data.phone || "N/A" },
+      { label: "NID", value: data.nidNumber || "N/A" },
+      { label: "Address", value: data.address || "N/A" },
+    ],
+    [
+      { label: "Generated", value: fmtDate(new Date().toISOString()) },
+    ]
+  );
 
   y = addSummaryCards(doc, y, [
     { label: "Bookings", value: String(data.summary.totalBookings) },
@@ -347,7 +359,6 @@ export async function generateMoallemStatement(data: MoallemStatementData) {
     { label: "Due", value: fmtBDT(data.summary.totalDue), highlight: data.summary.totalDue > 0 },
   ]);
 
-  // Commission summary bar
   y = addTotalsBar(doc, y, [
     `Commission: ${fmtBDT(data.summary.totalCommission)}`,
     `Comm. Paid: ${fmtBDT(data.summary.commissionPaid)}`,
@@ -410,15 +421,19 @@ export async function generateSupplierStatement(data: SupplierStatementData) {
 
   let y = await addPdfHeader(doc, cfg, logoBase64);
 
-  y = addTitleBlock(doc, y, "SUPPLIER STATEMENT", null);
-  y = addMetaLine(doc, y, [`Generated: ${fmtDate(new Date().toISOString())}`], []);
+  y = addTitleBlock(doc, y, "SUPPLIER STATEMENT");
 
-  y = await addInfoBox(doc, y, [
-    { label: "Agent", value: data.agentName },
-    { label: "Company", value: data.companyName || "N/A" },
-    { label: "Phone", value: data.phone || "N/A" },
-    { label: "Address", value: data.address || "N/A" },
-  ], "SUPPLIER DETAILS");
+  y = addBillToAndMeta(doc, y,
+    [
+      { label: "Agent", value: data.agentName },
+      { label: "Company", value: data.companyName || "N/A" },
+      { label: "Phone", value: data.phone || "N/A" },
+      { label: "Address", value: data.address || "N/A" },
+    ],
+    [
+      { label: "Generated", value: fmtDate(new Date().toISOString()) },
+    ]
+  );
 
   y = addSummaryCards(doc, y, [
     { label: "Contracted Hajji", value: String(data.summary.contractedHajji) },
@@ -484,7 +499,7 @@ export async function generateCashbookPdf(data: CashbookPdfData) {
 
   let y = await addPdfHeader(doc, cfg, logoBase64);
 
-  y = addTitleBlock(doc, y, "DAILY CASHBOOK", null);
+  y = addTitleBlock(doc, y, "DAILY CASHBOOK");
   y = addMetaLine(doc, y, [`Date: ${fmtDate(data.date)}`], [`Entries: ${data.entries.length}`]);
 
   y = addSummaryCards(doc, y, [
@@ -493,7 +508,6 @@ export async function generateCashbookPdf(data: CashbookPdfData) {
     { label: "Net Balance", value: fmtBDT(data.netBalance), highlight: true },
   ]);
 
-  // Income entries
   const incomeEntries = data.entries.filter(e => e.type === "income");
   if (incomeEntries.length > 0) {
     y = addSectionTitle(doc, y, "INCOME");
@@ -506,7 +520,6 @@ export async function generateCashbookPdf(data: CashbookPdfData) {
     });
   }
 
-  // Expense entries
   const expenseEntries = data.entries.filter(e => e.type === "expense");
   if (expenseEntries.length > 0) {
     y = ensurePageSpace(doc, y, 30);
@@ -527,7 +540,7 @@ export async function generateCashbookPdf(data: CashbookPdfData) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 9. SMART REPORT PDF (Enhanced version of reportExport)
+// 9. SMART REPORT PDF
 // ═══════════════════════════════════════════════════════════════
 export interface SmartReportData {
   title: string;
@@ -545,20 +558,16 @@ export async function generateSmartReport(data: SmartReportData) {
   });
 
   let y = await addPdfHeader(doc, cfg, logoBase64);
+  y = addTitleBlock(doc, y, data.title);
 
-  y = addTitleBlock(doc, y, data.title, null);
-
-  // Filters
   if (data.filters && data.filters.length > 0) {
     y = addFilterSummary(doc, y, data.filters);
   }
 
-  // Summary cards
   if (data.summaryCards && data.summaryCards.length > 0) {
     y = addSummaryCards(doc, y, data.summaryCards);
   }
 
-  // Data table — format numbers as BDT
   const fmtCell = (val: string | number) =>
     typeof val === "number" ? fmtBDT(val) : val;
 
@@ -567,16 +576,15 @@ export async function generateSmartReport(data: SmartReportData) {
     body: data.rows.map(row => row.map(fmtCell)),
     startY: y,
     showHead: "everyPage",
-    styles: { fontSize: 7.5, cellPadding: 2.5, font: "NotoSansBengali" },
-    headStyles: { fillColor: [DARK.r, DARK.g, DARK.b], font: "NotoSansBengali", fontStyle: "bold", fontSize: 7.5 },
-    alternateRowStyles: { fillColor: [LIGHT_BG.r, LIGHT_BG.g, LIGHT_BG.b] },
-    margin: { left: 14, right: 14 },
+    styles: { fontSize: 8, cellPadding: 3, font: "NotoSansBengali", lineColor: [220, 220, 220], lineWidth: 0.3 },
+    headStyles: { fillColor: [TABLE_HEADER.r, TABLE_HEADER.g, TABLE_HEADER.b], font: "NotoSansBengali", fontStyle: "bold", fontSize: 8, cellPadding: 3.5 },
+    alternateRowStyles: { fillColor: [255, 255, 255] },
+    margin: { left: MARGIN, right: MARGIN },
     didDrawCell: bengaliCellHook,
   });
 
   y = (doc as any).lastAutoTable?.finalY + 8 || 50;
 
-  // Summary footer
   if (data.summaryLines && data.summaryLines.length > 0) {
     y = ensurePageSpace(doc, y, data.summaryLines.length * 8 + 10);
     y = addTotalsBar(doc, y, data.summaryLines, 8 * data.summaryLines.length + 6);
@@ -608,13 +616,12 @@ export async function generateFinancialSummaryReport(data: FinancialSummaryRepor
 
   let y = await addPdfHeader(doc, cfg, logoBase64);
 
-  y = addTitleBlock(doc, y, "FINANCIAL SUMMARY", null);
+  y = addTitleBlock(doc, y, "FINANCIAL SUMMARY");
   y = addMetaLine(doc, y,
     [`Generated: ${fmtDate(new Date().toISOString())}`, data.period ? `Period: ${data.period}` : ""],
     []
   );
 
-  // KPI cards
   y = addSummaryCards(doc, y, [
     { label: "Total Income", value: fmtBDT(data.totalIncome) },
     { label: "Total Expense", value: fmtBDT(data.totalExpense) },
@@ -622,7 +629,6 @@ export async function generateFinancialSummaryReport(data: FinancialSummaryRepor
     { label: "Total Due", value: fmtBDT(data.totalDue), highlight: data.totalDue > 0 },
   ]);
 
-  // Income breakdown
   if (data.incomeBreakdown.length > 0) {
     y = addSectionTitle(doc, y, "INCOME BREAKDOWN");
     y = addRawTable(doc, {
@@ -634,7 +640,6 @@ export async function generateFinancialSummaryReport(data: FinancialSummaryRepor
     });
   }
 
-  // Expense breakdown
   if (data.expenseBreakdown.length > 0) {
     y = ensurePageSpace(doc, y, 30);
     y = addSectionTitle(doc, y, "EXPENSE BREAKDOWN");
@@ -647,7 +652,6 @@ export async function generateFinancialSummaryReport(data: FinancialSummaryRepor
     });
   }
 
-  // Profit bar
   y = addTotalsBar(doc, y, [
     `Total Income: ${fmtBDT(data.totalIncome)}`,
     `Total Expense: ${fmtBDT(data.totalExpense)}`,
