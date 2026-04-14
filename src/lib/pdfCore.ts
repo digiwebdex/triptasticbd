@@ -162,7 +162,7 @@ export async function addPdfHeader(
   doc.setTextColor(0);
   doc.setFontSize(10);
 
-  return 42; // Content starts after logo
+  return 48; // Content starts after larger logo
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -328,9 +328,9 @@ export function addBillToAndMeta(
   const rightX = pw / 2 + 15;
 
   // BILL TO header
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
+  doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text("BILL TO :", leftX, y);
 
   // Bill to fields
@@ -366,9 +366,9 @@ export function addBillToAndMeta(
 // SECTION TITLE (like "SERVICE DETAILS :" in sample)
 // ═══════════════════════════════════════════════════════════════
 export function addSectionTitle(doc: jsPDF, y: number, title: string): number {
-  doc.setFontSize(12);
+  doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
+  doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text(`${title} :`, MARGIN, y);
   doc.setTextColor(0);
   return y + 7;
