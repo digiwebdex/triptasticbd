@@ -338,8 +338,8 @@ export function addBillToAndMeta(
   const leftX = MARGIN;
   const rightX = pw / 2 + 15;
 
-  // BILL TO header
-  doc.setFontSize(16);
+  // BILL TO header — orange bold
+  doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text("BILL TO :", leftX, y);
