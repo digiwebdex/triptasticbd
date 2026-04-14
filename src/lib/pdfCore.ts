@@ -299,15 +299,31 @@ export function addTitleBlock(
   doc: jsPDF, y: number, title: string, status?: string | null
 ): number {
   const pw = getPageWidth(doc);
+  const upperTitle = title.toUpperCase();
 
-  // Large bold title on the right side — ORANGE like sample (~40pt)
-  doc.setFontSize(38);
+  // Auto-scale: short titles (like "INVOICE") get 38pt, longer titles scale down
+  let fontSize = 38;
+  if (upperTitle.length > 10) fontSize = 28;
+  if (upperTitle.length > 18) fontSize = 22;
+  if (upperTitle.length > 25) fontSize = 18;
+
+  doc.setFontSize(fontSize);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
-  doc.text(title.toUpperCase(), pw - MARGIN, y + 4, { align: "right" });
-  doc.setTextColor(0);
+  doc.text(upperTitle, pw - MARGIN, y + 4, { align: "right" });
 
-  return y + 10;
+  // Status badge below title if provided
+  if (status) {
+    const statusKey = status.toLowerCase() as StatusType;
+    const sc = STATUS_COLORS[statusKey] || MUTED;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(sc.r, sc.g, sc.b);
+    doc.text(`Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`, pw - MARGIN, y + 10, { align: "right" });
+  }
+
+  doc.setTextColor(0);
+  return y + (status ? 14 : 10);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -322,8 +338,8 @@ export function addBillToAndMeta(
   const leftX = MARGIN;
   const rightX = pw / 2 + 15;
 
-  // BILL TO header
-  doc.setFontSize(16);
+  // BILL TO header — orange bold
+  doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text("BILL TO :", leftX, y);
@@ -361,12 +377,13 @@ export function addBillToAndMeta(
 // SECTION TITLE (like "SERVICE DETAILS :" in sample)
 // ═══════════════════════════════════════════════════════════════
 export function addSectionTitle(doc: jsPDF, y: number, title: string): number {
-  doc.setFontSize(14);
+  y = ensurePageSpace(doc, y, 14);
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text(`${title} :`, MARGIN, y);
   doc.setTextColor(0);
-  return y + 7;
+  return y + 6;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -487,9 +504,9 @@ export interface InfoField {
 
 export async function addInfoBox(doc: jsPDF, y: number, fields: InfoField[], title?: string): Promise<number> {
   const pw = getPageWidth(doc);
-  const rowH = 5.5;
+  const rowH = 6;
   const rows = Math.ceil(fields.length / 2);
-  const totalH = (title ? 10 : 0) + rows * rowH + 4;
+  const totalH = (title ? 12 : 0) + rows * rowH + 4;
 
   y = ensurePageSpace(doc, y, totalH);
 
@@ -497,15 +514,16 @@ export async function addInfoBox(doc: jsPDF, y: number, fields: InfoField[], tit
   const col2 = pw / 2 + 5;
   let row = y;
 
+  // Title in orange bold — matches BILL TO style
   if (title) {
-    doc.setFontSize(12);
+    doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(DARK.r, DARK.g, DARK.b);
+    doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
     doc.text(`${title} :`, col1, row + 4);
-    row += 10;
+    row += 12;
   }
 
-  doc.setFontSize(9);
+  doc.setFontSize(9.5);
   doc.setTextColor(DARK.r, DARK.g, DARK.b);
 
   for (let i = 0; i < fields.length; i++) {
@@ -524,7 +542,7 @@ export async function addInfoBox(doc: jsPDF, y: number, fields: InfoField[], tit
 
     if (hasBengali(val)) {
       const displayVal = val.length > 35 ? val.substring(0, 35) + "..." : val;
-      await addBengaliText(doc, `: ${displayVal}`, col + labelW + 1, row, { fontSize: 9, maxWidth: maxValW });
+      await addBengaliText(doc, `: ${displayVal}`, col + labelW + 1, row, { fontSize: 9.5, maxWidth: maxValW });
     } else {
       doc.text(`: ${truncatedVal}`, col + labelW + 1, row);
     }
