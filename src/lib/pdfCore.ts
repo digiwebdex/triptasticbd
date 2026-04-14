@@ -21,7 +21,7 @@ export const DARK = { r: 51, g: 51, b: 51 };
 export const DARK_BG = { r: 55, g: 55, b: 55 }; // Footer bar
 export const LIGHT_BG = { r: 248, g: 248, b: 248 };
 export const MUTED = { r: 120, g: 120, b: 120 };
-export const TABLE_HEADER = { r: 50, g: 50, b: 50 }; // Dark table header
+export const TABLE_HEADER = { r: 243, g: 146, b: 55 }; // Orange table header matching sample
 export const WHITE = { r: 255, g: 255, b: 255 };
 
 // Legacy aliases
@@ -144,8 +144,8 @@ export async function addPdfHeader(
     try {
       const imageProps = doc.getImageProperties(logoBase64);
       const aspectRatio = imageProps.width / Math.max(imageProps.height, 1);
-      // Target: ~50mm wide logo
-      const logoW = Math.min(55, 35 * aspectRatio);
+      // Target: ~70mm wide logo matching sample design
+      const logoW = Math.min(72, 50 * aspectRatio);
       const logoH = logoW / Math.max(aspectRatio, 0.01);
       doc.addImage(logoBase64, "PNG", MARGIN, 8, logoW, logoH);
     } catch { /* skip */ }
@@ -162,7 +162,7 @@ export async function addPdfHeader(
   doc.setTextColor(0);
   doc.setFontSize(10);
 
-  return 42; // Content starts after logo
+  return 48; // Content starts after larger logo
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -305,10 +305,10 @@ export function addTitleBlock(
 ): number {
   const pw = getPageWidth(doc);
 
-  // Large bold title on the right side (like "INVOICE" in sample)
-  doc.setFontSize(28);
+  // Large bold title on the right side — ORANGE like sample
+  doc.setFontSize(32);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
+  doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text(title.toUpperCase(), pw - MARGIN, y + 2, { align: "right" });
   doc.setTextColor(0);
 
@@ -328,9 +328,9 @@ export function addBillToAndMeta(
   const rightX = pw / 2 + 15;
 
   // BILL TO header
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
+  doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text("BILL TO :", leftX, y);
 
   // Bill to fields
@@ -366,9 +366,9 @@ export function addBillToAndMeta(
 // SECTION TITLE (like "SERVICE DETAILS :" in sample)
 // ═══════════════════════════════════════════════════════════════
 export function addSectionTitle(doc: jsPDF, y: number, title: string): number {
-  doc.setFontSize(12);
+  doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(DARK.r, DARK.g, DARK.b);
+  doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text(`${title} :`, MARGIN, y);
   doc.setTextColor(0);
   return y + 7;
