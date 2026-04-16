@@ -978,5 +978,12 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.days": "দিন",
     "common.perPerson": "/জন",
     "common.viewAll": "সব দেখুন",
+    "common.viewInEnglish": "View in English",
+    "common.viewInBangla": "বাংলায় দেখুন",
   },
 };
+
+// Patch English-only keys that were added later (kept here to avoid renumbering the large bn block above).
+translations.en["common.viewInEnglish"] = "View in English";
+translations.en["common.viewInBangla"] = "View in Bangla";
+

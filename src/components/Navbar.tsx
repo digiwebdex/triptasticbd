@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Phone, User, Globe } from "lucide-react";
+import { Menu, X, Phone, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,6 +8,7 @@ import logoBn from "@/assets/logo-bangla.png";
 import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useMenuVisibility } from "@/components/admin/MenuVisibilityManager";
+import LanguageToggle from "@/components/LanguageToggle";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const { data: content } = useBulkSiteContent("navbar");
-  const { language, setLanguage, t } = useLanguage();
+  const { language, t } = useLanguage();
   const { visibility: menuVisibility } = useMenuVisibility();
 
   const phone = content?.phone || "+880 1711-999910";
@@ -61,8 +62,6 @@ const Navbar = () => {
     }
   };
 
-  const toggleLang = () => setLanguage(language === "en" ? "bn" : "en");
-
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-border shadow-soft">
       <div className="container mx-auto flex items-center justify-between h-24 px-4">
@@ -84,14 +83,7 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex items-center gap-3">
-          <button
-            onClick={toggleLang}
-            className="flex items-center gap-1.5 text-sm font-medium border border-border px-3 py-2 rounded-md hover:bg-secondary transition-colors"
-            title={language === "bn" ? "View in English" : "বাংলায় দেখুন"}
-          >
-            <Globe className="h-4 w-4" />
-            {language === "bn" ? "English" : "বাংলা"}
-          </button>
+          <LanguageToggle />
 
           <a href={`tel:${phone.replace(/[\s-]/g, "")}`} className="flex items-center gap-2 text-sm text-primary">
             <Phone className="h-4 w-4" />
@@ -103,19 +95,13 @@ const Navbar = () => {
             className="flex items-center gap-1.5 text-sm font-medium bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
           >
             <User className="h-4 w-4" />
-            {user ? (language === "bn" ? "ড্যাশবোর্ড" : "Dashboard") : (language === "bn" ? "সাইন ইন" : "Sign In")}
+            {user ? t("nav.dashboard") : t("nav.signIn")}
           </button>
         </div>
 
         {/* Mobile: lang toggle + hamburger */}
         <div className="lg:hidden flex items-center gap-2">
-          <button
-            onClick={toggleLang}
-            className="flex items-center gap-1 text-xs font-medium border border-border px-2 py-1.5 rounded-md"
-          >
-            <Globe className="h-3.5 w-3.5" />
-            {language === "bn" ? "EN" : "বাং"}
-          </button>
+          <LanguageToggle variant="compact" />
           <button onClick={() => setOpen(!open)} className="text-foreground p-2">
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -146,7 +132,7 @@ const Navbar = () => {
                 className="flex items-center gap-2 text-sm font-medium bg-primary text-primary-foreground px-4 py-2.5 rounded-md hover:bg-primary/90 transition-colors w-full justify-center"
               >
                 <User className="h-4 w-4" />
-                {user ? (language === "bn" ? "ড্যাশবোর্ড" : "Dashboard") : (language === "bn" ? "সাইন ইন" : "Sign In")}
+                {user ? t("nav.dashboard") : t("nav.signIn")}
               </button>
             </div>
           </motion.div>
