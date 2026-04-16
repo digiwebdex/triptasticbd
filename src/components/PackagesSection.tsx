@@ -1,14 +1,11 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Clock, Star, Plane, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BookingDialog from "@/components/BookingDialog";
 import { useState } from "react";
 import { useLanguage } from "@/i18n/LanguageContext";
-import heroImage from "@/assets/hero-kaaba-golden.jpg";
-import medinaImage from "@/assets/hero-medina.jpg";
 import { useActivePackages } from "@/hooks/usePackagesData";
-
-const fallbackImages = [heroImage, medinaImage];
+import PackageCard from "@/components/PackageCard";
 
 const TYPE_ORDER = ["hajj", "umrah", "tour", "visa", "air_ticket", "hotel", "transport", "ziyara"];
 const TYPE_LABELS: Record<string, { en: string; bn: string }> = {
@@ -82,107 +79,14 @@ const PackagesSection = () => {
               </motion.div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 max-w-6xl mx-auto">
-                {typePkgs.map((pkg: any, i: number) => {
-                  const features = Array.isArray(pkg.features) ? pkg.features : [];
-                  const services = Array.isArray(pkg.services) ? pkg.services : [];
-                  const hasFeatures = features.length > 0;
-
-                  return (
-                    <motion.div
-                      key={pkg.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
-                      className="relative rounded-2xl overflow-hidden bg-card border border-border flex flex-col group hover:shadow-elevated transition-all duration-500"
-                    >
-                      {/* Image with fixed 16:9 ratio and bullet points overlay */}
-                      <div className="relative overflow-hidden" style={{ aspectRatio: "16/9" }}>
-                        <img
-                          src={pkg.image_url || fallbackImages[i % fallbackImages.length]}
-                          alt={pkg.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(220,25%,10%)]/80 via-[hsl(220,25%,10%)]/30 to-transparent" />
-
-                        {/* Type badge */}
-                        <div className="absolute top-3 left-3">
-                          <span className="bg-primary text-primary-foreground text-[11px] font-bold px-3 py-1.5 rounded-full capitalize shadow-md">
-                            {pkg.type}
-                          </span>
-                        </div>
-
-                        {/* Rating */}
-                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                          <Star className="h-3 w-3 fill-primary text-primary" />
-                          <span className="text-xs font-bold text-foreground">4.9</span>
-                        </div>
-
-                        {/* Bullet points overlay on image */}
-                        {hasFeatures && (
-                          <div className="absolute top-12 left-3 right-3">
-                            <ul className="space-y-1">
-                              {features.slice(0, 7).map((f: string, fi: number) => (
-                                <li key={fi} className="flex items-start gap-1.5 text-[11px] leading-tight text-white drop-shadow-md">
-                                  <span className="text-primary font-bold flex-shrink-0">►</span>
-                                  <span className="line-clamp-1">{f}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* Price at bottom */}
-                        <div className="absolute bottom-3 left-3">
-                          <p className="text-2xl font-heading font-bold text-white drop-shadow-lg">
-                            ৳{Number(pkg.price).toLocaleString("en-IN")}
-                          </p>
-                          <p className="text-[11px] text-white/80">/ {t("packages.perPerson")}</p>
-                        </div>
-
-                        {/* Services tags at bottom right */}
-                        {services.length > 0 && (
-                          <div className="absolute bottom-3 right-3 flex flex-wrap gap-1 justify-end max-w-[60%]">
-                            {services.slice(0, 3).map((s: string, si: number) => (
-                              <span key={si} className="text-[9px] bg-primary/80 text-white px-2 py-0.5 rounded-full font-medium backdrop-blur-sm">
-                                {s}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Card body */}
-                      <div className="p-5 flex-1 flex flex-col">
-                        <h3 className="font-heading text-lg font-bold mb-2 line-clamp-1">{pkg.name}</h3>
-                        <div className="flex items-center gap-4 mb-3 text-xs text-muted-foreground">
-                          {pkg.duration_days && (
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3.5 w-3.5" />
-                              {pkg.duration_days} {t("common.days")}
-                            </span>
-                          )}
-                          {services.length > 0 && (
-                            <span className="flex items-center gap-1">
-                              <Plane className="h-3.5 w-3.5" />
-                              {services[0]}
-                            </span>
-                          )}
-                        </div>
-                        {pkg.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">{pkg.description}</p>
-                        )}
-                        <button
-                          onClick={() => { setBookingPackageId(pkg.id); setBookingOpen(true); }}
-                          className="w-full py-3 rounded-xl text-sm font-semibold text-center inline-flex items-center justify-center gap-2 bg-gradient-gold text-primary-foreground hover:opacity-90 hover:shadow-gold transition-all duration-300 cursor-pointer mt-auto"
-                        >
-                          {t("packages.bookNow")} <ArrowRight className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                {typePkgs.map((pkg: any, i: number) => (
+                  <PackageCard
+                    key={pkg.id}
+                    pkg={pkg}
+                    index={i}
+                    onBook={(p) => { setBookingPackageId(p.id); setBookingOpen(true); }}
+                  />
+                ))}
               </div>
             </div>
           );

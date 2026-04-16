@@ -15,6 +15,7 @@ const EMPTY_FORM = {
   name: "", type: "umrah", description: "", price: "", duration_days: "",
   image_url: "", start_date: "", expiry_date: "", services: "", features: "",
   is_active: true, status: "active", show_on_website: true,
+  rating: "4.9", highlight_tag: "",
 };
 
 export default function AdminPackagesPage() {
@@ -71,6 +72,7 @@ export default function AdminPackagesPage() {
   const buildPayload = (f: typeof form) => {
     const featuresList = parseFeatures(f.features);
     const servicesList = f.services ? f.services.split(",").map(s => s.trim()).filter(Boolean) : [];
+    const ratingNum = parseFloat(f.rating);
     return {
       name: f.name.trim(), type: f.type, description: f.description.trim() || null,
       price: parseFloat(f.price), duration_days: f.duration_days ? parseInt(f.duration_days) : null,
@@ -81,6 +83,8 @@ export default function AdminPackagesPage() {
       is_active: f.status === "active",
       status: f.status,
       show_on_website: f.show_on_website,
+      rating: isNaN(ratingNum) ? 4.9 : Math.max(0, Math.min(5, ratingNum)),
+      highlight_tag: f.highlight_tag.trim() || null,
     };
   };
 
@@ -106,6 +110,8 @@ export default function AdminPackagesPage() {
       is_active: p.is_active,
       status: p.status || (p.is_active ? "active" : "inactive"),
       show_on_website: p.show_on_website !== false,
+      rating: p.rating != null ? String(p.rating) : "4.9",
+      highlight_tag: p.highlight_tag || "",
     });
     setShowForm(true);
   };
@@ -139,6 +145,7 @@ export default function AdminPackagesPage() {
       price: p.price, duration_days: p.duration_days, image_url: p.image_url,
       start_date: p.start_date, expiry_date: p.expiry_date, services: svc, features: feat,
       is_active: false, status: "inactive", show_on_website: false,
+      rating: p.rating ?? 4.9, highlight_tag: p.highlight_tag ?? null,
     } as any);
     if (error) { toast.error(error.message); return; }
     toast.success("Package duplicated");
@@ -199,6 +206,18 @@ export default function AdminPackagesPage() {
           <label className="text-xs text-muted-foreground block mb-1">Services (comma-separated)</label>
           <input className={inputClass} placeholder="Visa, Hotel, Transport, Food"
             value={form.services} onChange={(e) => setForm({ ...form, services: e.target.value })} />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground block mb-1">Rating (0–5)</label>
+          <input className={inputClass} type="number" step="0.1" min="0" max="5" placeholder="4.9"
+            value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="text-xs text-muted-foreground block mb-1">
+            Highlight Tag <span className="text-muted-foreground/70">(optional — short pill on card, e.g. এখনই, New, Popular)</span>
+          </label>
+          <input className={inputClass} placeholder="এখনই / New / Popular" maxLength={20}
+            value={form.highlight_tag} onChange={(e) => setForm({ ...form, highlight_tag: e.target.value })} />
         </div>
 
         {/* Features / Bullet Points Editor */}

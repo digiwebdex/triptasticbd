@@ -1141,11 +1141,13 @@ export type Database = {
           duration_days: number | null
           expiry_date: string | null
           features: Json | null
+          highlight_tag: string | null
           id: string
           image_url: string | null
           is_active: boolean
           name: string
           price: number
+          rating: number
           services: Json | null
           show_on_website: boolean
           start_date: string | null
@@ -1159,11 +1161,13 @@ export type Database = {
           duration_days?: number | null
           expiry_date?: string | null
           features?: Json | null
+          highlight_tag?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           name: string
           price: number
+          rating?: number
           services?: Json | null
           show_on_website?: boolean
           start_date?: string | null
@@ -1177,11 +1181,13 @@ export type Database = {
           duration_days?: number | null
           expiry_date?: string | null
           features?: Json | null
+          highlight_tag?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           name?: string
           price?: number
+          rating?: number
           services?: Json | null
           show_on_website?: boolean
           start_date?: string | null
