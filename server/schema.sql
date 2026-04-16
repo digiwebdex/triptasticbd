@@ -148,9 +148,15 @@ CREATE TABLE IF NOT EXISTS packages (
   is_active BOOLEAN NOT NULL DEFAULT true,
   show_on_website BOOLEAN NOT NULL DEFAULT true,
   status TEXT NOT NULL DEFAULT 'active',
+  rating NUMERIC NOT NULL DEFAULT 4.9,
+  highlight_tag TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Backfill columns for existing deployments
+ALTER TABLE packages ADD COLUMN IF NOT EXISTS rating NUMERIC NOT NULL DEFAULT 4.9;
+ALTER TABLE packages ADD COLUMN IF NOT EXISTS highlight_tag TEXT;
 
 -- Installment plans
 CREATE TABLE IF NOT EXISTS installment_plans (
