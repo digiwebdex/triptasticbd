@@ -456,9 +456,7 @@ async function generateFamilyInvoice(
 
   addPaymentWatermark(doc, getWatermarkStatus(Number(booking.paid_amount), Number(booking.due_amount || 0)));
 
-  // BILL TO + FAMILY INVOICE title
-  y = addTitleBlock(doc, y, "FAMILY INVOICE");
-
+  // FAMILY INVOICE title is drawn inside addBillToAndMeta (right column)
   const billToFields = [
     { label: "Name", value: customer.full_name || "N/A" },
     { label: "Passport", value: customer.passport_number || "N/A" },
@@ -474,7 +472,7 @@ async function generateFamilyInvoice(
     ...(booking.packages?.start_date ? [{ label: "Travel Date", value: fmtDateLocal(booking.packages.start_date) }] : []),
   ];
 
-  y = addBillToAndMeta(doc, y, billToFields, metaFields);
+  y = addBillToAndMeta(doc, y, billToFields, metaFields, { title: "INVOICE" });
 
   y = addSectionTitle(doc, y, "FAMILY MEMBERS");
 
