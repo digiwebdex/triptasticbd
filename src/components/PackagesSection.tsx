@@ -77,7 +77,7 @@ const PackagesSection = () => {
                 <div className="h-8 w-1.5 rounded-full bg-gradient-gold" />
                 <h3 className="font-heading text-2xl md:text-3xl font-bold capitalize">{label}</h3>
                 <span className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">
-                  {typePkgs.length} {language === "bn" ? "টি" : "packages"}
+                  {typePkgs.length} {t("common.packagesSuffix")}
                 </span>
               </motion.div>
 
@@ -193,7 +193,7 @@ const PackagesSection = () => {
             onClick={() => navigate("/packages")}
             className="text-primary hover:underline text-sm font-medium inline-flex items-center gap-1"
           >
-            {t("common.viewAll") || "View All Packages"} <ArrowRight className="h-4 w-4" />
+            {t("common.viewAll")} <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       </div>

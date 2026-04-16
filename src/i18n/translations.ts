@@ -488,7 +488,38 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.loading": "Loading...",
     "common.days": "Days",
     "common.perPerson": "/person",
-    "common.viewAll": "View All",
+    "common.viewAll": "View All Packages",
+    "common.packagesSuffix": "packages",
+
+    // Footer extras
+    "footer.companyName": "MANASIK",
+    "footer.tagline": "Travel Hub",
+    "footer.description": "Your trusted companion for Hajj & Umrah. Making sacred journeys easy and comfortable.",
+    "footer.address": "595/1, Milk Vita Road, Tin Rastar Mor Songlogno,\nDeola, Tangail Sadar, Tangail",
+    "footer.quote": "\"Decades ahead and one step further in our journey of Hajj & Umrah service.\"",
+    "footer.journeySubtitle": "Your Sacred Journey Partner",
+    "footer.journeyHeading": "Bangladesh to Makkah Sharif",
+    "footer.journeyDescription": "Completing your sacred journey with trust and dedication",
+    "footer.journeyFrom": "🇧🇩 Bangladesh",
+    "footer.journeyTo": "🕋 Makkah Sharif",
+    "footer.servicesList.0": "Hajj Packages",
+    "footer.servicesList.1": "Umrah Packages",
+    "footer.servicesList.2": "Visa Processing",
+    "footer.servicesList.3": "Air Tickets",
+    "footer.servicesList.4": "Hotel Booking",
+    "footer.servicesList.5": "Ziyara Tours",
+
+    // WhatsApp
+    "whatsapp.button": "How can we help you?",
+    "whatsapp.message": "Assalamu Alaikum! Welcome to Manasik Travel Hub. How can we help?",
+
+    // Contact extras
+    "contact.location.default": "595/1, Milk Vita Road, Tin Rastar Mor Songlogno\nDeola, Tangail Sadar, Tangail",
+    "contact.hours.default": "Sat - Thu: 9AM - 9PM",
+    "contact.sending": "Sending...",
+    "contact.fillRequired": "Please fill in required fields",
+    "contact.sentSuccess": "Your message has been sent successfully!",
+    "contact.sendFailed": "Failed to send message",
   },
   bn: {
     // Navbar
@@ -980,6 +1011,37 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.viewAll": "সব দেখুন",
     "common.viewInEnglish": "View in English",
     "common.viewInBangla": "বাংলায় দেখুন",
+    "common.packagesSuffix": "টি",
+
+    // Footer extras
+    "footer.companyName": "মানাসিক",
+    "footer.tagline": "ট্রাভেল হাব",
+    "footer.description": "হজ্ব ও উমরাহ সেবায় আপনার বিশ্বস্ত সঙ্গী। পবিত্র যাত্রাকে সহজ ও আরামদায়ক করছি।",
+    "footer.address": "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড় সংলগ্ন,\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল",
+    "footer.quote": "\"হজ্ব ও উমরাহ সেবায় আমাদের চলার পথে দের যুগ ছাড়িয়ে এবং এক ধাপ এগিয়ে\"",
+    "footer.journeySubtitle": "পবিত্র যাত্রার সঙ্গী",
+    "footer.journeyHeading": "বাংলাদেশ থেকে মক্কা শরীফ",
+    "footer.journeyDescription": "বিশ্বস্ততা ও নিষ্ঠার সাথে আপনার পবিত্র যাত্রা সম্পন্ন করি",
+    "footer.journeyFrom": "🇧🇩 বাংলাদেশ",
+    "footer.journeyTo": "🕋 মক্কা শরীফ",
+    "footer.servicesList.0": "হজ প্যাকেজ",
+    "footer.servicesList.1": "উমরাহ প্যাকেজ",
+    "footer.servicesList.2": "ভিসা প্রসেসিং",
+    "footer.servicesList.3": "এয়ার টিকেট",
+    "footer.servicesList.4": "হোটেল বুকিং",
+    "footer.servicesList.5": "জিয়ারা ট্যুর",
+
+    // WhatsApp
+    "whatsapp.button": "আপনাকে কিভাবে সহযোগিতা করতে পারি",
+    "whatsapp.message": "আসসালামু আলাইকুম! Manasik Travel Hub এ স্বাগতম। কিভাবে সাহায্য করতে পারি?",
+
+    // Contact extras
+    "contact.location.default": "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল",
+    "contact.hours.default": "শনি - বৃহঃ: সকাল ৯টা - রাত ৯টা",
+    "contact.sending": "পাঠানো হচ্ছে...",
+    "contact.fillRequired": "প্রয়োজনীয় তথ্য পূরণ করুন",
+    "contact.sentSuccess": "আপনার বার্তা সফলভাবে পাঠানো হয়েছে!",
+    "contact.sendFailed": "বার্তা পাঠাতে সমস্যা হয়েছে",
   },
 };
 

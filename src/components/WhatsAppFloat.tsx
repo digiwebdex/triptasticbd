@@ -4,15 +4,12 @@ import { useLanguage } from "@/i18n/LanguageContext";
 
 const WhatsAppFloat = () => {
   const { data: content } = useBulkSiteContent("whatsapp");
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const lc = content?.[language];
 
   const phone = content?.phone || "8801711999910";
-  const defaultMsg = language === "bn"
-    ? "আসসালামু আলাইকুম! Manasik Travel Hub এ স্বাগতম। কিভাবে সাহায্য করতে পারি?"
-    : "Assalamu Alaikum! Welcome to Manasik Travel Hub. How can we help?";
-  const message = encodeURIComponent(lc?.message || defaultMsg);
-  const buttonText = lc?.button_text || "আপনাকে কিভাবে সহযোগিতা করতে পারি";
+  const message = encodeURIComponent(lc?.message || t("whatsapp.message"));
+  const buttonText = lc?.button_text || t("whatsapp.button");
 
   return (
     <a
