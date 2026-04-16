@@ -222,7 +222,7 @@ const createCrudRoutes = (tableName, options = {}) => {
       }
 
       const keys = entries.map(([key]) => key);
-      const values = entries.map(([, value]) => value);
+      const values = entries.map(([, value]) => serializeJsonValues(value));
       const sets = keys.map((key, i) => `${quote(key)} = $${i + 1}`);
       values.push(req.params.id);
 
