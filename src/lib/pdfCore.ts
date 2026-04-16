@@ -325,10 +325,12 @@ const STATUS_COLORS: Record<string, { r: number; g: number; b: number }> = {
 export function addTitleBlock(
   doc: jsPDF, y: number, title: string, status?: string | null
 ): number {
+  // Kept for backwards compatibility (used by reports/profile PDFs).
+  // For invoice-style docs, prefer passing { title } to addBillToAndMeta which
+  // renders the title on the right column matching the sample design.
   const pw = getPageWidth(doc);
   const upperTitle = title.toUpperCase();
 
-  // Auto-scale: short titles (like "INVOICE") get 38pt, longer titles scale down
   let fontSize = 38;
   if (upperTitle.length > 10) fontSize = 28;
   if (upperTitle.length > 18) fontSize = 22;
@@ -339,7 +341,6 @@ export function addTitleBlock(
   doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
   doc.text(upperTitle, pw - MARGIN, y + 4, { align: "right" });
 
-  // Status badge below title if provided
   if (status) {
     const statusKey = status.toLowerCase() as StatusType;
     const sc = STATUS_COLORS[statusKey] || MUTED;
@@ -354,46 +355,74 @@ export function addTitleBlock(
 }
 
 // ═══════════════════════════════════════════════════════════════
-// BILL TO + INVOICE METADATA (side-by-side layout from sample)
+// BILL TO + INVOICE TITLE + METADATA — pixel-perfect sample layout
+// Left column: orange "BILL TO :" header + stacked label/value pairs
+// Right column: huge orange "INVOICE" title + metadata block underneath
 // ═══════════════════════════════════════════════════════════════
 export function addBillToAndMeta(
   doc: jsPDF, y: number,
   billToFields: { label: string; value: string }[],
-  metaFields: { label: string; value: string }[]
+  metaFields: { label: string; value: string }[],
+  options?: { title?: string }
 ): number {
   const pw = getPageWidth(doc);
   const leftX = MARGIN;
-  const rightX = pw / 2 + 15;
+  const rightColX = pw / 2 + 8;
+  const title = (options?.title || "INVOICE").toUpperCase();
 
-  // BILL TO header — orange bold
+  // ── RIGHT: Large orange title (top of right column) ──
+  doc.setFontSize(38);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
+  doc.text(title, pw - MARGIN, y + 6, { align: "right" });
+
+  // ── LEFT: BILL TO heading ──
   doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
-  doc.text("BILL TO :", leftX, y);
+  doc.text("BILL TO :", leftX, y + 6);
 
-  // Bill to fields — larger font matching sample (~11pt)
-  let fieldY = y + 8;
+  // ── LEFT: Bill-to fields (label : value) ──
+  let fieldY = y + 14;
   doc.setFontSize(10.5);
+  doc.setTextColor(DARK.r, DARK.g, DARK.b);
+  doc.setFont("helvetica", "normal");
+
+  // Column-align the colon position
+  let maxLabelW = 0;
+  billToFields.forEach((f) => {
+    const w = doc.getTextWidth(f.label);
+    if (w > maxLabelW) maxLabelW = w;
+  });
+  const colonX = leftX + maxLabelW + 3;
+
   billToFields.forEach((f) => {
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(DARK.r, DARK.g, DARK.b);
-    const label = `${f.label}`;
-    doc.text(label, leftX, fieldY);
-    const labelW = doc.getTextWidth(label);
-    doc.text(`: ${f.value || "N/A"}`, leftX + labelW + 1, fieldY);
-    fieldY += 6;
+    doc.text(f.label, leftX, fieldY);
+    doc.text(":", colonX, fieldY);
+    doc.text(f.value || "N/A", colonX + 3, fieldY);
+    fieldY += 6.2;
   });
 
-  // Metadata on the right (Invoice No, Date, etc.) — matching sample
-  let metaY = y + 8;
-  doc.setFontSize(9.5);
+  // ── RIGHT: Metadata block, sits below the title ──
+  let metaY = y + 18;
+  doc.setFontSize(10);
+  doc.setTextColor(DARK.r, DARK.g, DARK.b);
+
+  let maxMetaLabelW = 0;
   metaFields.forEach((f) => {
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(DARK.r, DARK.g, DARK.b);
-    doc.text(f.label, rightX, metaY);
-    doc.setFont("helvetica", "bold");
-    doc.text(`: ${f.value}`, rightX + doc.getTextWidth(f.label) + 1, metaY);
-    metaY += 6;
+    const w = doc.getTextWidth(f.label);
+    if (w > maxMetaLabelW) maxMetaLabelW = w;
+  });
+  const metaColonX = rightColX + maxMetaLabelW + 3;
+
+  metaFields.forEach((f) => {
+    const isBold = /travel\s*date/i.test(f.label);
+    doc.setFont("helvetica", isBold ? "bold" : "normal");
+    doc.text(f.label, rightColX, metaY);
+    doc.text(":", metaColonX, metaY);
+    doc.text(f.value, metaColonX + 3, metaY);
+    metaY += 6.2;
   });
 
   doc.setTextColor(0);
