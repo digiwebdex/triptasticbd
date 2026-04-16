@@ -16,8 +16,8 @@ const ContactSection = forwardRef<HTMLElement>(function ContactSection(_, ref) {
   const phone = content?.phone || "+880 1711-999910";
   const phone2 = content?.phone2 || "+880 1711-999920";
   const email = lc?.email || content?.email || "manasiktravelhub.info@gmail.com";
-  const location = lc?.location || (language === "bn" ? "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল" : content?.location || "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড় সংলগ্ন\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল");
-  const hours = lc?.hours || (language === "bn" ? "শনি - বৃহঃ: সকাল ৯টা - রাত ৯টা" : content?.hours || "Sat - Thu: 9AM - 9PM");
+  const location = lc?.location || content?.location || t("contact.location.default");
+  const hours = lc?.hours || content?.hours || t("contact.hours.default");
 
   const contactItems = [
     { icon: Phone, label: t("contact.phone"), value: `${phone}, ${phone2}`, href: `tel:${phone.replace(/[\s-]/g, "")}` },
@@ -29,7 +29,7 @@ const ContactSection = forwardRef<HTMLElement>(function ContactSection(_, ref) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.phone.trim()) {
-      toast.error(bn ? "প্রয়োজনীয় তথ্য পূরণ করুন" : "Please fill in required fields");
+      toast.error(t("contact.fillRequired"));
       return;
     }
     setLoading(true);
@@ -41,13 +41,13 @@ const ContactSection = forwardRef<HTMLElement>(function ContactSection(_, ref) {
         body: JSON.stringify(form),
       });
       if (res.ok) {
-        toast.success(bn ? "আপনার বার্তা সফলভাবে পাঠানো হয়েছে!" : "Your message has been sent successfully!");
+        toast.success(t("contact.sentSuccess"));
         setForm({ name: "", phone: "", email: "", service: "", message: "" });
       } else {
-        toast.error(bn ? "বার্তা পাঠাতে সমস্যা হয়েছে" : "Failed to send message");
+        toast.error(t("contact.sendFailed"));
       }
     } catch {
-      toast.error(bn ? "বার্তা পাঠাতে সমস্যা হয়েছে" : "Failed to send message");
+      toast.error(t("contact.sendFailed"));
     }
     setLoading(false);
   };
@@ -108,7 +108,7 @@ const ContactSection = forwardRef<HTMLElement>(function ContactSection(_, ref) {
             <textarea rows={4} placeholder={t("contact.yourMessage")} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className={`w-full ${inputClass} resize-none`} />
             <button type="submit" disabled={loading} className="w-full bg-gradient-gold text-primary-foreground font-semibold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity shadow-gold disabled:opacity-50 inline-flex items-center justify-center gap-2">
               <Send className="h-4 w-4" />
-              {loading ? (bn ? "পাঠানো হচ্ছে..." : "Sending...") : t("contact.sendMessage")}
+              {loading ? t("contact.sending") : t("contact.sendMessage")}
             </button>
           </motion.form>
         </div>

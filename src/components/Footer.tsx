@@ -11,14 +11,22 @@ const Footer = () => {
   const { t, language } = useLanguage();
 
   const lc = content?.[language];
-  const companyName = content?.company_name || "MANASIK";
-  const tagline = lc?.company_tagline || (language === "bn" ? "ট্রাভেল হাব" : content?.company_tagline || "Travel Hub");
-  const description = lc?.description || (language === "bn" ? "হজ্ব ও উমরাহ সেবায় আমাদের চলার পথ দের যুগ ছাড়িয়ে এবং এক ধাপ এগিয়ে" : content?.description || "Your trusted companion for Hajj & Umrah. Making sacred journeys easy and comfortable.");
+  const companyName = content?.company_name || t("footer.companyName");
+  const tagline = lc?.company_tagline || content?.company_tagline || t("footer.tagline");
+  const description = lc?.description || content?.description || t("footer.description");
   const phone = content?.phone || "+880 1711-999910";
   const phone2 = content?.phone2 || "+880 1711-999920";
   const email = content?.email || "manasiktravelhub.info@gmail.com";
-  const address = lc?.address || (language === "bn" ? "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড় সংলগ্ন,\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল" : content?.address || "595/1, Milk Vita Road, Tin Rastar Mor Songlogno,\nDeola, Tangail Sadar, Tangail");
-  const servicesList = lc?.services_list || (language === "bn" ? ["হজ প্যাকেজ", "উমরাহ প্যাকেজ", "ভিসা প্রসেসিং", "এয়ার টিকেট", "হোটেল বুকিং", "জিয়ারা ট্যুর"] : content?.services_list || ["Hajj Packages", "Umrah Packages", "Visa Processing", "Air Tickets", "Hotel Booking", "Ziyara Tours"]);
+  const address = lc?.address || content?.address || t("footer.address");
+  const fallbackServices = [
+    t("footer.servicesList.0"),
+    t("footer.servicesList.1"),
+    t("footer.servicesList.2"),
+    t("footer.servicesList.3"),
+    t("footer.servicesList.4"),
+    t("footer.servicesList.5"),
+  ];
+  const servicesList = lc?.services_list || content?.services_list || fallbackServices;
   const devName = content?.developer_name || "DigiWebDex";
   const devUrl = content?.developer_url || "https://digiwebdex.com";
 
@@ -72,12 +80,12 @@ const Footer = () => {
         {/* Location labels */}
         <div className="absolute bottom-16 left-6 md:left-12">
           <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
-            <p className="text-xs font-bold text-foreground">{lc?.journey_from || (language === "bn" ? "🇧🇩 বাংলাদেশ" : "🇧🇩 Bangladesh")}</p>
+            <p className="text-xs font-bold text-foreground">{lc?.journey_from || t("footer.journeyFrom")}</p>
           </div>
         </div>
         <div className="absolute bottom-16 right-6 md:right-12">
           <div className="bg-primary/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
-            <p className="text-xs font-bold text-primary-foreground">{lc?.journey_to || (language === "bn" ? "🕋 মক্কা শরীফ" : "🕋 Makkah Sharif")}</p>
+            <p className="text-xs font-bold text-primary-foreground">{lc?.journey_to || t("footer.journeyTo")}</p>
           </div>
         </div>
 
@@ -85,13 +93,13 @@ const Footer = () => {
         <div className="absolute inset-0 flex items-center justify-center text-center px-4">
           <div className="animate-fade-in">
             <p className="text-primary font-heading text-sm md:text-base uppercase tracking-[0.3em] mb-2 drop-shadow-lg">
-              {lc?.journey_subtitle || (language === "bn" ? "পবিত্র যাত্রার সঙ্গী" : "Your Sacred Journey Partner")}
+              {lc?.journey_subtitle || t("footer.journeySubtitle")}
             </p>
             <h3 className="text-white text-2xl md:text-4xl font-heading font-bold mb-3 drop-shadow-lg">
-              {lc?.journey_heading || (language === "bn" ? "বাংলাদেশ থেকে মক্কা শরীফ" : "Bangladesh to Makkah Sharif")}
+              {lc?.journey_heading || t("footer.journeyHeading")}
             </h3>
             <p className="text-white/80 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
-              {lc?.journey_description || (language === "bn" ? "বিশ্বস্ততা ও নিষ্ঠার সাথে আপনার পবিত্র যাত্রা সম্পন্ন করি" : "Completing your sacred journey with trust and dedication")}
+              {lc?.journey_description || t("footer.journeyDescription")}
             </p>
           </div>
         </div>
@@ -108,11 +116,15 @@ const Footer = () => {
           <div className="md:col-span-1">
             <div className="mb-5">
               <div className="bg-white/95 rounded-xl p-1.5 inline-block">
-                <img src={logoBn} alt="মানাসিক ট্রাভেল হাব Logo" className="h-14 w-auto object-contain" />
+                <img
+                  src={language === "bn" ? logoBn : logoEn}
+                  alt={`${companyName} ${tagline} Logo`}
+                  className="h-14 w-auto object-contain"
+                />
               </div>
             </div>
             <p className="text-sm leading-relaxed mb-5">
-              <span className="text-primary font-semibold italic">"হজ্ব ও উমরাহ সেবায় আমাদের চলার পথে দের যুগ ছাড়িয়ে এবং এক ধাপ এগিয়ে"</span>
+              <span className="text-primary font-semibold italic">{t("footer.quote")}</span>
             </p>
             <div className="flex items-center gap-3">
               <a href={content?.facebook_url || "https://www.facebook.com/profile.php?id=61585173125908"} target="_blank" rel="noopener noreferrer" className="bg-white/8 hover:bg-primary/80 transition-all p-2.5 rounded-xl border border-white/10 hover:border-primary">
