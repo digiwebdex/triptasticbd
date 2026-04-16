@@ -133,7 +133,8 @@ export async function initPdf(options?: { orientation?: "portrait" | "landscape"
 }
 
 // ═══════════════════════════════════════════════════════════════
-// HEADER — Clean logo-only design matching sample
+// HEADER — Logo (top-left) + Orange rounded QR tab (top-right)
+// Matches sample design: tab hangs from top edge with rounded bottom
 // ═══════════════════════════════════════════════════════════════
 export async function addPdfHeader(
   doc: jsPDF, cfg: PdfCompanyConfig, logoBase64: string, qrDataUrl?: string
@@ -145,25 +146,51 @@ export async function addPdfHeader(
     try {
       const imageProps = doc.getImageProperties(logoBase64);
       const aspectRatio = imageProps.width / Math.max(imageProps.height, 1);
-      // Target: ~70mm wide logo matching sample design
       const logoW = Math.min(72, 50 * aspectRatio);
       const logoH = logoW / Math.max(aspectRatio, 0.01);
       doc.addImage(logoBase64, "PNG", MARGIN, 8, logoW, logoH);
     } catch { /* skip */ }
   }
 
-  // ── QR code — top right ──
+  // ── Orange QR tab — top right, hanging from top edge ──
+  // Width ~30mm, height ~42mm, rounded only on bottom (approximated with full rounded rect from y=-6)
+  const tabW = 32;
+  const tabH = 44;
+  const tabX = pw - MARGIN - tabW - 10;
+  const tabY = -8; // extends above page edge so only bottom shows rounded
+  doc.setFillColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
+  doc.roundedRect(tabX, tabY, tabW, tabH, 6, 6, "F");
+
+  // QR code or "QR Code" text inside the tab
   if (qrDataUrl) {
     try {
       const qrSize = 22;
-      doc.addImage(qrDataUrl, "PNG", pw - MARGIN - qrSize, 8, qrSize, qrSize);
-    } catch { /* skip */ }
+      const qrX = tabX + (tabW - qrSize) / 2;
+      const qrY = tabY + tabH - qrSize - 4;
+      // White background behind QR for contrast
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(qrX - 1, qrY - 1, qrSize + 2, qrSize + 2, 1, 1, "F");
+      doc.addImage(qrDataUrl, "PNG", qrX, qrY, qrSize, qrSize);
+    } catch {
+      // Fallback: render "QR Code" text centered
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("QR", tabX + tabW / 2, tabY + tabH - 16, { align: "center" });
+      doc.text("Code", tabX + tabW / 2, tabY + tabH - 8, { align: "center" });
+    }
+  } else {
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("QR", tabX + tabW / 2, tabY + tabH - 16, { align: "center" });
+    doc.text("Code", tabX + tabW / 2, tabY + tabH - 8, { align: "center" });
   }
 
   doc.setTextColor(0);
   doc.setFontSize(10);
 
-  return 48; // Content starts after larger logo
+  return 50; // Content starts below header
 }
 
 // ═══════════════════════════════════════════════════════════════
