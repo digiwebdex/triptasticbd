@@ -9,6 +9,7 @@ import heroImage from "@/assets/hero-kaaba-golden.jpg";
 import medinaImage from "@/assets/hero-medina.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 import SEOHead, { breadcrumbJsonLd } from "@/components/SEOHead";
+import PackageCard from "@/components/PackageCard";
 
 const fallbackImages = [heroImage, medinaImage];
 
