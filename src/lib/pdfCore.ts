@@ -438,11 +438,17 @@ export function addBillToAndMeta(
   });
   const colonX = leftX + maxLabelW + 3;
 
+  // Sanitize: replace Bengali Taka (৳) with "BDT" so helvetica renders cleanly
+  // (avoids letter-spacing / fallback issues in jsPDF when a single Bengali char appears in Latin text)
+  const sanitizeForLatin = (v: string) =>
+    (v || "").replace(/৳\s*/g, "BDT ").replace(/[\u0980-\u09FF]/g, "");
+
   billToFields.forEach((f) => {
     doc.setFont("helvetica", "normal");
     doc.text(f.label, leftX, fieldY);
     doc.text(":", colonX, fieldY);
-    doc.text(f.value || "N/A", colonX + 3, fieldY);
+    const safeVal = sanitizeForLatin(f.value || "N/A") || "N/A";
+    doc.text(safeVal, colonX + 3, fieldY);
     fieldY += 6.2;
   });
 
