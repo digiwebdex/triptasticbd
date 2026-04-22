@@ -44,7 +44,7 @@ function getEmailTemplate(type: NotificationType, d: any) {
   const footer = `<hr style="border:none;border-top:1px solid #e0e0e0;margin:20px 0"/>
     <p style="font-size:11px;color:#999;text-align:center">
       Manasik Travel Hub | +880 1711-999910 | manasiktravelhub.info@gmail.com<br/>
-      ৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড় সংলগ্ন, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল
+      595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail
     </p></div>`;
   const table = (rows: [string, string][]) => `<table style="width:100%;border-collapse:collapse;margin:16px 0">${rows.map(([k, v]) => `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;width:40%;background:#f9f9f9">${k}</td><td style="padding:8px;border:1px solid #ddd">${v}</td></tr>`).join("")}</table>`;
 
