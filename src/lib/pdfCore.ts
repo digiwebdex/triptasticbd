@@ -148,7 +148,7 @@ export async function addPdfHeader(
       const aspectRatio = imageProps.width / Math.max(imageProps.height, 1);
       const logoW = Math.min(72, 50 * aspectRatio);
       const logoH = logoW / Math.max(aspectRatio, 0.01);
-      doc.addImage(logoBase64, "PNG", MARGIN + 6, 16, logoW, logoH);
+      doc.addImage(logoBase64, "PNG", MARGIN, 10, logoW, logoH);
     } catch { /* skip */ }
   }
 
