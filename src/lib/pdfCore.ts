@@ -288,7 +288,15 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
       doc.setFontSize(6);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(200);
-      doc.text(`Page ${i} of ${totalPages}`, pw / 2, barY + 24, { align: "center" });
+      doc.text(`Page ${i} of ${totalPages}`, pw - MARGIN - 4, barY + 22, { align: "right" });
+    }
+
+    // Address line — full width, centered at bottom of footer bar
+    if (cfg.address) {
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(255);
+      doc.text(cfg.address, pw / 2, barY + barH - 3, { align: "center", maxWidth: pw - 20 });
     }
 
     doc.setTextColor(0);
