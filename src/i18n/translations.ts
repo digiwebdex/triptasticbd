@@ -495,7 +495,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "footer.companyName": "MANASIK",
     "footer.tagline": "Travel Hub",
     "footer.description": "Your trusted companion for Hajj & Umrah. Making sacred journeys easy and comfortable.",
-    "footer.address": "595/1, Milk Vita Road, Tin Rastar Mor Songlogno,\nDeola, Tangail Sadar, Tangail",
+    "footer.address": "595/1, Milk Vita Road, Three-Way Intersection,\nDewla, Tangail Sadar, Tangail",
     "footer.quote": "\"Decades ahead and one step further in our journey of Hajj & Umrah service.\"",
     "footer.journeySubtitle": "Your Sacred Journey Partner",
     "footer.journeyHeading": "Bangladesh to Makkah Sharif",
@@ -514,7 +514,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "whatsapp.message": "Assalamu Alaikum! Welcome to Manasik Travel Hub. How can we help?",
 
     // Contact extras
-    "contact.location.default": "595/1, Milk Vita Road, Tin Rastar Mor Songlogno\nDeola, Tangail Sadar, Tangail",
+    "contact.location.default": "595/1, Milk Vita Road, Three-Way Intersection\nDewla, Tangail Sadar, Tangail",
     "contact.hours.default": "Sat - Thu: 9AM - 9PM",
     "contact.sending": "Sending...",
     "contact.fillRequired": "Please fill in required fields",
