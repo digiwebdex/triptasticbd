@@ -29,7 +29,7 @@ export const WHITE = { r: 255, g: 255, b: 255 };
 export const GOLD = BRAND_ORANGE;
 export const ORANGE = BRAND_ORANGE;
 
-export const FOOTER_HEIGHT = 36;
+export const FOOTER_HEIGHT = 42;
 const CONTENT_BOTTOM_PADDING = 4;
 const CONTINUATION_START_Y = 18;
 const MARGIN = 16;
@@ -148,7 +148,7 @@ export async function addPdfHeader(
       const aspectRatio = imageProps.width / Math.max(imageProps.height, 1);
       const logoW = Math.min(72, 50 * aspectRatio);
       const logoH = logoW / Math.max(aspectRatio, 0.01);
-      doc.addImage(logoBase64, "PNG", MARGIN, 10, logoW, logoH);
+      doc.addImage(logoBase64, "PNG", 6, 6, logoW, logoH);
     } catch { /* skip */ }
   }
 
@@ -294,13 +294,13 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
     // Address line — full corporate address, centered at bottom of footer bar
     if (cfg.address) {
       doc.setFontSize(7);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("helvetica", "bold");
       doc.setTextColor(255);
-      const addressLines = doc.splitTextToSize(cfg.address, pw - 12);
+      const addressLines = doc.splitTextToSize(cfg.address, pw - 16);
       const linesToShow = addressLines.slice(0, 2);
-      const startY = barY + barH - 3 - (linesToShow.length - 1) * 3;
+      const startY = barY + barH - 4 - (linesToShow.length - 1) * 3.2;
       linesToShow.forEach((line: string, idx: number) => {
-        doc.text(line, pw / 2, startY + idx * 3, { align: "center" });
+        doc.text(line, pw / 2, startY + idx * 3.2, { align: "center" });
       });
     }
 
