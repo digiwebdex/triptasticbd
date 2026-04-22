@@ -29,7 +29,7 @@ export const WHITE = { r: 255, g: 255, b: 255 };
 export const GOLD = BRAND_ORANGE;
 export const ORANGE = BRAND_ORANGE;
 
-export const FOOTER_HEIGHT = 28;
+export const FOOTER_HEIGHT = 36;
 const CONTENT_BOTTOM_PADDING = 4;
 const CONTINUATION_START_Y = 18;
 const MARGIN = 16;
@@ -141,14 +141,14 @@ export async function addPdfHeader(
 ): Promise<number> {
   const pw = getPageWidth(doc);
 
-  // ── Logo — top left, large ──
+  // ── Logo — top left, shifted down & right for breathing room ──
   if (logoBase64) {
     try {
       const imageProps = doc.getImageProperties(logoBase64);
       const aspectRatio = imageProps.width / Math.max(imageProps.height, 1);
       const logoW = Math.min(72, 50 * aspectRatio);
       const logoH = logoW / Math.max(aspectRatio, 0.01);
-      doc.addImage(logoBase64, "PNG", MARGIN, 8, logoW, logoH);
+      doc.addImage(logoBase64, "PNG", MARGIN + 6, 16, logoW, logoH);
     } catch { /* skip */ }
   }
 
