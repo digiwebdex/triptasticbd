@@ -21,7 +21,7 @@ const lazyRetry = (importFn: () => Promise<any>) =>
     })
   );
 
-const GuidelineSection = lazyRetry(() => import("@/components/GuidelineSection"));
+
 const VideoGuideSection = lazyRetry(() => import("@/components/VideoGuideSection"));
 const GallerySection = lazyRetry(() => import("@/components/GallerySection"));
 const TestimonialsSection = lazyRetry(() => import("@/components/TestimonialsSection"));
