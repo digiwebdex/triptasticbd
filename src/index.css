@@ -148,12 +148,25 @@
   .bg-gradient-gold,
   .bg-gradient-sunset { background: var(--gradient-sunset); }
   .bg-gradient-ocean { background: var(--gradient-ocean); }
+  .bg-gradient-teal { background: var(--gradient-teal); }
+  .bg-gradient-mix { background: var(--gradient-mix); }
   .bg-gradient-brand { background: var(--gradient-brand); }
   .bg-gradient-dark { background: var(--gradient-dark); }
   .bg-gradient-hero-overlay { background: var(--gradient-hero-overlay); }
 
+  .text-gradient-mix {
+    background: var(--gradient-mix);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-teal { color: hsl(var(--teal)); }
+  .bg-teal { background-color: hsl(var(--teal)); }
+  .border-teal { border-color: hsl(var(--teal)); }
+
   .shadow-gold { box-shadow: var(--shadow-gold); }
   .shadow-ocean { box-shadow: var(--shadow-ocean); }
+  .shadow-teal { box-shadow: var(--shadow-teal); }
   .shadow-soft { box-shadow: var(--shadow-soft); }
   .shadow-luxury { box-shadow: var(--shadow-luxury); }
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
