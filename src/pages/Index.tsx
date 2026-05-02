@@ -21,7 +21,7 @@ const lazyRetry = (importFn: () => Promise<any>) =>
     })
   );
 
-const GuidelineSection = lazyRetry(() => import("@/components/GuidelineSection"));
+
 const VideoGuideSection = lazyRetry(() => import("@/components/VideoGuideSection"));
 const GallerySection = lazyRetry(() => import("@/components/GallerySection"));
 const TestimonialsSection = lazyRetry(() => import("@/components/TestimonialsSection"));
@@ -48,11 +48,6 @@ const Index = () => {
         {show("services") && <ServicesSection />}
         {show("packages") && <PackagesSection />}
         {show("facilities") && <FacilitiesSection />}
-        {show("guidelines") && (
-          <Suspense fallback={<SectionFallback />}>
-            <GuidelineSection />
-          </Suspense>
-        )}
         {show("gallery") && (
           <Suspense fallback={<SectionFallback />}>
             <GallerySection />
