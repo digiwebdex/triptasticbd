@@ -12,23 +12,18 @@ type GalleryItem = {
 type TabType = "all" | "images" | "videos";
 
 const defaultItems: GalleryItem[] = [
-  { type: "image", src: "/gallery/image-1.jpeg" },
-  { type: "image", src: "/gallery/image-2.jpeg" },
-  { type: "image", src: "/gallery/image-3.jpeg" },
-  { type: "image", src: "/gallery/image-4.jpeg" },
-  { type: "image", src: "/gallery/image-5.jpeg" },
-  { type: "image", src: "/gallery/image-6.jpeg" },
-  { type: "image", src: "/gallery/image-7.jpeg" },
-  { type: "image", src: "/gallery/image-8.webp" },
-  { type: "image", src: "/gallery/image-9.jpeg" },
-  { type: "image", src: "/gallery/image-10.jpeg" },
-  { type: "image", src: "/gallery/image-11.jpeg" },
-  { type: "image", src: "/gallery/image-12.jpeg" },
-  { type: "image", src: "/gallery/image-13.jpeg" },
-  { type: "image", src: "/gallery/image-14.jpeg" },
-  { type: "image", src: "/gallery/image-15.jpeg" },
-  { type: "video", src: "/gallery/video-1.mp4" },
-  { type: "video", src: "/gallery/video-2.mp4" },
+  { type: "image", src: "/gallery/image-1.jpg" },
+  { type: "image", src: "/gallery/image-2.jpg" },
+  { type: "image", src: "/gallery/image-3.jpg" },
+  { type: "image", src: "/gallery/image-4.jpg" },
+  { type: "image", src: "/gallery/image-5.jpg" },
+  { type: "image", src: "/gallery/image-6.jpg" },
+  { type: "image", src: "/gallery/image-7.jpg" },
+  { type: "image", src: "/gallery/image-8.jpg" },
+  { type: "image", src: "/gallery/image-9.jpg" },
+  { type: "image", src: "/gallery/image-10.jpg" },
+  { type: "image", src: "/gallery/image-11.jpg" },
+  { type: "image", src: "/gallery/image-12.jpg" },
 ];
 
 const tabs: { key: TabType; labelBn: string; labelEn: string; icon: typeof ImageIcon }[] = [
@@ -48,7 +43,7 @@ export default function GallerySection() {
   const sectionLabel = lc?.section_label || (bn ? "স্মৃতি" : "Memories");
   const heading = lc?.heading || (bn ? "আমাদের " : "Our ");
   const headingHighlight = lc?.heading_highlight || (bn ? "গ্যালারি" : "Gallery");
-  const description = lc?.description || (bn ? "হজ্জ ও ওমরাহ যাত্রার বিশেষ মুহূর্তগুলো আমাদের গ্যালারিতে দেখুন।" : "Explore special moments from our Hajj & Umrah journeys.");
+  const description = lc?.description || (bn ? "বিশ্বজুড়ে আমাদের ভ্রমণের স্মরণীয় মুহূর্তগুলো দেখুন।" : "Explore unforgettable moments from our journeys around the world.");
 
   const items: GalleryItem[] = content?.items || defaultItems;
 
