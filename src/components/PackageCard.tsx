@@ -45,21 +45,21 @@ const PackageCard = ({ pkg, index = 0, onBook }: PackageCardProps) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.08 }}
-      className="relative rounded-2xl overflow-hidden bg-card border border-border flex flex-col group hover:shadow-elevated transition-all duration-500"
+      className="relative rounded-2xl overflow-hidden bg-card border-2 border-border/60 flex flex-col group hover:border-primary/40 hover:shadow-elevated hover:-translate-y-1 transition-all duration-500"
     >
       {/* Image header */}
       <div className="relative overflow-hidden" style={{ aspectRatio: "16/10" }}>
         <img
           src={pkg.image_url || fallbackImages[index % fallbackImages.length]}
           alt={pkg.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/20" />
 
         {/* Top-left: type badge */}
         <div className="absolute top-3 left-3">
-          <span className="bg-gradient-gold text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full capitalize shadow-md">
+          <span className="bg-gradient-gold text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full capitalize shadow-lg">
             {typeLabel}
           </span>
         </div>
@@ -67,43 +67,47 @@ const PackageCard = ({ pkg, index = 0, onBook }: PackageCardProps) => {
         {/* Top-right: highlight tag + rating */}
         <div className="absolute top-3 right-3 flex items-center gap-1.5">
           {highlightTag && (
-            <span className="bg-white/95 text-foreground text-[11px] font-semibold px-2 py-1 rounded-full shadow-sm">
-              ↗ {highlightTag}
+            <span className="bg-white text-foreground text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
+              ★ {highlightTag}
             </span>
           )}
-          <div className="flex items-center gap-1 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm">
+          <div className="flex items-center gap-1 bg-white px-2.5 py-1 rounded-full shadow-md">
             <Star className="h-3 w-3 fill-primary text-primary" />
             <span className="text-xs font-bold text-foreground">{rating}</span>
           </div>
         </div>
 
-        {/* Bottom-left: price */}
-        <div className="absolute bottom-3 left-3 text-white">
-          <p className="text-2xl font-heading font-bold drop-shadow-lg leading-none">
-            ৳{Number(pkg.price).toLocaleString("en-IN")}
-          </p>
-          <p className="text-[11px] text-white/85 mt-1">/ {t("packages.perPerson")}</p>
+        {/* Bottom: title + price overlay for clear readability */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <h3 className="font-heading text-lg md:text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] line-clamp-2 mb-2">
+            {pkg.name}
+          </h3>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-2xl md:text-3xl font-heading font-extrabold text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] leading-none">
+                ৳{Number(pkg.price).toLocaleString("en-IN")}
+              </p>
+              <p className="text-[11px] text-white/95 mt-1 font-medium drop-shadow-md">/ {t("packages.perPerson")}</p>
+            </div>
+            {pkg.duration_days && (
+              <span className="inline-flex items-center gap-1 bg-white/95 text-foreground text-xs font-bold px-2.5 py-1.5 rounded-full shadow-md">
+                <Clock className="h-3.5 w-3.5" />
+                {pkg.duration_days} {t("common.days")}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Card body */}
-      <div className="p-5 flex-1 flex flex-col">
-        <h3 className="font-heading text-lg font-bold mb-2 line-clamp-2">{pkg.name}</h3>
-
-        <div className="flex items-center gap-3 mb-3 text-xs text-muted-foreground">
-          {pkg.duration_days && (
-            <span className="inline-flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {pkg.duration_days} {t("common.days")}
-            </span>
-          )}
-        </div>
-
+      <div className="p-5 flex-1 flex flex-col bg-card">
         {features.length > 0 && (
-          <ul className="space-y-1.5 mb-4">
+          <ul className="space-y-2 mb-4">
             {features.slice(0, 4).map((f, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-foreground/85 leading-snug">
-                <Check className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+              <li key={i} className="flex items-start gap-2 text-sm text-foreground leading-snug">
+                <span className="flex-shrink-0 mt-0.5 w-4 h-4 rounded-full bg-primary/15 flex items-center justify-center">
+                  <Check className="h-2.5 w-2.5 text-primary" strokeWidth={3} />
+                </span>
                 <span className="line-clamp-2">{f}</span>
               </li>
             ))}
@@ -113,7 +117,7 @@ const PackageCard = ({ pkg, index = 0, onBook }: PackageCardProps) => {
         {services.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {services.slice(0, 4).map((s, i) => (
-              <span key={i} className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded-full font-medium">
+              <span key={i} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold border border-primary/20">
                 {s}
               </span>
             ))}
@@ -121,14 +125,14 @@ const PackageCard = ({ pkg, index = 0, onBook }: PackageCardProps) => {
         )}
 
         {pkg.description && features.length === 0 && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">{pkg.description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1">{pkg.description}</p>
         )}
 
         <button
           onClick={handleBook}
-          className="w-full py-3 rounded-xl text-sm font-semibold inline-flex items-center justify-center gap-2 bg-gradient-gold text-primary-foreground hover:opacity-90 hover:shadow-gold transition-all duration-300 mt-auto"
+          className="w-full py-3 rounded-xl text-sm font-bold inline-flex items-center justify-center gap-2 bg-gradient-gold text-primary-foreground hover:opacity-90 hover:shadow-gold transition-all duration-300 mt-auto group/btn"
         >
-          {t("packages.bookNow")} <ArrowRight className="h-4 w-4" />
+          {t("packages.bookNow")} <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
         </button>
       </div>
     </motion.article>
