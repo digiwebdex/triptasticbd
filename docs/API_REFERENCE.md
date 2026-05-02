@@ -1,4 +1,4 @@
-# API Reference — Manasik Travel Hub
+# API Reference — TRIP TASTIC
 
 > Complete API endpoint documentation for the Express backend
 > **Last Updated:** April 2026
@@ -8,7 +8,7 @@
 ## Base URL
 
 ```
-Production: https://manasiktravelhub.com/api
+Production: https://triptastic.com.bd/api
 Local:      http://localhost:3004/api
 ```
 
@@ -253,7 +253,7 @@ These are database views accessible via the standard GET pattern:
 ### Create a Package
 
 ```bash
-curl -X POST https://manasiktravelhub.com/api/packages \
+curl -X POST https://triptastic.com.bd/api/packages \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -270,14 +270,14 @@ curl -X POST https://manasiktravelhub.com/api/packages \
 ### List Bookings (with filters)
 
 ```bash
-curl "https://manasiktravelhub.com/api/bookings?status=confirmed&limit=10&order=created_at&ascending=false" \
+curl "https://triptastic.com.bd/api/bookings?status=confirmed&limit=10&order=created_at&ascending=false" \
   -H "Authorization: Bearer <token>"
 ```
 
 ### Upload a File
 
 ```bash
-curl -X POST https://manasiktravelhub.com/api/upload \
+curl -X POST https://triptastic.com.bd/api/upload \
   -H "Authorization: Bearer <token>" \
   -F "file=@receipt.jpg"
 ```

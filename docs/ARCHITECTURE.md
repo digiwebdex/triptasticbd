@@ -1,4 +1,4 @@
-# Project Architecture — Manasik Travel Hub
+# Project Architecture — TRIP TASTIC
 
 > Visual architecture guide, component relationships, and data flows
 > **Last Updated:** April 2026

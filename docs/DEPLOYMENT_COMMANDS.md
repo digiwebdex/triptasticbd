@@ -1,4 +1,4 @@
-# Deployment Commands — Manasik Travel Hub
+# Deployment Commands — TRIP TASTIC
 
 > All working deployment and server management commands
 > **Last Updated:** April 2026
@@ -8,7 +8,7 @@
 ## ⚡ Standard Deployment (Most Common)
 
 ```bash
-cd /var/www/manasik-travel-hub && git pull origin main && npm run build && pm2 restart manasik-api
+cd /var/www/trip-tastic && git pull origin main && npm run build && pm2 restart triptastic-api
 ```
 
 After deploy, do a **hard refresh** in browser: `Ctrl + Shift + R`
@@ -18,7 +18,7 @@ After deploy, do a **hard refresh** in browser: `Ctrl + Shift + R`
 ## 📦 Full Deployment (With New Packages)
 
 ```bash
-cd /var/www/manasik-travel-hub && git pull origin main && npm install && npm run build && pm2 restart manasik-api
+cd /var/www/trip-tastic && git pull origin main && npm install && npm run build && pm2 restart triptastic-api
 ```
 
 ---
@@ -28,7 +28,7 @@ cd /var/www/manasik-travel-hub && git pull origin main && npm install && npm run
 ### 1. Pull Latest Code
 
 ```bash
-cd /var/www/manasik-travel-hub
+cd /var/www/trip-tastic
 git pull origin main
 ```
 
@@ -47,7 +47,7 @@ npm run build
 ### 4. Restart API Server
 
 ```bash
-pm2 restart manasik-api
+pm2 restart triptastic-api
 ```
 
 ---
@@ -58,23 +58,23 @@ pm2 restart manasik-api
 # Check all process status
 pm2 status
 
-# Restart manasik API
-pm2 restart manasik-api
+# Restart triptastic API
+pm2 restart triptastic-api
 
 # Stop API
-pm2 stop manasik-api
+pm2 stop triptastic-api
 
 # Start API
-pm2 start manasik-api
+pm2 start triptastic-api
 
 # View live logs
-pm2 logs manasik-api
+pm2 logs triptastic-api
 
 # View last 100 lines of logs
-pm2 logs manasik-api --lines 100
+pm2 logs triptastic-api --lines 100
 
 # View last 50 error lines
-pm2 logs manasik-api --err --lines 50
+pm2 logs triptastic-api --err --lines 50
 
 # Monitor (real-time CPU/memory)
 pm2 monit
@@ -86,7 +86,7 @@ pm2 save
 pm2 startup
 
 # Flush all logs
-pm2 flush manasik-api
+pm2 flush triptastic-api
 ```
 
 ---
@@ -97,17 +97,17 @@ pm2 flush manasik-api
 
 ```bash
 # Connect to PostgreSQL (port 5433)
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1
 ```
 
 ### Schema & Data
 
 ```bash
 # Run schema from file
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -f /var/www/manasik-travel-hub/server/schema.sql
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -f /var/www/trip-tastic/server/schema.sql
 
 # Insert CMS section data
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "
 INSERT INTO site_content (section_key, content)
 SELECT key, '{}'::jsonb
 FROM unnest(ARRAY['hero','navbar','services','about','packages','testimonials','facilities','gallery','guideline','video_guide','contact','whatsapp','footer']) AS key
@@ -115,26 +115,26 @@ WHERE NOT EXISTS (SELECT 1 FROM site_content WHERE section_key = key);
 "
 
 # Check site_content records
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "SELECT section_key, updated_at FROM site_content ORDER BY section_key;"
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "SELECT section_key, updated_at FROM site_content ORDER BY section_key;"
 ```
 
 ### Backup & Restore
 
 ```bash
 # Backup database
-pg_dump -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 > /var/www/manasik-travel-hub/server/backups/backup_$(date +%Y%m%d_%H%M%S).sql
+pg_dump -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 > /var/www/trip-tastic/server/backups/backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Restore database
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 < /path/to/backup.sql
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 < /path/to/backup.sql
 
 # Check database size
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "SELECT pg_size_pretty(pg_database_size('manasik'));"
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "SELECT pg_size_pretty(pg_database_size('triptastic'));"
 
 # List all tables
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "\dt"
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "\dt"
 
 # Count rows in key tables
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "
 SELECT 'bookings' as table_name, count(*) FROM bookings
 UNION ALL SELECT 'payments', count(*) FROM payments
 UNION ALL SELECT 'profiles', count(*) FROM profiles
@@ -164,8 +164,8 @@ tail -f /var/log/nginx/error.log
 # View access logs
 tail -f /var/log/nginx/access.log
 
-# View manasik-specific logs (if configured)
-tail -f /var/log/nginx/manasik-error.log
+# View triptastic-specific logs (if configured)
+tail -f /var/log/nginx/triptastic-error.log
 ```
 
 ---
@@ -213,18 +213,18 @@ cat .env
 ### Required `server/.env` Variables
 
 ```env
-DATABASE_URL=postgresql://digiwebdex:PASSWORD@127.0.0.1:5433/manasik
+DATABASE_URL=postgresql://digiwebdex:PASSWORD@127.0.0.1:5433/triptastic
 JWT_SECRET=your-jwt-secret-here
 JWT_REFRESH_SECRET=your-refresh-secret-here
 JWT_EXPIRES_IN=1h
 JWT_REFRESH_EXPIRES_IN=7d
 PORT=3004
-FRONTEND_URL=https://manasiktravelhub.com
+FRONTEND_URL=https://triptastic.com.bd
 UPLOAD_DIR=./uploads
 BULKSMSBD_API_KEY=your_api_key
-BULKSMSBD_SENDER_ID=MANASIK
+BULKSMSBD_SENDER_ID=TRIPTASTIC
 RESEND_API_KEY=your_resend_key
-NOTIFICATION_FROM_EMAIL=noreply@manasiktravelhub.com
+NOTIFICATION_FROM_EMAIL=noreply@triptastic.com.bd
 ```
 
 ---
@@ -242,7 +242,7 @@ certbot renew --force-renewal
 certbot certificates
 
 # Test SSL
-openssl s_client -connect manasiktravelhub.com:443 -servername manasiktravelhub.com
+openssl s_client -connect triptastic.com.bd:443 -servername triptastic.com.bd
 ```
 
 ---
@@ -254,7 +254,7 @@ openssl s_client -connect manasiktravelhub.com:443 -servername manasiktravelhub.
 systemctl start docker
 
 # 2. Start PostgreSQL container
-docker start manasik-postgres
+docker start triptastic-postgres
 
 # 3. Start Nginx
 systemctl start nginx
@@ -285,7 +285,7 @@ docker stop <container-name>
 docker logs <container-name> --tail 50
 
 # Execute psql inside container
-docker exec -it <container-name> psql -U digiwebdex -d manasik
+docker exec -it <container-name> psql -U digiwebdex -d triptastic
 ```
 
 ---
@@ -297,7 +297,7 @@ docker exec -it <container-name> psql -U digiwebdex -d manasik
 curl -s http://localhost:3004/api/packages | head -c 200
 
 # Check PM2 process
-pm2 show manasik-api
+pm2 show triptastic-api
 
 # Check disk space
 df -h
@@ -306,16 +306,16 @@ df -h
 free -h
 
 # Check project size
-du -sh /var/www/manasik-travel-hub/
+du -sh /var/www/trip-tastic/
 
 # Check node_modules size
-du -sh /var/www/manasik-travel-hub/node_modules/
+du -sh /var/www/trip-tastic/node_modules/
 
 # Check dist size
-du -sh /var/www/manasik-travel-hub/dist/
+du -sh /var/www/trip-tastic/dist/
 
 # Check uploads size
-du -sh /var/www/manasik-travel-hub/server/uploads/
+du -sh /var/www/trip-tastic/server/uploads/
 ```
 
 ---
@@ -325,14 +325,14 @@ du -sh /var/www/manasik-travel-hub/server/uploads/
 ### API not responding
 
 ```bash
-pm2 logs manasik-api --lines 50
-pm2 restart manasik-api
+pm2 logs triptastic-api --lines 50
+pm2 restart triptastic-api
 ```
 
 ### Build fails
 
 ```bash
-cd /var/www/manasik-travel-hub
+cd /var/www/trip-tastic
 npm install
 npm run build 2>&1 | tail -50
 ```
@@ -342,7 +342,7 @@ npm run build 2>&1 | tail -50
 ```bash
 npm install <package-name>
 npm run build
-pm2 restart manasik-api
+pm2 restart triptastic-api
 ```
 
 ### Database connection error
@@ -355,7 +355,7 @@ docker ps | grep postgres
 netstat -tlnp | grep 5433
 
 # Test connection
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "SELECT 1;"
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "SELECT 1;"
 ```
 
 ### Disk space issues

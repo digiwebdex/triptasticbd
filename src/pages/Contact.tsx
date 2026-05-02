@@ -17,7 +17,7 @@ const Contact = () => {
 
   const phone = content?.phone || "+880 1711-999910";
   const phone2 = content?.phone2 || "+880 1711-999920";
-  const email = content?.email || "manasiktravelhub.info@gmail.com";
+  const email = content?.email || "info@triptastic.com.bd";
   const location = content?.location || (bn ? "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল" : "595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail");
   const hours = content?.hours || (bn ? "শনি - বৃহঃ: সকাল ৯টা - রাত ৯টা" : "Sat - Thu: 9AM - 9PM");
 
@@ -60,9 +60,9 @@ const Contact = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Contact Us - যোগাযোগ"
-        description="মানাসিক ট্রাভেল হাব এর সাথে যোগাযোগ করুন। ফোন, ইমেইল বা অফিসে আসুন। Contact Manasik Travel Hub."
+        description="ট্রিপ টেস্টিক এর সাথে যোগাযোগ করুন। ফোন, ইমেইল বা অফিসে আসুন। Contact TRIP TASTIC."
         canonicalUrl="/contact"
-        keywords="যোগাযোগ, contact, Manasik Travel Hub contact, phone, email"
+        keywords="যোগাযোগ, contact, TRIP TASTIC contact, phone, email"
         jsonLd={breadcrumbJsonLd([
           { name: "Home", url: "/" },
           { name: "Contact", url: "/contact" },

@@ -1,4 +1,4 @@
-# GitHub Setup & Project Transfer — Manasik Travel Hub
+# GitHub Setup & Project Transfer — TRIP TASTIC
 
 > GitHub connection, project transfer, and workspace management
 > **Last Updated:** April 2026
@@ -32,7 +32,7 @@
 ### VPS Deployment
 1. Run `git pull origin main` on VPS
 2. Changes pulled from the same GitHub repository
-3. Build and restart: `npm run build && pm2 restart manasik-api`
+3. Build and restart: `npm run build && pm2 restart triptastic-api`
 
 ---
 
@@ -79,8 +79,8 @@
 
 ### Production (VPS)
 - Manual deploy via `git pull`
-- Live at: `https://manasiktravelhub.com`
-- API at: `https://manasiktravelhub.com/api`
+- Live at: `https://triptastic.com.bd`
+- API at: `https://triptastic.com.bd/api`
 
 ### Code Flow
 

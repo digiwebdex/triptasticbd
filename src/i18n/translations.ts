@@ -122,7 +122,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "about.label": "Why Choose Us",
     "about.heading": "A Journey of",
     "about.headingHighlight": "Faith & Trust",
-    "about.description": "Manasik Travel Hub has been serving pilgrims from Tangail, Bangladesh with excellence. Our commitment to quality, transparency, and spiritual guidance makes us the preferred choice for thousands of families.",
+    "about.description": "TRIP TASTIC has been serving pilgrims from Tangail, Bangladesh with excellence. Our commitment to quality, transparency, and spiritual guidance makes us the preferred choice for thousands of families.",
     "about.reason1.title": "Government Approved",
     "about.reason1.desc": "Fully licensed and government-approved Hajj & Umrah agency",
     "about.reason2.title": "Personalized Care",
@@ -437,10 +437,10 @@ export const translations: Record<Language, Record<string, string>> = {
     "verify.totalAmount": "Total Amount",
     "verify.paidAmount": "Paid Amount",
     "verify.dueAmount": "Due Amount",
-    "verify.companyFooter": "Manasik Travel Hub — Hajj & Umrah Services",
+    "verify.companyFooter": "TRIP TASTIC — Hajj & Umrah Services",
 
     // Invoice Page
-    "invoice.searchPlaceholder": "Enter Tracking ID (e.g. MTH-XXXXXXXX)",
+    "invoice.searchPlaceholder": "Enter Tracking ID (e.g. TT-XXXXXXXX)",
     "invoice.searchButton": "Search",
     "invoice.loading": "Loading...",
     "invoice.notFound": "Booking not found. Please check the tracking ID.",
@@ -492,7 +492,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "common.packagesSuffix": "packages",
 
     // Footer extras
-    "footer.companyName": "MANASIK",
+    "footer.companyName": "TRIPTASTIC",
     "footer.tagline": "Travel Hub",
     "footer.description": "Your trusted companion for Hajj & Umrah. Making sacred journeys easy and comfortable.",
     "footer.address": "595/1, Milk Vita Road, Three-Way Intersection,\nDewla, Tangail Sadar, Tangail",
@@ -511,7 +511,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // WhatsApp
     "whatsapp.button": "How can we help you?",
-    "whatsapp.message": "Assalamu Alaikum! Welcome to Manasik Travel Hub. How can we help?",
+    "whatsapp.message": "Assalamu Alaikum! Welcome to TRIP TASTIC. How can we help?",
 
     // Contact extras
     "contact.location.default": "595/1, Milk Vita Road, Three-Way Intersection\nDewla, Tangail Sadar, Tangail",
@@ -642,7 +642,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "about.label": "কেন আমাদের বেছে নেবেন",
     "about.heading": "বিশ্বাস ও",
     "about.headingHighlight": "আস্থার যাত্রা",
-    "about.description": "মানাসিক ট্রাভেল হাব টাঙ্গাইল, বাংলাদেশ থেকে হাজীদের চমৎকার সেবা প্রদান করে আসছে। গুণমান, স্বচ্ছতা এবং আধ্যাত্মিক গাইডেন্সের প্রতি আমাদের প্রতিশ্রুতি আমাদেরকে হাজারো পরিবারের পছন্দের প্রতিষ্ঠান করেছে।",
+    "about.description": "ট্রিপ টেস্টিক টাঙ্গাইল, বাংলাদেশ থেকে হাজীদের চমৎকার সেবা প্রদান করে আসছে। গুণমান, স্বচ্ছতা এবং আধ্যাত্মিক গাইডেন্সের প্রতি আমাদের প্রতিশ্রুতি আমাদেরকে হাজারো পরিবারের পছন্দের প্রতিষ্ঠান করেছে।",
     "about.reason1.title": "সরকার অনুমোদিত",
     "about.reason1.desc": "সম্পূর্ণ লাইসেন্সপ্রাপ্ত এবং সরকার অনুমোদিত হজ ও উমরাহ এজেন্সি",
     "about.reason2.title": "ব্যক্তিগত যত্ন",
@@ -957,10 +957,10 @@ export const translations: Record<Language, Record<string, string>> = {
     "verify.totalAmount": "মোট পরিমাণ",
     "verify.paidAmount": "পরিশোধিত পরিমাণ",
     "verify.dueAmount": "বকেয়া পরিমাণ",
-    "verify.companyFooter": "মানাসিক ট্রাভেল হাব — হজ ও উমরাহ সেবা",
+    "verify.companyFooter": "ট্রিপ টেস্টিক — হজ ও উমরাহ সেবা",
 
     // Invoice Page
-    "invoice.searchPlaceholder": "ট্র্যাকিং আইডি লিখুন (যেমন MTH-XXXXXXXX)",
+    "invoice.searchPlaceholder": "ট্র্যাকিং আইডি লিখুন (যেমন TT-XXXXXXXX)",
     "invoice.searchButton": "খুঁজুন",
     "invoice.loading": "লোড হচ্ছে...",
     "invoice.notFound": "বুকিং পাওয়া যায়নি। ট্র্যাকিং আইডি পরীক্ষা করুন।",
@@ -1033,7 +1033,7 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // WhatsApp
     "whatsapp.button": "আপনাকে কিভাবে সহযোগিতা করতে পারি",
-    "whatsapp.message": "আসসালামু আলাইকুম! Manasik Travel Hub এ স্বাগতম। কিভাবে সাহায্য করতে পারি?",
+    "whatsapp.message": "আসসালামু আলাইকুম! TRIP TASTIC এ স্বাগতম। কিভাবে সাহায্য করতে পারি?",
 
     // Contact extras
     "contact.location.default": "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল",

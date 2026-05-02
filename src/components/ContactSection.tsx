@@ -15,7 +15,7 @@ const ContactSection = forwardRef<HTMLElement>(function ContactSection(_, ref) {
   const lc = content?.[language];
   const phone = content?.phone || "+880 1711-999910";
   const phone2 = content?.phone2 || "+880 1711-999920";
-  const email = lc?.email || content?.email || "manasiktravelhub.info@gmail.com";
+  const email = lc?.email || content?.email || "info@triptastic.com.bd";
   const location = lc?.location || content?.location || t("contact.location.default");
   const hours = lc?.hours || content?.hours || t("contact.hours.default");
 

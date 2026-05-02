@@ -16,7 +16,7 @@ const Footer = () => {
   const description = lc?.description || content?.description || t("footer.description");
   const phone = content?.phone || "+880 1711-999910";
   const phone2 = content?.phone2 || "+880 1711-999920";
-  const email = content?.email || "manasiktravelhub.info@gmail.com";
+  const email = content?.email || "info@triptastic.com.bd";
   const address = lc?.address || content?.address || t("footer.address");
   const fallbackServices = [
     t("footer.servicesList.0"),

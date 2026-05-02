@@ -22,12 +22,12 @@ export default function InvoicePage() {
   const printRef = useRef<HTMLDivElement>(null);
 
   const company: CompanyInfo = {
-    name: "Manasik Travel Hub",
+    name: "TRIP TASTIC",
     phone: "+880 1711-999910",
-    email: "manasiktravelhub.info@gmail.com",
-    address: "Corporate Office: Manasik Travel Hub, 595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail",
+    email: "info@triptastic.com.bd",
+    address: "Corporate Office: TRIP TASTIC, 595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail",
   };
-  const companyAddressBn = "কর্পোরেট অফিস: মানাসিক ট্রাভেল হাব, ৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল";
+  const companyAddressBn = "কর্পোরেট অফিস: ট্রিপ টেস্টিক, ৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল";
 
   const search = async () => {
     if (!trackingId.trim()) return;
@@ -196,7 +196,7 @@ export default function InvoicePage() {
                 <div className="border border-gray-700 rounded p-1.5 mt-1 flex flex-col items-center">
                   <p className="text-[7px] font-bold text-green-700 mb-0.5">{t("invoice.verifiedBooking")}</p>
                   <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://manasiktravelhub.com/verify/${generateVerificationId(booking.tracking_id)}`)}`}
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`https://triptastic.com.bd/verify/${generateVerificationId(booking.tracking_id)}`)}`}
                     alt="QR Code"
                     className="w-[72px] h-[72px]"
                     style={{ imageRendering: "pixelated" }}

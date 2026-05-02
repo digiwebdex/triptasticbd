@@ -126,7 +126,7 @@ const AdminDocumentViewer = ({ bookings }: Props) => {
               {filtered.map((doc) => (
                 <tr key={doc.id} className="border-b border-border/50">
                   <td className="py-2.5 pr-3 font-mono text-xs text-primary">
-                    {doc.bookings?.tracking_id?.replace(/^RK-/i, "MTH-") || "—"}
+                    {doc.bookings?.tracking_id?.replace(/^RK-/i, "TT-") || "—"}
                   </td>
                   <td className="py-2.5 pr-3">{doc.profiles?.full_name || "—"}</td>
                   <td className="py-2.5 pr-3">

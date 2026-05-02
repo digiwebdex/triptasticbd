@@ -82,8 +82,8 @@ export default function AdminCreateBookingPage() {
       const wallets = (walletRes.data as any[]) || [];
       setWalletAccounts(wallets);
       setSuppliers(supRes.data || []);
-      // Auto-assign default Moallem "Manasik Travel Hub"
-      const defaultMoallem = moallemsList.find((m: any) => m.name === "Manasik Travel Hub");
+      // Auto-assign default Moallem "TRIP TASTIC"
+      const defaultMoallem = moallemsList.find((m: any) => m.name === "TRIP TASTIC");
       // Auto-assign default wallet based on initial payment method (cash)
       const defaultWallet = wallets.find((w: any) => w.name === "Cash");
       setForm((prev) => ({

@@ -164,7 +164,7 @@ export default function VerifyInvoice() {
             <div className="bg-gray-50 border-t border-gray-100 px-6 py-4 text-center">
               <p className="text-xs text-gray-400">{t("verify.companyFooter")}</p>
               <p className="text-xs text-gray-400 mt-1">
-                +880 1711-999910, +880 1711-999920 | manasiktravelhub.info@gmail.com
+                +880 1711-999910, +880 1711-999920 | info@triptastic.com.bd
               </p>
             </div>
           </div>

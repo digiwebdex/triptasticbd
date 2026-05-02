@@ -1,4 +1,4 @@
-# Troubleshooting Guide — Manasik Travel Hub
+# Troubleshooting Guide — TRIP TASTIC
 
 > Common issues, solutions, and diagnostic commands
 > **Last Updated:** April 2026
@@ -13,9 +13,9 @@
 
 **Fix:**
 ```bash
-cd /var/www/manasik-travel-hub
+cd /var/www/trip-tastic
 npm run build
-pm2 restart manasik-api
+pm2 restart triptastic-api
 ```
 Then hard refresh: `Ctrl + Shift + R`
 
@@ -27,12 +27,12 @@ Then hard refresh: `Ctrl + Shift + R`
 ```bash
 npm install <package-name>
 npm run build
-pm2 restart manasik-api
+pm2 restart triptastic-api
 ```
 
 **Example (react-helmet-async):**
 ```bash
-npm install react-helmet-async && npm run build && pm2 restart manasik-api
+npm install react-helmet-async && npm run build && pm2 restart triptastic-api
 ```
 
 ### "Failed to load notification settings"
@@ -56,7 +56,7 @@ localStorage.removeItem('mth_language');
 
 **Fix:**
 1. Check server: `pm2 status`
-2. Check logs: `pm2 logs manasik-api --lines 50`
+2. Check logs: `pm2 logs triptastic-api --lines 50`
 3. Verify `server/.env` has correct `JWT_SECRET` and `DATABASE_URL`
 
 ### CMS content not showing
@@ -65,7 +65,7 @@ localStorage.removeItem('mth_language');
 
 **Fix:**
 ```bash
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "
 INSERT INTO site_content (section_key, content)
 SELECT key, '{}'::jsonb
 FROM unnest(ARRAY['hero','navbar','services','about','packages','testimonials','facilities','gallery','guideline','video_guide','contact','whatsapp','footer']) AS key
@@ -80,7 +80,7 @@ WHERE NOT EXISTS (SELECT 1 FROM site_content WHERE section_key = key);
 **Fix:**
 ```bash
 npm install react-helmet-async
-npm run build && pm2 restart manasik-api
+npm run build && pm2 restart triptastic-api
 ```
 Then hard refresh and check page source (`Ctrl+U`)
 
@@ -94,9 +94,9 @@ Then hard refresh and check page source (`Ctrl+U`)
 
 **Fix:**
 ```bash
-pm2 logs manasik-api --lines 50
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "SELECT 1;"
-pm2 restart manasik-api
+pm2 logs triptastic-api --lines 50
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "SELECT 1;"
+pm2 restart triptastic-api
 ```
 
 ### "relation does not exist" error
@@ -105,7 +105,7 @@ pm2 restart manasik-api
 
 **Fix:**
 ```bash
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -f server/schema.sql
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -f server/schema.sql
 ```
 
 ### File upload fails
@@ -114,8 +114,8 @@ psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -f server/schema.sql
 
 **Fix:**
 ```bash
-mkdir -p /var/www/manasik-travel-hub/server/uploads
-chmod 755 /var/www/manasik-travel-hub/server/uploads
+mkdir -p /var/www/trip-tastic/server/uploads
+chmod 755 /var/www/trip-tastic/server/uploads
 ```
 
 ### API CORS error
@@ -126,7 +126,7 @@ chmod 755 /var/www/manasik-travel-hub/server/uploads
 ```bash
 nano server/.env
 # Update FRONTEND_URL to match your domain
-pm2 restart manasik-api
+pm2 restart triptastic-api
 ```
 
 ---
@@ -146,7 +146,7 @@ docker start <container-name>
 netstat -tlnp | grep 5433
 
 # Test connection
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "SELECT 1;"
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "SELECT 1;"
 ```
 
 ### Wrong database password
@@ -160,7 +160,7 @@ cat server/.env | grep DATABASE_URL
 ### Slow queries
 
 ```bash
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "
   SELECT relname, n_tup_ins, n_tup_upd, n_tup_del
   FROM pg_stat_user_tables
   ORDER BY n_tup_ins DESC;
@@ -207,8 +207,8 @@ nano .env
 ```bash
 pm2 resurrect
 # If that fails:
-cd /var/www/manasik-travel-hub
-pm2 start server/index.js --name manasik-api
+cd /var/www/trip-tastic
+pm2 start server/index.js --name triptastic-api
 pm2 save
 ```
 
@@ -241,10 +241,10 @@ curl -s http://localhost:3004/api/packages | head -c 200
 pm2 status
 
 # PM2 logs
-pm2 logs manasik-api --lines 50
+pm2 logs triptastic-api --lines 50
 
 # Database check
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1 -c "SELECT count(*) FROM bookings;"
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "SELECT count(*) FROM bookings;"
 
 # Disk space
 df -h

@@ -6,7 +6,7 @@ import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 const defaultSlides = [
-  { image: heroBanner1, alt: "Manasik Travel Hub - Hajj & Umrah Services" },
+  { image: heroBanner1, alt: "TRIP TASTIC - Hajj & Umrah Services" },
 ];
 
 const HeroSection = () => {

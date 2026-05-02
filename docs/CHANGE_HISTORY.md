@@ -1,4 +1,4 @@
-# Change History — Manasik Travel Hub
+# Change History — TRIP TASTIC
 
 > Complete log of all major changes, features, and fixes
 > **Last Updated:** April 2026

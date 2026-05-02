@@ -133,8 +133,8 @@ const cleanText = (...values: unknown[]): string => {
 const toPublicTrackingId = (value?: string | null): string => {
   const normalized = cleanText(value).toUpperCase();
   if (!normalized) return "";
-  if (normalized.startsWith("MTH-")) return normalized;
-  if (normalized.startsWith("RK-")) return `MTH-${normalized.slice(3)}`;
+  if (normalized.startsWith("TT-")) return normalized;
+  if (normalized.startsWith("RK-")) return `TT-${normalized.slice(3)}`;
   return normalized;
 };
 
