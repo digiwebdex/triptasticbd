@@ -230,7 +230,11 @@ const AdventureCTA = () => {
           ))}
 
           {/* Destination markers */}
-          {routes.map((r) => (
+          {routes.map((r, i) => {
+            // Alternate label above/below to reduce overlap in dense regions
+            const above = i % 2 === 0;
+            const labelY = above ? r.y - 10 : r.y + 16;
+            return (
             <g key={`d-${r.code}`}>
               {/* pulse */}
               <circle cx={r.x} cy={r.y} r="4" fill="hsl(var(--gold))" opacity="0.9">
@@ -257,7 +261,7 @@ const AdventureCTA = () => {
               />
               <text
                 x={r.x}
-                y={r.y - 8}
+                y={labelY}
                 textAnchor="middle"
                 fontSize="10"
                 fontWeight="700"
@@ -267,7 +271,8 @@ const AdventureCTA = () => {
                 {r.code}
               </text>
             </g>
-          ))}
+            );
+          })}
 
           {/* Origin marker (Dhaka) */}
           <g>
