@@ -32,6 +32,7 @@ const Footer = () => {
     { label: t("nav.home"), href: "/" },
     { label: t("nav.packages"), href: "/packages" },
     { label: t("nav.hotels"), href: "/hotels" },
+    { label: language === "bn" ? "উমরাহ গাইডলাইন" : "Umrah Guideline", href: "/umrah-guide" },
     { label: t("nav.about"), href: "/about" },
     { label: t("nav.contact"), href: "/contact" },
     { label: t("nav.track"), href: "/track" },
