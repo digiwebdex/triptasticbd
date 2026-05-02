@@ -141,6 +141,9 @@ const Footer = () => {
           </div>
           <div className="text-center text-sm text-white/35">
             <p>© {new Date().getFullYear()} {companyName} {tagline}. {t("footer.allRights")}</p>
+            <p className="mt-2 text-xs text-white/30">
+              {language === "bn" ? "ট্রেড লাইসেন্স নং" : "Trade License No"}: <span className="text-white/60 font-medium">77349852504677</span>
+            </p>
             <p className="mt-2 text-xs text-white/20">{t("footer.designBy")} <a href={devUrl} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">{devName}</a></p>
           </div>
         </div>
