@@ -21,9 +21,9 @@
     --primary-foreground: 0 0% 100%;
     --primary-glow: 32 100% 62%;
 
-    /* Secondary = deep ocean blue (trust) */
-    --secondary: 217 89% 28%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary = soft neutral surface (readable inputs/cards). Brand blue available via --ocean / bg-ocean */
+    --secondary: 210 30% 96%;
+    --secondary-foreground: 215 35% 12%;
     --secondary-glow: 210 95% 50%;
 
     --muted: 210 30% 95%;
