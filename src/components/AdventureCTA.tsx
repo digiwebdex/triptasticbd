@@ -88,7 +88,7 @@ const AdventureCTA = () => {
   ];
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto">
+    <div className="relative w-full max-w-7xl mx-auto px-2 md:px-4">
       {/* Map container */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
