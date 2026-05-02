@@ -92,7 +92,7 @@ const AboutSection = () => {
                 <input
                   type="text"
                   placeholder={t("about.trackPlaceholder")}
-                  className="flex-1 bg-secondary border border-border rounded-xl px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 uppercase"
+                  className="flex-1 bg-muted border border-border rounded-xl px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 uppercase"
                   value={trackingId}
                   onChange={(e) => setTrackingId(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleTrack()}

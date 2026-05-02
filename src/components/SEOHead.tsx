@@ -14,7 +14,7 @@ interface SEOHeadProps {
 
 const SITE_NAME = "TRIP TASTIC";
 const DEFAULT_DESCRIPTION =
-  "ট্রিপ টেস্টিক - হজ্জ, উমরাহ ও ভিসা সেবায় বাংলাদেশের বিশ্বস্ত প্রতিষ্ঠান। Trusted Hajj, Umrah, Visa & Tour services from Bangladesh.";
+  "TRIP TASTIC — Premium Hajj, Umrah, international tours, air tickets, visa processing & air ambulance support. Trusted travel partner from Bangladesh.";
 const DEFAULT_OG_IMAGE = "/og-image.jpg";
 const BASE_URL = "https://triptastic.com.bd";
 
@@ -27,7 +27,7 @@ export default function SEOHead({
   ogType = "website",
   noIndex = false,
   jsonLd,
-  lang = "bn",
+  lang = "en",
 }: SEOHeadProps) {
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const fullOgImage = ogImage.startsWith("http") ? ogImage : `${BASE_URL}${ogImage}`;
