@@ -48,11 +48,6 @@ const Index = () => {
         {show("services") && <ServicesSection />}
         {show("packages") && <PackagesSection />}
         {show("facilities") && <FacilitiesSection />}
-        {show("guidelines") && (
-          <Suspense fallback={<SectionFallback />}>
-            <GuidelineSection />
-          </Suspense>
-        )}
         {show("gallery") && (
           <Suspense fallback={<SectionFallback />}>
             <GallerySection />
