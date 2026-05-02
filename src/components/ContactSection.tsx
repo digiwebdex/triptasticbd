@@ -13,14 +13,13 @@ const ContactSection = forwardRef<HTMLElement>(function ContactSection(_, ref) {
   const [loading, setLoading] = useState(false);
 
   const lc = content?.[language];
-  const phone = content?.phone || "+880 1711-999910";
-  const phone2 = content?.phone2 || "+880 1711-999920";
+  const phone = content?.phone || "+880 1711-925400";
   const email = lc?.email || content?.email || "info@triptastic.com.bd";
   const location = lc?.location || content?.location || t("contact.location.default");
   const hours = lc?.hours || content?.hours || t("contact.hours.default");
 
   const contactItems = [
-    { icon: Phone, label: t("contact.phone"), value: `${phone}, ${phone2}`, href: `tel:${phone.replace(/[\s-]/g, "")}` },
+    { icon: Phone, label: t("contact.phone"), value: phone, href: `tel:${phone.replace(/[\s-]/g, "")}` },
     { icon: Mail, label: t("contact.email"), value: email, href: `mailto:${email}` },
     { icon: MapPin, label: t("contact.location"), value: location, href: "#" },
     { icon: Clock, label: t("contact.hours"), value: hours, href: "#" },

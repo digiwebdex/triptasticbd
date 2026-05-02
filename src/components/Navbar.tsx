@@ -18,7 +18,7 @@ const Navbar = () => {
   const { language, t } = useLanguage();
   const { visibility: menuVisibility } = useMenuVisibility();
 
-  const phone = content?.phone || "+880 1711-999910";
+  const phone = content?.phone || "+880 1711-925400";
 
   const allNavLinks = [
     { key: "home", label: t("nav.home"), href: "#hero" },

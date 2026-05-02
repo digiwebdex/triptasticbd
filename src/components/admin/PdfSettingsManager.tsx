@@ -131,7 +131,7 @@ export default function PdfSettingsManager() {
             className={inputClass}
             value={config.phone}
             onChange={(e) => updateField("phone", e.target.value)}
-            placeholder="+880 1711-999910"
+            placeholder="+880 1711-925400"
           />
         </div>
         <div>
@@ -140,7 +140,7 @@ export default function PdfSettingsManager() {
             className={inputClass}
             value={config.phone2}
             onChange={(e) => updateField("phone2", e.target.value)}
-            placeholder="+880 1711-999920"
+            placeholder="(optional)"
           />
         </div>
         <div>

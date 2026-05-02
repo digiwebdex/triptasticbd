@@ -198,7 +198,6 @@ export async function addPdfHeader(
 // ═══════════════════════════════════════════════════════════════
 export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { showPageNumbers?: boolean }) {
   const totalPages = doc.getNumberOfPages();
-  const phone2 = (cfg as any).phone2 || "+880 1711-999920";
 
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
@@ -227,42 +226,33 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
       doc.setLineWidth(0.35);
 
       if (glyph === "phone") {
-        // Stylized phone handset (rounded rectangle tilted)
         const w = r * 0.9, h = r * 1.4;
         doc.roundedRect(cx - w / 2, cy - h / 2, w, h, 0.5, 0.5, "F");
-        // Speaker dot at top (white)
         doc.setFillColor(255, 255, 255);
         doc.circle(cx, cy - h / 2 + 0.5, 0.25, "F");
         doc.setFillColor(BRAND_ORANGE.r, BRAND_ORANGE.g, BRAND_ORANGE.b);
       } else if (glyph === "email") {
-        // Envelope: rectangle outline + diagonal flap
         const w = r * 1.6, h = r * 1.1;
         doc.setLineWidth(0.4);
         doc.rect(cx - w / 2, cy - h / 2, w, h, "S");
-        // Flap (V shape from top corners to center)
         doc.line(cx - w / 2, cy - h / 2, cx, cy + h / 6);
         doc.line(cx + w / 2, cy - h / 2, cx, cy + h / 6);
       } else if (glyph === "web") {
-        // Globe: circle outline + meridian + horizontal latitude
         doc.setLineWidth(0.35);
         doc.circle(cx, cy, r * 0.75, "S");
-        // Vertical meridian (ellipse-like with line)
         doc.line(cx, cy - r * 0.75, cx, cy + r * 0.75);
-        // Horizontal equator
         doc.line(cx - r * 0.75, cy, cx + r * 0.75, cy);
-        // Curved meridian (approximated)
         doc.ellipse(cx, cy, r * 0.35, r * 0.75, "S");
       }
       doc.setLineWidth(0.2);
     };
 
-    // Phone numbers - left side with phone icon
-    drawIconCircle(MARGIN + 3, barY + 12, 2.5, "phone");
-    doc.setFontSize(8.5);
+    // Phone number - left side with phone icon
+    drawIconCircle(MARGIN + 3, barY + 13, 2.5, "phone");
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255);
-    doc.text(cfg.phone, MARGIN + 9, barY + 10);
-    doc.text(phone2, MARGIN + 9, barY + 16);
+    doc.text(cfg.phone, MARGIN + 9, barY + 14);
 
     // Email & website - center with envelope + globe icons
     const centerX = pw / 2 - 5;
@@ -274,7 +264,7 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
     doc.text(cfg.email || "info@triptastic.com.bd", centerX, barY + 10);
     doc.text("triptastic.com.bd", centerX, barY + 16);
 
-    // Thank You — right side (script/cursive style)
+    // Thank You — right side
     doc.setFontSize(16);
     doc.setFont("helvetica", "bolditalic");
     doc.setTextColor(255);
@@ -282,6 +272,7 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
     doc.setFontSize(6.5);
     doc.setFont("helvetica", "bold");
     doc.text("Stay With TRIP TASTIC", pw - MARGIN - 4, barY + 17, { align: "right" });
+
 
     // Page numbers
     if (options?.showPageNumbers !== false && totalPages > 1) {

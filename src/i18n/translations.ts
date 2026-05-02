@@ -495,7 +495,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "footer.companyName": "TRIPTASTIC",
     "footer.tagline": "Travel Hub",
     "footer.description": "Your trusted companion for Hajj & Umrah. Making sacred journeys easy and comfortable.",
-    "footer.address": "595/1, Milk Vita Road, Three-Way Intersection,\nDewla, Tangail Sadar, Tangail",
+    "footer.address": "4th Floor, Jail Road, Munshipara,\nDinajpur Sadar - 5200",
     "footer.quote": "\"Decades ahead and one step further in our journey of Hajj & Umrah service.\"",
     "footer.journeySubtitle": "Your Sacred Journey Partner",
     "footer.journeyHeading": "Bangladesh to Makkah Sharif",
@@ -514,7 +514,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "whatsapp.message": "Assalamu Alaikum! Welcome to TRIP TASTIC. How can we help?",
 
     // Contact extras
-    "contact.location.default": "595/1, Milk Vita Road, Three-Way Intersection\nDewla, Tangail Sadar, Tangail",
+    "contact.location.default": "4th Floor, Jail Road, Munshipara\nDinajpur Sadar - 5200",
     "contact.hours.default": "Sat - Thu: 9AM - 9PM",
     "contact.sending": "Sending...",
     "contact.fillRequired": "Please fill in required fields",
@@ -1017,7 +1017,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "footer.companyName": "মানাসিক",
     "footer.tagline": "ট্রাভেল হাব",
     "footer.description": "হজ্ব ও উমরাহ সেবায় আপনার বিশ্বস্ত সঙ্গী। পবিত্র যাত্রাকে সহজ ও আরামদায়ক করছি।",
-    "footer.address": "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড় সংলগ্ন,\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল",
+    "footer.address": "৪র্থ তলা, জেল রোড, মুন্সিপাড়া,\nদিনাজপুর সদর - ৫২০০",
     "footer.quote": "\"হজ্ব ও উমরাহ সেবায় আমাদের চলার পথে দের যুগ ছাড়িয়ে এবং এক ধাপ এগিয়ে\"",
     "footer.journeySubtitle": "পবিত্র যাত্রার সঙ্গী",
     "footer.journeyHeading": "বাংলাদেশ থেকে মক্কা শরীফ",
@@ -1036,7 +1036,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "whatsapp.message": "আসসালামু আলাইকুম! TRIP TASTIC এ স্বাগতম। কিভাবে সাহায্য করতে পারি?",
 
     // Contact extras
-    "contact.location.default": "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়\nদেওলা, টাঙ্গাইল সদর, টাঙ্গাইল",
+    "contact.location.default": "৪র্থ তলা, জেল রোড, মুন্সিপাড়া\nদিনাজপুর সদর - ৫২০০",
     "contact.hours.default": "শনি - বৃহঃ: সকাল ৯টা - রাত ৯টা",
     "contact.sending": "পাঠানো হচ্ছে...",
     "contact.fillRequired": "প্রয়োজনীয় তথ্য পূরণ করুন",
