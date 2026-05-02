@@ -189,7 +189,7 @@ export function exportHajjiExcel({ title, customers }: HajjiReportData) {
     rows.push([]);
   });
   rows.push([]);
-  rows.push(["Manasik Travel Hub"]);
+  rows.push(["TRIP TASTIC"]);
   rows.push(["Phone: +880 1711-999910, +880 1711-999920 | Email: manasiktravelhub.info@gmail.com"]);
   const ws = XLSX.utils.aoa_to_sheet(rows);
   const wb = XLSX.utils.book_new();
@@ -204,7 +204,7 @@ export function exportExcel({ title, columns, rows, summary }: ReportData) {
     summary.forEach(line => wsData.push([line]));
   }
   wsData.push([]);
-  wsData.push(["Manasik Travel Hub"]);
+  wsData.push(["TRIP TASTIC"]);
   wsData.push(["Phone: +880 1711-999910, +880 1711-999920 | Email: manasiktravelhub.info@gmail.com"]);
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   const wb = XLSX.utils.book_new();

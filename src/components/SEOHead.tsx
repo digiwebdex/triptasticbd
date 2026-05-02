@@ -12,11 +12,11 @@ interface SEOHeadProps {
   lang?: string;
 }
 
-const SITE_NAME = "Manasik Travel Hub";
+const SITE_NAME = "TRIP TASTIC";
 const DEFAULT_DESCRIPTION =
-  "মানাসিক ট্রাভেল হাব - হজ্জ, উমরাহ ও ভিসা সেবায় বাংলাদেশের বিশ্বস্ত প্রতিষ্ঠান। Trusted Hajj, Umrah, Visa & Tour services from Bangladesh.";
+  "ট্রিপ টেস্টিক - হজ্জ, উমরাহ ও ভিসা সেবায় বাংলাদেশের বিশ্বস্ত প্রতিষ্ঠান। Trusted Hajj, Umrah, Visa & Tour services from Bangladesh.";
 const DEFAULT_OG_IMAGE = "/og-image.jpg";
-const BASE_URL = "https://manasiktravelhub.com";
+const BASE_URL = "https://triptastic.com.bd";
 
 export default function SEOHead({
   title,

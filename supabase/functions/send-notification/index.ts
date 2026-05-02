@@ -38,12 +38,12 @@ interface NotificationRequest {
 function getEmailTemplate(type: NotificationType, d: any) {
   const header = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#ffffff;border:1px solid #e0e0e0;border-radius:8px">
     <div style="text-align:center;padding:15px 0;border-bottom:2px solid #E8860B;margin-bottom:20px">
-      <h1 style="color:#E8860B;margin:0;font-size:22px">Manasik Travel Hub</h1>
+      <h1 style="color:#E8860B;margin:0;font-size:22px">TRIP TASTIC</h1>
       <p style="color:#888;margin:4px 0 0;font-size:12px">Hajj & Umrah Services</p>
     </div>`;
   const footer = `<hr style="border:none;border-top:1px solid #e0e0e0;margin:20px 0"/>
     <p style="font-size:11px;color:#999;text-align:center">
-      Manasik Travel Hub | +880 1711-999910 | manasiktravelhub.info@gmail.com<br/>
+      TRIP TASTIC | +880 1711-999910 | manasiktravelhub.info@gmail.com<br/>
       595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail
     </p></div>`;
   const table = (rows: [string, string][]) => `<table style="width:100%;border-collapse:collapse;margin:16px 0">${rows.map(([k, v]) => `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;width:40%;background:#f9f9f9">${k}</td><td style="padding:8px;border:1px solid #ddd">${v}</td></tr>`).join("")}</table>`;
@@ -62,7 +62,7 @@ function getEmailTemplate(type: NotificationType, d: any) {
     case "booking_completed":
       return {
         subject: `🎉 Booking Completed — ${d.trackingId}`,
-        html: `${header}<h2 style="color:#1a7f37">Payment Completed ✅</h2><p>Dear <strong>${d.name}</strong>,</p><p>Your booking <strong>${d.trackingId}</strong> is fully paid!</p>${table([["Tracking ID", d.trackingId], ["Total Paid", `৳${d.totalAmount.toLocaleString()}`], ["Status", "Completed"]])}<p>Thank you for choosing Manasik Travel Hub!</p>${footer}`,
+        html: `${header}<h2 style="color:#1a7f37">Payment Completed ✅</h2><p>Dear <strong>${d.name}</strong>,</p><p>Your booking <strong>${d.trackingId}</strong> is fully paid!</p>${table([["Tracking ID", d.trackingId], ["Total Paid", `৳${d.totalAmount.toLocaleString()}`], ["Status", "Completed"]])}<p>Thank you for choosing TRIP TASTIC!</p>${footer}`,
       };
     case "booking_status_updated":
       return {
@@ -91,7 +91,7 @@ function getEmailTemplate(type: NotificationType, d: any) {
       };
     case "custom":
       return {
-        subject: d.customSubject || "Notification from Manasik Travel Hub",
+        subject: d.customSubject || "Notification from TRIP TASTIC",
         html: `${header}<h2 style="color:#b8860b">${d.customSubject || "Message"}</h2><p>Dear <strong>${d.name}</strong>,</p><p>${d.customMessage || ""}</p>${footer}`,
       };
     default:
@@ -101,7 +101,7 @@ function getEmailTemplate(type: NotificationType, d: any) {
 
 // --- SMS templates ---
 function getSmsMessage(type: NotificationType, d: any): string {
-  const contact = "Manasik Travel Hub: 01711-999910";
+  const contact = "TRIP TASTIC: 01711-999910";
   switch (type) {
     case "booking_created":
       return `Dear ${d.name}, booking ${d.trackingId} for ${d.packageName} created. Total: ৳${d.totalAmount.toLocaleString()}. ${contact}`;

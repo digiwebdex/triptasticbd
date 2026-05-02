@@ -15,11 +15,11 @@ export function formatAmount(n: number | null | undefined): string {
   return Number(n || 0).toLocaleString("en-IN");
 }
 
-/** Format tracking ID: convert legacy RK- prefix to MTH- */
+/** Format tracking ID: convert legacy RK- prefix to TT- */
 export function formatTrackingId(value?: string | null): string {
   const normalized = (value || "").trim().toUpperCase();
   if (!normalized) return "";
-  if (normalized.startsWith("MTH-")) return normalized;
-  if (normalized.startsWith("RK-")) return `MTH-${normalized.slice(3)}`;
+  if (normalized.startsWith("TT-")) return normalized;
+  if (normalized.startsWith("RK-")) return `TT-${normalized.slice(3)}`;
   return normalized;
 }

@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      const message = `Manasik Travel Hub OTP is ${otpCode}`;
+      const message = `TRIP TASTIC OTP is ${otpCode}`;
       const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(smsNumber)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
 
       const smsRes = await fetch(smsUrl);
@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
         }
 
         // Create auth user with a random password (they'll use OTP to login)
-        const tempEmail = `${sanitizedPhone.replace(/\+/g, "")}@phone.manasiktravelhub.com`;
+        const tempEmail = `${sanitizedPhone.replace(/\+/g, "")}@phone.triptastic.com.bd`;
         const tempPassword = crypto.randomUUID() + "Aa1!";
 
         const { data: newUser, error: createError } = await supabase.auth.admin.createUser({

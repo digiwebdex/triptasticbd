@@ -19,4 +19,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-Sitemap: https://manasiktravelhub.com/sitemap.xml
+Sitemap: https://triptastic.com.bd/sitemap.xml

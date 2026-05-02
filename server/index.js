@@ -1000,10 +1000,10 @@ app.post('/api/create-guest-booking', async (req, res) => {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: process.env.NOTIFICATION_FROM_EMAIL || 'Manasik Travel Hub <noreply@manasiktravelhub.com>',
+            from: process.env.NOTIFICATION_FROM_EMAIL || 'TRIP TASTIC <noreply@triptastic.com.bd>',
             to: [guest_email],
             subject: `Booking Confirmed - ${booking.tracking_id}`,
-            html: `<h2>Your Booking is Confirmed!</h2><p>Tracking ID: <strong>${booking.tracking_id}</strong></p><p>Package: ${pkg.name}</p><p>Total: ৳${totalAmount.toLocaleString()}</p><p>Thank you for choosing Manasik Travel Hub.</p>`,
+            html: `<h2>Your Booking is Confirmed!</h2><p>Tracking ID: <strong>${booking.tracking_id}</strong></p><p>Package: ${pkg.name}</p><p>Total: ৳${totalAmount.toLocaleString()}</p><p>Thank you for choosing TRIP TASTIC.</p>`,
           }),
         });
       } catch (emailErr) {
@@ -1095,7 +1095,7 @@ app.post('/api/send-notification', authenticate, requireRole('admin'), async (re
           method: 'POST',
           headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: process.env.NOTIFICATION_FROM_EMAIL || 'Manasik Travel Hub <noreply@manasiktravelhub.com>',
+            from: process.env.NOTIFICATION_FROM_EMAIL || 'TRIP TASTIC <noreply@triptastic.com.bd>',
             to: [profile.email],
             subject,
             html,
@@ -1119,8 +1119,8 @@ app.post('/api/send-notification', authenticate, requireRole('admin'), async (re
       const BULKSMS_API_KEY = process.env.BULKSMS_API_KEY;
       if (BULKSMS_API_KEY) {
         try {
-          const smsMessage = sms_message || custom_message || `Manasik Travel Hub: Booking ${booking?.tracking_id || ''} - ${type}`;
-          const smsRes = await fetch(`https://bulksmsbd.net/api/smsapi?api_key=${BULKSMS_API_KEY}&type=text&number=${profile.phone}&senderid=${process.env.BULKSMS_SENDER_ID || 'MANASIK'}&message=${encodeURIComponent(smsMessage)}`);
+          const smsMessage = sms_message || custom_message || `TRIP TASTIC: Booking ${booking?.tracking_id || ''} - ${type}`;
+          const smsRes = await fetch(`https://bulksmsbd.net/api/smsapi?api_key=${BULKSMS_API_KEY}&type=text&number=${profile.phone}&senderid=${process.env.BULKSMS_SENDER_ID || 'TRIPTASTIC'}&message=${encodeURIComponent(smsMessage)}`);
           const status = smsRes.ok ? 'sent' : 'failed';
           results.push({ channel: 'sms', status });
 
@@ -1158,7 +1158,7 @@ app.post('/api/contact', async (req, res) => {
     }
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const CONTACT_EMAIL = 'manasiktravelhub@gmail.com';
+    const CONTACT_EMAIL = 'info@triptastic.com.bd';
 
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEY not configured');
@@ -1181,7 +1181,7 @@ app.post('/api/contact', async (req, res) => {
           <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;color:#555;">Service:</td><td style="padding:8px;">${safeService || 'Not selected'}</td></tr>
           <tr><td style="padding:8px;font-weight:bold;color:#555;vertical-align:top;">Message:</td><td style="padding:8px;">${safeMessage || 'No message'}</td></tr>
         </table>
-        <p style="color:#999;font-size:12px;margin-top:20px;">Sent from Manasik Travel Hub website contact form</p>
+        <p style="color:#999;font-size:12px;margin-top:20px;">Sent from TRIP TASTIC website contact form</p>
       </div>
     `;
 
@@ -1192,7 +1192,7 @@ app.post('/api/contact', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: process.env.NOTIFICATION_FROM_EMAIL || 'Manasik Travel Hub <noreply@manasiktravelhub.com>',
+        from: process.env.NOTIFICATION_FROM_EMAIL || 'TRIP TASTIC <noreply@triptastic.com.bd>',
         to: [CONTACT_EMAIL],
         subject: `New Contact: ${name} - ${service || 'General Inquiry'}`,
         html: htmlBody,
@@ -1264,7 +1264,7 @@ app.post('/api/send-otp', async (req, res) => {
         return res.status(500).json({ error: 'SMS service not configured' });
       }
 
-      const message = `Manasik Travel Hub OTP is ${otpCode}`;
+      const message = `TRIP TASTIC OTP is ${otpCode}`;
       const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(smsNumber)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
       let smsText = '';
       let smsHttpStatus = 0;
@@ -1329,7 +1329,7 @@ app.post('/api/send-otp', async (req, res) => {
           const { createClient } = require('@supabase/supabase-js');
           const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-          const tempEmail = `${sanitizedPhone.replace(/\+/g, '')}@phone.manasiktravelhub.com`;
+          const tempEmail = `${sanitizedPhone.replace(/\+/g, '')}@phone.triptastic.com.bd`;
           const tempPassword = require('uuid').v4() + 'Aa1!';
 
           const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -1501,6 +1501,6 @@ app.get('*', (req, res) => {
 // START
 // =============================================
 app.listen(PORT, () => {
-  console.log(`🚀 Manasik Travel Hub API running on port ${PORT}`);
+  console.log(`🚀 TRIP TASTIC API running on port ${PORT}`);
   console.log(`📁 Serving frontend from ${frontendPath}`);
 });

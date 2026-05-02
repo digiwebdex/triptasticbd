@@ -1,5 +1,5 @@
 /**
- * pdfCore.ts — Unified PDF Design System for Manasik Travel Hub
+ * pdfCore.ts — Unified PDF Design System for TRIP TASTIC
  * 
  * Clean, professional A4 design matching the company invoice template.
  * Large logo header, clean typography, dark footer bar with contact info.
@@ -272,7 +272,7 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
     doc.setFontSize(7.5);
     doc.setTextColor(255);
     doc.text(cfg.email || "manasiktravelhub.info@gmail.com", centerX, barY + 10);
-    doc.text("manasiktravelhub.com", centerX, barY + 16);
+    doc.text("triptastic.com.bd", centerX, barY + 16);
 
     // Thank You — right side (script/cursive style)
     doc.setFontSize(16);
@@ -281,7 +281,7 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
     doc.text("Thank You", pw - MARGIN - 4, barY + 10, { align: "right" });
     doc.setFontSize(6.5);
     doc.setFont("helvetica", "bold");
-    doc.text("Stay With MANASIK TRAVEL HUB", pw - MARGIN - 4, barY + 17, { align: "right" });
+    doc.text("Stay With TRIP TASTIC", pw - MARGIN - 4, barY + 17, { align: "right" });
 
     // Page numbers
     if (options?.showPageNumbers !== false && totalPages > 1) {
@@ -347,7 +347,7 @@ export function addSignatureBlock(doc: jsPDF, sig: SignatureData, y: number): nu
     doc.setFont("helvetica", "bold");
     doc.text(sig.authorized_name, rightCenter, lineY + 5, { align: "center" });
   } else {
-    doc.text("Manasik Travel Hub", rightCenter, lineY + 5, { align: "center" });
+    doc.text("TRIP TASTIC", rightCenter, lineY + 5, { align: "center" });
   }
 
   if (sig.designation) {

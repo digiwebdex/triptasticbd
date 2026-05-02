@@ -1,11 +1,11 @@
-# Manasik Travel Hub — Developer Documentation (A-Z)
+# TRIP TASTIC — Developer Documentation (A-Z)
 
 > **Last Updated:** April 2026
 > **Version:** 3.x
 > **Repository:** https://github.com/digiwebdex/sakinah-journey-ec91ec18
 
 ## Overview
-Manasik Travel Hub is a comprehensive travel management platform designed for Hajj & Umrah services. This documentation covers the architecture, setup, and maintenance procedures for the system.
+TRIP TASTIC is a comprehensive travel management platform designed for Hajj & Umrah services. This documentation covers the architecture, setup, and maintenance procedures for the system.
 
 ## Tech Stack
 - **Frontend:** React, TypeScript, Tailwind CSS, Vite
@@ -21,7 +21,7 @@ Manasik Travel Hub is a comprehensive travel management platform designed for Ha
 4. Run development server: `npm run dev`.
 
 ## Branding Guidelines
-All references to the previous brand "Rahe Kaba" have been removed. The system is now fully rebranded to "Manasik Travel Hub". Ensure all new assets, templates, and documentation follow this identity.
+All references to the previous brand "Rahe Kaba" have been removed. The system is now fully rebranded to "TRIP TASTIC". Ensure all new assets, templates, and documentation follow this identity.
 
 ## Maintenance
 - **Database:** Use `psql` commands provided in `DEPLOYMENT_COMMANDS.md`.
@@ -29,4 +29,4 @@ All references to the previous brand "Rahe Kaba" have been removed. The system i
 - **Updates:** Pull from `main` branch and rebuild.
 
 ## Support
-For technical issues, contact the development team at support@manasiktravelhub.com.
+For technical issues, contact the development team at support@triptastic.com.bd.

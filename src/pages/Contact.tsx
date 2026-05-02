@@ -60,9 +60,9 @@ const Contact = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Contact Us - যোগাযোগ"
-        description="মানাসিক ট্রাভেল হাব এর সাথে যোগাযোগ করুন। ফোন, ইমেইল বা অফিসে আসুন। Contact Manasik Travel Hub."
+        description="ট্রিপ টেস্টিক এর সাথে যোগাযোগ করুন। ফোন, ইমেইল বা অফিসে আসুন। Contact TRIP TASTIC."
         canonicalUrl="/contact"
-        keywords="যোগাযোগ, contact, Manasik Travel Hub contact, phone, email"
+        keywords="যোগাযোগ, contact, TRIP TASTIC contact, phone, email"
         jsonLd={breadcrumbJsonLd([
           { name: "Home", url: "/" },
           { name: "Contact", url: "/contact" },

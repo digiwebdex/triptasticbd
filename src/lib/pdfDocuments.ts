@@ -1,7 +1,7 @@
 /**
  * pdfDocuments.ts — PDF Document Types (Receipts, Vouchers, Statements, Cashbook, Reports)
  * 
- * Clean A4 design matching the Manasik Travel Hub invoice template.
+ * Clean A4 design matching the TRIP TASTIC invoice template.
  */
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -40,7 +40,7 @@ export interface PaymentReceiptData {
 
 export async function generatePaymentReceipt(data: PaymentReceiptData) {
   const { doc, logoBase64, sig, cfg } = await initPdf({
-    qrUrl: `https://manasiktravelhub.com/verify?id=${data.bookingTrackingId}`,
+    qrUrl: `https://triptastic.com.bd/verify?id=${data.bookingTrackingId}`,
   });
   const qr = await generateTrackingQr(data.bookingTrackingId);
 

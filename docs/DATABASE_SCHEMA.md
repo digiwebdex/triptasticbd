@@ -1,4 +1,4 @@
-# Database Schema Reference — Manasik Travel Hub
+# Database Schema Reference — TRIP TASTIC
 
 > Complete database table reference, relationships, views, functions, and triggers
 > **Last Updated:** March 26, 2026
@@ -24,7 +24,7 @@
 ## Connection
 
 ```bash
-psql -U digiwebdex -d manasik -p 5433 -h 127.0.0.1
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1
 ```
 
 ---

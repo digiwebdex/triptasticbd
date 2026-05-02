@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     if (manualData?.phone) {
       // Manual single reminder (existing behavior)
       const { phone, customer_name, tracking_id, amount, due_date, installment_number } = manualData;
-      const message = `Dear ${customer_name}, installment #${installment_number} of ৳${Number(amount).toLocaleString()} for booking ${tracking_id} is due on ${due_date}. Please pay at the earliest. Manasik Travel Hub: 01711-999910`;
+      const message = `Dear ${customer_name}, installment #${installment_number} of ৳${Number(amount).toLocaleString()} for booking ${tracking_id} is due on ${due_date}. Please pay at the earliest. TRIP TASTIC: 01711-999910`;
 
       const apiKey = Deno.env.get("BULKSMSBD_API_KEY");
       const senderId = Deno.env.get("BULKSMSBD_SENDER_ID");
@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
       // Send SMS
       if (smsApiKey && phone) {
         try {
-          const message = `Dear ${name}, installment #${payment.installment_number || 1} of ৳${Number(payment.amount).toLocaleString()} for booking ${booking.tracking_id} is overdue (${dueDate}). Please pay immediately. Manasik Travel Hub: 01711-999910`;
+          const message = `Dear ${name}, installment #${payment.installment_number || 1} of ৳${Number(payment.amount).toLocaleString()} for booking ${booking.tracking_id} is overdue (${dueDate}). Please pay immediately. TRIP TASTIC: 01711-999910`;
           const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(phone)}&senderid=${encodeURIComponent(smsSenderId || "")}&message=${encodeURIComponent(message)}`;
           const smsRes = await fetch(smsUrl);
           result.sms = smsRes.ok ? "sent" : "failed";
@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
               <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;background:#f9f9f9">Amount Due</td><td style="padding:8px;border:1px solid #ddd">৳${Number(payment.amount).toLocaleString()}</td></tr>
               <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;background:#f9f9f9">Total Due</td><td style="padding:8px;border:1px solid #ddd">৳${Number(booking.due_amount || 0).toLocaleString()}</td></tr>
             </table>
-            <p style="font-size:12px;color:#999">Manasik Travel Hub | +880 1711-999910</p>
+            <p style="font-size:12px;color:#999">TRIP TASTIC | +880 1711-999910</p>
           </div>`;
 
           const emailRes = await fetch("https://api.resend.com/emails", {

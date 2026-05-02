@@ -167,7 +167,7 @@ export default function PdfSettingsManager() {
             className={inputClass}
             value={config.website}
             onChange={(e) => updateField("website", e.target.value)}
-            placeholder="https://manasiktravelhub.com"
+            placeholder="https://triptastic.com.bd"
           />
         </div>
       </div>
