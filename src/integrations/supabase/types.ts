@@ -1404,6 +1404,100 @@ export type Database = {
           },
         ]
       }
+      settlement_items: {
+        Row: {
+          amount_applied: number
+          created_at: string
+          id: string
+          invoice_no: string | null
+          settlement_id: string
+          source_id: string
+          source_type: string
+        }
+        Insert: {
+          amount_applied?: number
+          created_at?: string
+          id?: string
+          invoice_no?: string | null
+          settlement_id: string
+          source_id: string
+          source_type: string
+        }
+        Update: {
+          amount_applied?: number
+          created_at?: string
+          id?: string
+          invoice_no?: string | null
+          settlement_id?: string
+          source_id?: string
+          source_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settlement_items_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settlements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payer_name: string | null
+          payment_method: string
+          receipt_file_path: string | null
+          settlement_date: string
+          settlement_no: string
+          status: string
+          total_amount: number
+          updated_at: string
+          wallet_account_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payer_name?: string | null
+          payment_method?: string
+          receipt_file_path?: string | null
+          settlement_date?: string
+          settlement_no?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          wallet_account_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payer_name?: string | null
+          payment_method?: string
+          receipt_file_path?: string | null
+          settlement_date?: string
+          settlement_no?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          wallet_account_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settlements_wallet_account_id_fkey"
+            columns: ["wallet_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_content: {
         Row: {
           content: Json
@@ -1681,6 +1775,222 @@ export type Database = {
           },
         ]
       }
+      ticket_bookings: {
+        Row: {
+          arrival_date: string | null
+          bill_correction_amount: number | null
+          billing_name: string | null
+          booking_ref: string | null
+          client_reference: string | null
+          created_at: string
+          created_by: string | null
+          customer_billing_amount: number
+          customer_due: number
+          departure_date: string | null
+          expected_collection_date: string | null
+          id: string
+          invoice_no: string
+          issue_date: string
+          our_cost: number
+          passenger_name: string
+          payment_status: string
+          profit: number
+          received_amount: number
+          remarks: string | null
+          route: string | null
+          staff_name: string | null
+          status: string
+          terms_of_charge: string
+          updated_at: string
+          vendor_id: string | null
+          vendor_name: string | null
+        }
+        Insert: {
+          arrival_date?: string | null
+          bill_correction_amount?: number | null
+          billing_name?: string | null
+          booking_ref?: string | null
+          client_reference?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_billing_amount?: number
+          customer_due?: number
+          departure_date?: string | null
+          expected_collection_date?: string | null
+          id?: string
+          invoice_no?: string
+          issue_date?: string
+          our_cost?: number
+          passenger_name: string
+          payment_status?: string
+          profit?: number
+          received_amount?: number
+          remarks?: string | null
+          route?: string | null
+          staff_name?: string | null
+          status?: string
+          terms_of_charge?: string
+          updated_at?: string
+          vendor_id?: string | null
+          vendor_name?: string | null
+        }
+        Update: {
+          arrival_date?: string | null
+          bill_correction_amount?: number | null
+          billing_name?: string | null
+          booking_ref?: string | null
+          client_reference?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_billing_amount?: number
+          customer_due?: number
+          departure_date?: string | null
+          expected_collection_date?: string | null
+          id?: string
+          invoice_no?: string
+          issue_date?: string
+          our_cost?: number
+          passenger_name?: string
+          payment_status?: string
+          profit?: number
+          received_amount?: number
+          remarks?: string | null
+          route?: string | null
+          staff_name?: string | null
+          status?: string
+          terms_of_charge?: string
+          updated_at?: string
+          vendor_id?: string | null
+          vendor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_bookings_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_refunds: {
+        Row: {
+          bill_received: number
+          billing_amount_was: number
+          billing_name: string | null
+          booking_ref: string | null
+          client_reference: string | null
+          created_at: string
+          created_by: string | null
+          credit_amount_to_client: number
+          credit_status: string
+          customer_refund_charge: number
+          due: number
+          id: string
+          invoice_no: string
+          our_refund_charge: number
+          passenger_name: string
+          profit: number
+          refund_back_from_vendor: number
+          refund_date: string
+          remarks: string | null
+          route: string | null
+          staff_name: string | null
+          status: string
+          terms_of_charge: string
+          ticket_booking_id: string | null
+          ticket_costing_was: number
+          updated_at: string
+          vendor_id: string | null
+          vendor_name: string | null
+          wallet_account_id: string | null
+        }
+        Insert: {
+          bill_received?: number
+          billing_amount_was?: number
+          billing_name?: string | null
+          booking_ref?: string | null
+          client_reference?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_amount_to_client?: number
+          credit_status?: string
+          customer_refund_charge?: number
+          due?: number
+          id?: string
+          invoice_no?: string
+          our_refund_charge?: number
+          passenger_name: string
+          profit?: number
+          refund_back_from_vendor?: number
+          refund_date?: string
+          remarks?: string | null
+          route?: string | null
+          staff_name?: string | null
+          status?: string
+          terms_of_charge?: string
+          ticket_booking_id?: string | null
+          ticket_costing_was?: number
+          updated_at?: string
+          vendor_id?: string | null
+          vendor_name?: string | null
+          wallet_account_id?: string | null
+        }
+        Update: {
+          bill_received?: number
+          billing_amount_was?: number
+          billing_name?: string | null
+          booking_ref?: string | null
+          client_reference?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_amount_to_client?: number
+          credit_status?: string
+          customer_refund_charge?: number
+          due?: number
+          id?: string
+          invoice_no?: string
+          our_refund_charge?: number
+          passenger_name?: string
+          profit?: number
+          refund_back_from_vendor?: number
+          refund_date?: string
+          remarks?: string | null
+          route?: string | null
+          staff_name?: string | null
+          status?: string
+          terms_of_charge?: string
+          ticket_booking_id?: string | null
+          ticket_costing_was?: number
+          updated_at?: string
+          vendor_id?: string | null
+          vendor_name?: string | null
+          wallet_account_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_refunds_ticket_booking_id_fkey"
+            columns: ["ticket_booking_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_refunds_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_refunds_wallet_account_id_fkey"
+            columns: ["wallet_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -1771,6 +2081,104 @@ export type Database = {
         }
         Relationships: []
       }
+      visa_applications: {
+        Row: {
+          applicant_name: string
+          application_date: string
+          billing_amount: number
+          billing_name: string | null
+          client_delivery_date: string | null
+          client_reference: string | null
+          country_name: string
+          created_at: string
+          created_by: string | null
+          customer_due: number
+          expected_collection_date: string | null
+          id: string
+          invoice_no: string
+          our_cost: number
+          passport_number: string | null
+          payment_status: string
+          profit: number
+          received_amount: number
+          remarks: string | null
+          staff_name: string | null
+          status: string
+          submission_date: string | null
+          updated_at: string
+          vendor_delivery_date: string | null
+          vendor_id: string | null
+          vendor_name: string | null
+          visa_status: string
+        }
+        Insert: {
+          applicant_name: string
+          application_date?: string
+          billing_amount?: number
+          billing_name?: string | null
+          client_delivery_date?: string | null
+          client_reference?: string | null
+          country_name: string
+          created_at?: string
+          created_by?: string | null
+          customer_due?: number
+          expected_collection_date?: string | null
+          id?: string
+          invoice_no?: string
+          our_cost?: number
+          passport_number?: string | null
+          payment_status?: string
+          profit?: number
+          received_amount?: number
+          remarks?: string | null
+          staff_name?: string | null
+          status?: string
+          submission_date?: string | null
+          updated_at?: string
+          vendor_delivery_date?: string | null
+          vendor_id?: string | null
+          vendor_name?: string | null
+          visa_status?: string
+        }
+        Update: {
+          applicant_name?: string
+          application_date?: string
+          billing_amount?: number
+          billing_name?: string | null
+          client_delivery_date?: string | null
+          client_reference?: string | null
+          country_name?: string
+          created_at?: string
+          created_by?: string | null
+          customer_due?: number
+          expected_collection_date?: string | null
+          id?: string
+          invoice_no?: string
+          our_cost?: number
+          passport_number?: string | null
+          payment_status?: string
+          profit?: number
+          received_amount?: number
+          remarks?: string | null
+          staff_name?: string | null
+          status?: string
+          submission_date?: string | null
+          updated_at?: string
+          vendor_delivery_date?: string | null
+          vendor_id?: string | null
+          vendor_name?: string | null
+          visa_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visa_applications_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       v_booking_profit: {
@@ -1855,6 +2263,10 @@ export type Database = {
     }
     Functions: {
       deactivate_expired_packages: { Args: never; Returns: undefined }
+      gen_refund_invoice_no: { Args: never; Returns: string }
+      gen_settlement_no: { Args: never; Returns: string }
+      gen_ticket_invoice_no: { Args: never; Returns: string }
+      gen_visa_invoice_no: { Args: never; Returns: string }
       generate_installment_schedule: {
         Args: {
           p_booking_id: string
@@ -1870,6 +2282,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      recalc_source_received: {
+        Args: { p_source_id: string; p_source_type: string }
+        Returns: undefined
       }
       recalculate_wallet_balances: {
         Args: never
