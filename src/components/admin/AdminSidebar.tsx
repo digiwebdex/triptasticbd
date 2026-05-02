@@ -23,16 +23,19 @@ const mainMenuItems = [
   { title: "Moallems",        url: "/admin/moallems",       icon: UserCheck,       roles: ["admin", "accountant", "booking", "viewer"] },
   { title: "Supplier Agents", url: "/admin/supplier-agents", icon: Truck,          roles: ["admin", "accountant", "viewer"] },
   { title: "Packages",        url: "/admin/packages",       icon: Package,         roles: ["admin", "viewer"] },
-  { title: "Air Tickets",     url: "/admin/packages?type=air_ticket", icon: Plane,   roles: ["admin", "viewer"] },
-  { title: "Visa Services",   url: "/admin/packages?type=visa",      icon: FileCheck, roles: ["admin", "viewer"] },
+  { title: "Air Tickets",     url: "/admin/tickets",        icon: Plane,           roles: ["admin", "accountant", "booking", "viewer"] },
+  { title: "Visa Services",   url: "/admin/visa",           icon: FileCheck,       roles: ["admin", "accountant", "booking", "viewer"] },
+  { title: "Ticket Refunds",  url: "/admin/ticket-refunds", icon: RotateCcw,       roles: ["admin", "accountant", "viewer"] },
   { title: "Tours",           url: "/admin/packages?type=tour",      icon: Map,     roles: ["admin", "viewer"] },
   { title: "Hotels",          url: "/admin/hotels",         icon: Hotel,           roles: ["admin", "viewer"] },
 ];
 
 const financeMenuItems = [
   { title: "Payments",        url: "/admin/payments",       icon: CreditCard,      roles: ["admin", "accountant", "viewer"] },
+  { title: "Settlements",     url: "/admin/settlements",    icon: FileCheck,       roles: ["admin", "accountant", "viewer"] },
   { title: "Accounting",      url: "/admin/accounting",     icon: Calculator,      roles: ["admin", "accountant", "viewer"] },
   { title: "Receivables",     url: "/admin/receivables",    icon: DollarSign,      roles: ["admin", "accountant", "viewer"] },
+  { title: "Due Alerts",      url: "/admin/due-alerts",     icon: AlertTriangle,   roles: ["admin", "accountant", "viewer"] },
   
   { title: "Refunds",         url: "/admin/refunds",        icon: RotateCcw,       roles: ["admin", "accountant", "viewer"] },
   { title: "Reports",         url: "/admin/reports",        icon: BarChart3,       roles: ["admin", "accountant", "viewer"] },
