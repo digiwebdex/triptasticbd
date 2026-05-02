@@ -1,4 +1,5 @@
 import { Phone, Mail, MapPin, Facebook, Youtube, Instagram, Plane } from "lucide-react";
+import AnimatedWorldMap from "@/components/AnimatedWorldMap";
 import sslcommerzPayWith from "@/assets/payment/sslcommerz-pay-with.png";
 import logo from "@/assets/triptastic-logo.png";
 import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
