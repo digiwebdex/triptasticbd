@@ -8,8 +8,8 @@ interface LanguageContextType {
   ready: boolean;
 }
 
-const STORAGE_KEY = "rk_language";
-const DEFAULT_LANG: Language = "bn";
+const STORAGE_KEY = "tt_language";
+const DEFAULT_LANG: Language = "en";
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
