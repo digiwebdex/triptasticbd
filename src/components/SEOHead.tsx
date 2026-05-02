@@ -88,22 +88,17 @@ export function organizationJsonLd() {
     description: DEFAULT_DESCRIPTION,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "595/1, Milk Vita Road, Three-Way Intersection, Dewla",
-      addressLocality: "Tangail Sadar, Tangail",
+      streetAddress: "4th Floor, Jail Road, Munshipara",
+      addressLocality: "Dinajpur Sadar",
+      postalCode: "5200",
       addressCountry: "BD",
     },
-    telephone: ["+8801711999910", "+8801711999920"],
+    telephone: ["+8801711925400"],
     sameAs: ["https://www.facebook.com/profile.php?id=61585173125908"],
     contactPoint: [
       {
         "@type": "ContactPoint",
-        telephone: "+8801711999910",
-        contactType: "customer service",
-        availableLanguage: ["Bengali", "English"],
-      },
-      {
-        "@type": "ContactPoint",
-        telephone: "+8801711999920",
+        telephone: "+8801711925400",
         contactType: "customer service",
         availableLanguage: ["Bengali", "English"],
       },
