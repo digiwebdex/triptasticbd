@@ -129,7 +129,7 @@ const AdventureCTA = () => {
               className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-4 py-4 flex items-center gap-3 overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+              <div className="relative w-10 h-10 rounded-xl bg-gradient-sunset flex items-center justify-center shadow-gold">
                 <Icon className="h-5 w-5 text-white" />
               </div>
               <div className="relative text-left">
