@@ -118,8 +118,8 @@ const AdventureCTA = () => {
 
         <svg
           viewBox="0 0 1000 500"
-          className="w-full h-auto block"
-          preserveAspectRatio="xMidYMid meet"
+          className="w-full h-auto block min-h-[420px] md:min-h-[560px] lg:min-h-[640px]"
+          preserveAspectRatio="xMidYMid slice"
         >
           <defs>
             {/* Background gradient */}
