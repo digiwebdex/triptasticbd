@@ -23,11 +23,16 @@ interface Service {
   descBn: string;
 }
 
+// Unified, refined brand palette — only 3 subtle accent variants
+const ACCENT_TEAL = "from-[hsl(var(--teal))] to-[hsl(var(--teal-dark))]";
+const ACCENT_GOLD = "from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]";
+const ACCENT_MIX  = "from-[hsl(var(--teal))] to-[hsl(var(--gold))]";
+
 const services: Service[] = [
   {
     Icon: Sparkles,
     badge: "Hajj",
-    gradient: "from-emerald-500 to-teal-600",
+    gradient: ACCENT_TEAL,
     titleEn: "Premium Hajj Package",
     titleBn: "প্রিমিয়াম হজ্জ প্যাকেজ",
     descEn: "Expert guidance, premium hotels near Haram and full pilgrimage support.",
@@ -36,7 +41,7 @@ const services: Service[] = [
   {
     Icon: Moon,
     badge: "Umrah",
-    gradient: "from-teal-500 to-cyan-600",
+    gradient: ACCENT_TEAL,
     titleEn: "Premium Umrah Package",
     titleBn: "প্রিমিয়াম উমরাহ প্যাকেজ",
     descEn: "Year-round Umrah packages for individuals, families and groups.",
@@ -45,7 +50,7 @@ const services: Service[] = [
   {
     Icon: Compass,
     badge: "Tour",
-    gradient: "from-amber-500 to-orange-600",
+    gradient: ACCENT_GOLD,
     titleEn: "International Tour Package",
     titleBn: "ইন্টারন্যাশনাল ট্যুর প্যাকেজ",
     descEn: "Curated holidays to top destinations across Asia, Europe and beyond.",
@@ -54,7 +59,7 @@ const services: Service[] = [
   {
     Icon: Plane,
     badge: "Flights",
-    gradient: "from-sky-500 to-blue-600",
+    gradient: ACCENT_MIX,
     titleEn: "Air Tickets",
     titleBn: "এয়ার টিকিট",
     descEn: "Best fares on domestic & international flights with flexible booking.",
@@ -63,7 +68,7 @@ const services: Service[] = [
   {
     Icon: Globe2,
     badge: "Visa",
-    gradient: "from-indigo-500 to-violet-600",
+    gradient: ACCENT_TEAL,
     titleEn: "Tourist Visa",
     titleBn: "ট্যুরিস্ট ভিসা",
     descEn: "Smooth tourist visa processing for popular destinations worldwide.",
@@ -72,7 +77,7 @@ const services: Service[] = [
   {
     Icon: Briefcase,
     badge: "Visa",
-    gradient: "from-violet-500 to-purple-600",
+    gradient: ACCENT_GOLD,
     titleEn: "Business Visa",
     titleBn: "বিজনেস ভিসা",
     descEn: "Professional business visa support with invitation letters & docs.",
@@ -81,7 +86,7 @@ const services: Service[] = [
   {
     Icon: Stethoscope,
     badge: "Visa",
-    gradient: "from-rose-500 to-pink-600",
+    gradient: ACCENT_TEAL,
     titleEn: "Medical Visa",
     titleBn: "মেডিকেল ভিসা",
     descEn: "Medical travel arrangements with hospital appointments & care.",
@@ -90,7 +95,7 @@ const services: Service[] = [
   {
     Icon: HardHat,
     badge: "Visa",
-    gradient: "from-yellow-500 to-amber-600",
+    gradient: ACCENT_GOLD,
     titleEn: "Work Visa",
     titleBn: "ওয়ার্ক ভিসা",
     descEn: "End-to-end work visa processing for global job opportunities.",
@@ -99,7 +104,7 @@ const services: Service[] = [
   {
     Icon: Ambulance,
     badge: "Emergency",
-    gradient: "from-red-500 to-rose-600",
+    gradient: ACCENT_MIX,
     titleEn: "Air Ambulance",
     titleBn: "এয়ার অ্যাম্বুলেন্স",
     descEn: "Domestic & international medical evacuation, 24/7 rapid response.",
