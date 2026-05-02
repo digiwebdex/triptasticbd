@@ -39,31 +39,18 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <SEOHead
           canonicalUrl="/"
-          keywords="হজ্জ, উমরাহ, Hajj, Umrah, Visa, Tour, Bangladesh, ট্রিপ টেস্টিক, TRIP TASTIC, Tangail"
+          description="TRIP TASTIC — Hajj, Umrah, international tours, air tickets, visa processing & air ambulance. Your trusted travel partner."
+          keywords="TRIP TASTIC, travel agency Bangladesh, Hajj package, Umrah package, tour package, air ticket, tourist visa, business visa, medical visa, work visa, air ambulance"
           jsonLd={organizationJsonLd()}
         />
         <Navbar />
         {show("hero") && <HeroSection />}
         {show("services") && <ServicesSection />}
-        {show("facilities") && <FacilitiesSection />}
         {show("packages") && <PackagesSection />}
-        {show("air_tickets") && (
-          <TypedPackageSection packageType="air_ticket" sectionId="air-tickets" />
-        )}
-        {show("visa_services") && (
-          <TypedPackageSection packageType="visa" sectionId="visa-services" />
-        )}
-        {show("tour_packages") && (
-          <TypedPackageSection packageType="tour" sectionId="tour-packages" />
-        )}
+        {show("facilities") && <FacilitiesSection />}
         {show("guidelines") && (
           <Suspense fallback={<SectionFallback />}>
             <GuidelineSection />
-          </Suspense>
-        )}
-        {show("video_guide") && (
-          <Suspense fallback={<SectionFallback />}>
-            <VideoGuideSection />
           </Suspense>
         )}
         {show("gallery") && (
