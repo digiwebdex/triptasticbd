@@ -176,7 +176,7 @@
 
   /* Subtle dotted travel-path pattern */
   .travel-pattern {
-    background-image: radial-gradient(circle, hsl(22 100% 55% / 0.08) 1px, transparent 1px);
+    background-image: radial-gradient(circle, hsl(38 90% 52% / 0.10) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
