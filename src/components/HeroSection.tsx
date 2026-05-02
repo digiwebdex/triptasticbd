@@ -1,117 +1,123 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import heroBanner1 from "@/assets/hero-banner-1.jpg";
-import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
+import { motion } from "framer-motion";
+import { ArrowRight, Plane, Sparkles } from "lucide-react";
+import heroImg from "@/assets/tt-hero.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
-
-const defaultSlides = [
-  { image: heroBanner1, alt: "TRIP TASTIC - Hajj & Umrah Services" },
-];
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
-  const { data: content } = useBulkSiteContent("hero");
-  const { language } = useLanguage();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { t, language } = useLanguage();
+  const navigate = useNavigate();
 
-  // CMS-managed hero slides
-  const cmsSlides = content?.hero_slides;
-  const activeSlides = cmsSlides && cmsSlides.length > 0
-    ? cmsSlides.map((s: any) => ({
-        image: s.src || s.image,
-        mobileImage: s.mobile_src || s.mobile_image || s.src || s.image,
-        alt: s.alt || "Hero slide",
-      }))
-    : defaultSlides.map(s => ({ ...s, mobileImage: s.image }));
-
-  useEffect(() => {
-    if (activeSlides.length <= 1) return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % activeSlides.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [activeSlides.length]);
-
-  const goTo = useCallback((dir: number) => {
-    setCurrentSlide((prev) => (prev + dir + activeSlides.length) % activeSlides.length);
-  }, [activeSlides.length]);
+  const headline = language === "bn"
+    ? "অসাধারণ গন্তব্যে আপনার পরবর্তী যাত্রা"
+    : "Your next unforgettable journey starts here";
+  const sub = language === "bn"
+    ? "হজ্জ, উমরাহ, ট্যুর প্যাকেজ, এয়ার টিকিট, ভিসা প্রসেসিং এবং এয়ার অ্যাম্বুলেন্স সাপোর্ট — এক জায়গায় সম্পূর্ণ ভ্রমণ সমাধান।"
+    : "Hajj, Umrah, international tours, air tickets, visa processing and air ambulance — all your travel needs in one trusted place.";
 
   return (
     <section
       id="hero"
-      className="relative w-full overflow-hidden pt-24 sm:pt-24"
+      className="relative w-full min-h-[100vh] flex items-center overflow-hidden pt-20"
     >
-      {/* Background Images with Ken Burns effect */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSlide}
-          initial={{ opacity: 0, scale: 1.08 }}
-          animate={{ opacity: 1, scale: 1.02 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        >
-          {/* Desktop image */}
-          <img
-            src={activeSlides[currentSlide]?.image}
-            alt={activeSlides[currentSlide]?.alt}
-            className="hidden sm:block w-full h-auto"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
-          {/* Mobile image */}
-          <img
-            src={activeSlides[currentSlide]?.mobileImage}
-            alt={activeSlides[currentSlide]?.alt}
-            className="block sm:hidden w-full h-auto"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-          />
-        </motion.div>
-      </AnimatePresence>
+      {/* Background photo */}
+      <img
+        src={heroImg}
+        alt="TRIP TASTIC — airplane wing over tropical islands at sunset"
+        className="absolute inset-0 w-full h-full object-cover"
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
+      />
 
-      {/* Subtle gradient overlay for any future text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40" />
+      {/* Gradient overlays for text legibility */}
+      <div className="absolute inset-0 bg-gradient-hero-overlay" />
+      <div className="absolute inset-0 bg-gradient-to-r from-charcoal/70 via-charcoal/30 to-transparent" />
 
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-gold z-10" />
+      {/* Floating sunset glow */}
+      <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary/30 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-secondary/40 blur-3xl pointer-events-none" />
 
-      {/* Slide Navigation - only show if multiple slides */}
-      {activeSlides.length > 1 && (
-        <>
-          <button
-            onClick={() => goTo(-1)}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/20 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/40 transition-all"
-            aria-label="Previous slide"
+      <div className="container mx-auto px-4 relative z-10 py-20">
+        <div className="max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 mb-6"
           >
-            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-          </button>
-          <button
-            onClick={() => goTo(1)}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/20 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/40 transition-all"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-          </button>
+            <Sparkles className="h-4 w-4 text-primary-glow" />
+            <span className="text-white text-xs sm:text-sm font-medium tracking-wide">
+              {language === "bn" ? "বিশ্বস্ত ট্রাভেল পার্টনার" : "Trusted travel partner"}
+            </span>
+          </motion.div>
 
-          {/* Slide Indicators */}
-          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 sm:gap-2">
-            {activeSlides.map((_: any, i: number) => (
-              <button
-                key={i}
-                onClick={() => setCurrentSlide(i)}
-                aria-label={`Go to slide ${i + 1}`}
-                className={`h-1 sm:h-1.5 rounded-full transition-all duration-500 ${
-                  i === currentSlide
-                    ? "bg-primary w-7 sm:w-10"
-                    : "bg-white/40 w-3 sm:w-4 hover:bg-white/60"
-                }`}
-              />
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] mb-6"
+          >
+            {headline.split(" ").slice(0, -2).join(" ")}{" "}
+            <span className="text-gradient-sunset">
+              {headline.split(" ").slice(-2).join(" ")}
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="text-base sm:text-lg md:text-xl text-white/85 max-w-2xl leading-relaxed mb-10"
+          >
+            {sub}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="flex flex-wrap items-center gap-4"
+          >
+            <button
+              onClick={() => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" })}
+              className="group inline-flex items-center gap-2 bg-gradient-sunset text-white font-semibold px-7 py-4 rounded-full shadow-gold hover:shadow-glow transition-all hover:scale-105"
+            >
+              {language === "bn" ? "সার্ভিস দেখুন" : "Explore Services"}
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/30 text-white font-semibold px-7 py-4 rounded-full hover:bg-white/20 transition-all"
+            >
+              <Plane className="h-4 w-4" />
+              {language === "bn" ? "যোগাযোগ" : "Contact Us"}
+            </button>
+          </motion.div>
+
+          {/* Stats strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="mt-14 grid grid-cols-3 gap-6 sm:gap-10 max-w-xl"
+          >
+            {[
+              { n: "10+", l: language === "bn" ? "সার্ভিস" : "Services" },
+              { n: "50+", l: language === "bn" ? "গন্তব্য" : "Destinations" },
+              { n: "24/7", l: language === "bn" ? "সাপোর্ট" : "Support" },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white tabular-nums">{s.n}</div>
+                <div className="text-xs sm:text-sm text-white/70 mt-1">{s.l}</div>
+              </div>
             ))}
-          </div>
-        </>
-      )}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Bottom fade for next section */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-b from-transparent to-background pointer-events-none" />
     </section>
   );
 };

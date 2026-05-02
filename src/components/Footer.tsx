@@ -1,8 +1,6 @@
-import { Phone, Mail, MapPin, Facebook, Youtube, Instagram, Star, Plane } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Youtube, Instagram, Plane } from "lucide-react";
 import sslcommerzPayWith from "@/assets/payment/sslcommerz-pay-with.png";
-import logoEn from "@/assets/logo-nobg.png";
-import logoBn from "@/assets/logo-bangla.png";
-import footerJourney from "@/assets/footer-journey.jpg";
+import logo from "@/assets/triptastic-logo.png";
 import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -41,83 +39,45 @@ const Footer = () => {
 
   return (
     <>
-      {/* Animated Journey Banner - Bangladesh to Makkah */}
-      <div className="relative h-72 md:h-96 overflow-hidden">
-        {/* Background journey image */}
-        <img
-          src={footerJourney}
-          alt="Journey from Bangladesh to Makkah"
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-[hsl(220,25%,10%)]" />
-        <div className="absolute inset-0 bg-black/15" />
+      {/* CTA Strip — bold gradient */}
+      <section className="relative overflow-hidden">
+        <div className="bg-gradient-brand py-16 md:py-20 relative">
+          <div className="absolute inset-0 travel-pattern opacity-20" />
+          <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-primary/40 blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-secondary/50 blur-3xl" />
 
-        {/* Animated plane flying from Bangladesh (left) to Makkah (right) */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Dotted flight path */}
-          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-            <path
-              d="M 5,60 Q 25,30 50,45 T 95,35"
-              fill="none"
-              stroke="hsl(var(--primary))"
-              strokeWidth="2"
-              strokeDasharray="8 6"
-              opacity="0.5"
-              vectorEffect="non-scaling-stroke"
-              style={{ filter: 'drop-shadow(0 0 4px hsl(var(--primary) / 0.4))' }}
-            />
-          </svg>
-
-          {/* Animated plane */}
-          <div className="animate-[planeJourney_8s_ease-in-out_infinite]">
-            <div className="bg-primary/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg shadow-primary/30">
-              <Plane className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground -rotate-12" />
-            </div>
-          </div>
-        </div>
-
-        {/* Location labels */}
-        <div className="absolute bottom-16 left-6 md:left-12">
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
-            <p className="text-xs font-bold text-foreground">{lc?.journey_from || t("footer.journeyFrom")}</p>
-          </div>
-        </div>
-        <div className="absolute bottom-16 right-6 md:right-12">
-          <div className="bg-primary/90 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
-            <p className="text-xs font-bold text-primary-foreground">{lc?.journey_to || t("footer.journeyTo")}</p>
-          </div>
-        </div>
-
-        {/* Center text */}
-        <div className="absolute inset-0 flex items-center justify-center text-center px-4">
-          <div className="animate-fade-in">
-            <p className="text-primary font-heading text-sm md:text-base uppercase tracking-[0.3em] mb-2 drop-shadow-lg">
-              {lc?.journey_subtitle || t("footer.journeySubtitle")}
-            </p>
-            <h3 className="text-white text-2xl md:text-4xl font-heading font-bold mb-3 drop-shadow-lg">
-              {lc?.journey_heading || t("footer.journeyHeading")}
+          <div className="container mx-auto px-4 relative z-10 text-center">
+            <Plane className="h-10 w-10 text-white mx-auto mb-4 -rotate-12" />
+            <h3 className="text-white font-heading text-3xl md:text-5xl font-extrabold mb-4 drop-shadow-md">
+              {language === "bn" ? "আপনার পরবর্তী যাত্রা প্ল্যান করুন" : "Ready for your next adventure?"}
             </h3>
-            <p className="text-white/80 text-sm md:text-base max-w-xl mx-auto drop-shadow-md">
-              {lc?.journey_description || t("footer.journeyDescription")}
+            <p className="text-white/85 text-base md:text-lg max-w-xl mx-auto mb-8">
+              {language === "bn"
+                ? "আমাদের ট্রাভেল এক্সপার্টদের সাথে কথা বলুন — যেকোনো সার্ভিসের কাস্টমাইজড কোটেশন পান।"
+                : "Talk to our travel experts and get a personalised quote for any service."}
             </p>
+            <a
+              href={`tel:${phone.replace(/[\s-]/g, "")}`}
+              className="inline-flex items-center gap-2 bg-white text-secondary font-bold px-8 py-4 rounded-full shadow-elevated hover:scale-105 transition-transform"
+            >
+              <Phone className="h-4 w-4" />
+              {phone}
+            </a>
           </div>
         </div>
-      </div>
-    <footer className="bg-[hsl(220,25%,10%)] text-white py-16 relative overflow-hidden">
+      </section>
+
+    <footer className="bg-charcoal text-white py-16 relative overflow-hidden">
       {/* Decorative top border */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-gold" />
-      
-      {/* Subtle pattern */}
-      <div className="absolute inset-0 islamic-pattern opacity-5" />
-      
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-sunset" />
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           <div className="md:col-span-1">
             <div className="mb-5">
-              <div className="bg-white/95 rounded-xl p-1.5 inline-block">
+              <div className="bg-white/95 rounded-2xl p-3 inline-block shadow-lg">
                 <img
-                  src={language === "bn" ? logoBn : logoEn}
+                  src={logo}
                   alt={`${companyName} ${tagline} Logo`}
                   className="h-14 w-auto object-contain"
                 />

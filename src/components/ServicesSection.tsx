@@ -1,72 +1,189 @@
 import { motion } from "framer-motion";
-import { Plane, Building2, Bus, MapPin, BookOpen, CreditCard, Globe, Users, SendHorizonal, FileText, Wallet, Hotel, Landmark, BadgeDollarSign, Luggage } from "lucide-react";
-import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
+import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import imgHajj from "@/assets/tt-hajj.jpg";
+import imgUmrah from "@/assets/tt-umrah.jpg";
+import imgTour from "@/assets/tt-tour.jpg";
+import imgAirTicket from "@/assets/tt-airticket.jpg";
+import imgTouristVisa from "@/assets/tt-tourist-visa.jpg";
+import imgBusinessVisa from "@/assets/tt-business-visa.jpg";
+import imgMedicalVisa from "@/assets/tt-medical-visa.jpg";
+import imgWorkVisa from "@/assets/tt-work-visa.jpg";
+import imgAirAmbulance from "@/assets/tt-air-ambulance.jpg";
 
-const iconMap: Record<string, any> = { BookOpen, Globe, CreditCard, Plane, Building2, Bus, MapPin, Users, SendHorizonal, FileText, Wallet, Hotel, Landmark, BadgeDollarSign, Luggage };
+interface Service {
+  image: string;
+  badge: string;
+  badgeColor: string;
+  titleEn: string;
+  titleBn: string;
+  descEn: string;
+  descBn: string;
+  span?: string;
+}
+
+const services: Service[] = [
+  {
+    image: imgHajj,
+    badge: "Spiritual",
+    badgeColor: "bg-emerald-500",
+    titleEn: "Premium Hajj Package",
+    titleBn: "প্রিমিয়াম হজ্জ প্যাকেজ",
+    descEn: "Complete Hajj packages with expert guidance, premium hotels near Haram and full pilgrimage support.",
+    descBn: "অভিজ্ঞ গাইড, হারামের নিকটবর্তী প্রিমিয়াম হোটেল ও সম্পূর্ণ সহায়তা সহ হজ্জ প্যাকেজ।",
+    span: "lg:col-span-2 lg:row-span-2",
+  },
+  {
+    image: imgUmrah,
+    badge: "Spiritual",
+    badgeColor: "bg-emerald-500",
+    titleEn: "Premium Umrah Package",
+    titleBn: "প্রিমিয়াম উমরাহ প্যাকেজ",
+    descEn: "Year-round Umrah packages for individuals, families and groups.",
+    descBn: "ব্যক্তি, পরিবার ও গ্রুপের জন্য সারাবছর উমরাহ প্যাকেজ।",
+  },
+  {
+    image: imgTour,
+    badge: "Adventure",
+    badgeColor: "bg-secondary",
+    titleEn: "International Tour Package",
+    titleBn: "ইন্টারন্যাশনাল ট্যুর প্যাকেজ",
+    descEn: "Curated holidays to top destinations across Asia, Europe and beyond.",
+    descBn: "এশিয়া, ইউরোপ ও বিশ্বের সেরা গন্তব্যে কিউরেটেড হলিডে।",
+  },
+  {
+    image: imgAirTicket,
+    badge: "Flights",
+    badgeColor: "bg-sky",
+    titleEn: "Domestic & International Air Tickets",
+    titleBn: "দেশি-বিদেশি এয়ার টিকিট",
+    descEn: "Best-fare tickets across all major airlines, with flexible booking and rescheduling.",
+    descBn: "সকল প্রধান এয়ারলাইন্সের সেরা মূল্যে টিকিট, সহজ বুকিং ও রিশিডিউল।",
+    span: "lg:col-span-2",
+  },
+  {
+    image: imgTouristVisa,
+    badge: "Visa",
+    badgeColor: "bg-primary",
+    titleEn: "Tourist Visa",
+    titleBn: "ট্যুরিস্ট ভিসা",
+    descEn: "Smooth tourist visa processing for popular destinations worldwide.",
+    descBn: "বিশ্বের জনপ্রিয় গন্তব্যের জন্য সহজ ট্যুরিস্ট ভিসা প্রসেসিং।",
+  },
+  {
+    image: imgBusinessVisa,
+    badge: "Visa",
+    badgeColor: "bg-primary",
+    titleEn: "Business Visa",
+    titleBn: "বিজনেস ভিসা",
+    descEn: "Professional business visa support with invitation letters and documentation.",
+    descBn: "ইনভিটেশন লেটার ও ডকুমেন্টেশনসহ পেশাদার বিজনেস ভিসা সাপোর্ট।",
+  },
+  {
+    image: imgMedicalVisa,
+    badge: "Visa",
+    badgeColor: "bg-primary",
+    titleEn: "Medical Visa",
+    titleBn: "মেডিকেল ভিসা",
+    descEn: "Medical travel arrangements with hospital appointments and care logistics.",
+    descBn: "হাসপাতাল অ্যাপয়েন্টমেন্ট ও সম্পূর্ণ যত্নসহ মেডিকেল ভিসা ব্যবস্থা।",
+  },
+  {
+    image: imgWorkVisa,
+    badge: "Visa",
+    badgeColor: "bg-primary",
+    titleEn: "Work Visa",
+    titleBn: "ওয়ার্ক ভিসা",
+    descEn: "End-to-end work visa processing for global job opportunities.",
+    descBn: "বিদেশে কাজের সুযোগের জন্য সম্পূর্ণ ওয়ার্ক ভিসা প্রসেসিং।",
+  },
+  {
+    image: imgAirAmbulance,
+    badge: "Emergency",
+    badgeColor: "bg-destructive",
+    titleEn: "Air Ambulance Support",
+    titleBn: "এয়ার অ্যাম্বুলেন্স সাপোর্ট",
+    descEn: "Domestic and international medical evacuation with rapid response 24/7.",
+    descBn: "২৪/৭ দ্রুত সাড়া দিয়ে দেশি-বিদেশি মেডিকেল ইভাকুয়েশন।",
+    span: "lg:col-span-3",
+  },
+];
 
 const ServicesSection = () => {
-  const { data: content } = useBulkSiteContent("services");
-  const { t, language } = useLanguage();
-
-  const lc = content?.[language];
-  const sectionLabel = lc?.section_label || t("services.label");
-  const heading = lc?.heading || t("services.heading");
-  const headingHighlight = lc?.heading_highlight || t("services.headingHighlight");
-  const description = lc?.description || t("services.description");
-
-  const defaultServices = [
-    { icon: "Landmark", title: "হজ্ব", desc: "পবিত্র হজ্ব পালনের জন্য সম্পূর্ণ প্যাকেজ ও গাইডেন্স সেবা" },
-    { icon: "Globe", title: "উমরাহ হজ্ব", desc: "সারা বছর উমরাহ পালনের জন্য বিশেষ প্যাকেজ ও ব্যবস্থাপনা" },
-    { icon: "Plane", title: "এয়ার টিকিট", desc: "দেশে-বিদেশে সকল এয়ারলাইন্সের টিকিট বুকিং ব্যবস্থাপনা" },
-    { icon: "Hotel", title: "হোটেল বুকিং", desc: "মক্কা-মদিনাসহ বিশ্বের যেকোনো স্থানে হোটেল বুকিং সেবা" },
-    { icon: "BadgeDollarSign", title: "রিয়াল এক্সচেঞ্জ", desc: "সৌদি রিয়াল ক্রয়-বিক্রয় ও বৈদেশিক মুদ্রা বিনিময় সেবা" },
-  ];
-
-  const items = lc?.items || defaultServices;
+  const { language } = useLanguage();
 
   return (
-    <section id="services" className="py-24 relative overflow-hidden">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 islamic-pattern opacity-50" />
-      
+    <section id="services" className="py-24 relative overflow-hidden bg-background">
+      <div className="absolute inset-0 travel-pattern opacity-60 pointer-events-none" />
+
       <div className="container mx-auto px-4 relative z-10">
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-          <span className="text-primary text-xs font-semibold tracking-[0.3em] uppercase">{sectionLabel}</span>
-          <h2 className="font-heading text-3xl md:text-5xl font-bold mt-3 mb-4">
-            {heading} <span className="text-gradient-gold">{headingHighlight}</span>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center max-w-2xl mx-auto mb-14"
+        >
+          <span className="inline-block text-primary text-xs font-bold tracking-[0.3em] uppercase mb-3">
+            {language === "bn" ? "আমাদের সার্ভিস" : "What We Offer"}
+          </span>
+          <h2 className="font-heading text-3xl md:text-5xl font-extrabold mb-4">
+            {language === "bn" ? "সম্পূর্ণ ভ্রমণ " : "Complete travel "}
+            <span className="text-gradient-sunset">
+              {language === "bn" ? "সমাধান" : "solutions"}
+            </span>
           </h2>
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-px w-12 bg-primary/30" />
-            <div className="w-2 h-2 rounded-full bg-primary/50" />
-            <div className="h-px w-12 bg-primary/30" />
-          </div>
-          <p className="text-muted-foreground max-w-xl mx-auto">{description}</p>
+          <p className="text-muted-foreground text-base md:text-lg">
+            {language === "bn"
+              ? "এক জায়গায় হজ্জ, উমরাহ, ট্যুর, টিকিট, ভিসা ও জরুরি সহায়তা।"
+              : "Hajj, Umrah, tours, tickets, visa and emergency support — under one roof."}
+          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-          {items.map((service: any, i: number) => {
-            const IconComp = iconMap[service.icon] || Globe;
-            return (
-              <motion.div
-                key={service.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="group relative bg-card border border-border rounded-2xl p-6 hover:border-primary/40 transition-all duration-500 hover:shadow-luxury overflow-hidden"
-              >
-                {/* Hover gold top line */}
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-gold scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-                
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                  <IconComp className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="font-heading text-lg font-bold mb-2 group-hover:text-primary transition-colors">{service.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{service.desc}</p>
-              </motion.div>
-            );
-          })}
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[260px] gap-5">
+          {services.map((s, i) => (
+            <motion.article
+              key={s.titleEn}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05, duration: 0.5 }}
+              className={`group relative overflow-hidden rounded-3xl shadow-luxury cursor-pointer ${s.span || ""}`}
+            >
+              <img
+                src={s.image}
+                alt={s.titleEn}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                loading="lazy"
+              />
+              {/* Always-visible bottom gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-transparent" />
+              {/* Hover sunset overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Badge */}
+              <div className="absolute top-4 left-4 z-10">
+                <span className={`${s.badgeColor} text-white text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full shadow-md`}>
+                  {s.badge}
+                </span>
+              </div>
+
+              {/* Arrow */}
+              <div className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-transform group-hover:rotate-45 group-hover:bg-white">
+                <ArrowUpRight className="h-5 w-5 group-hover:text-primary" />
+              </div>
+
+              {/* Content */}
+              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 z-10">
+                <h3 className="font-heading text-lg md:text-xl font-bold text-white leading-tight mb-2 drop-shadow-md">
+                  {language === "bn" ? s.titleBn : s.titleEn}
+                </h3>
+                <p className="text-sm text-white/85 leading-snug line-clamp-2 max-w-md">
+                  {language === "bn" ? s.descBn : s.descEn}
+                </p>
+              </div>
+            </motion.article>
+          ))}
         </div>
       </div>
     </section>

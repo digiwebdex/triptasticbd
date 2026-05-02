@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Noto Sans Bengali', 'Noto Sans', 'sans-serif'],
-        body: ['Noto Sans Bengali', 'Noto Sans', 'sans-serif'],
+        heading: ['Plus Jakarta Sans', 'Noto Sans Bengali', 'sans-serif'],
+        body: ['Manrope', 'Noto Sans Bengali', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -56,6 +56,11 @@ export default {
           light: "hsl(var(--gold-light))",
           dark: "hsl(var(--gold-dark))",
         },
+        ocean: {
+          DEFAULT: "hsl(var(--ocean))",
+          light: "hsl(var(--ocean-light))",
+        },
+        sky: "hsl(var(--sky))",
         charcoal: {
           DEFAULT: "hsl(var(--charcoal))",
           light: "hsl(var(--charcoal-light))",
