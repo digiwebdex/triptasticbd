@@ -23,11 +23,11 @@ export default function InvoicePage() {
 
   const company: CompanyInfo = {
     name: "TRIP TASTIC",
-    phone: "+880 1711-999910",
+    phone: "+880 1711-925400",
     email: "info@triptastic.com.bd",
-    address: "Corporate Office: TRIP TASTIC, 595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail",
+    address: "Corporate Office: TRIP TASTIC, 4th Floor, Jail Road, Munshipara, Dinajpur Sadar - 5200",
   };
-  const companyAddressBn = "কর্পোরেট অফিস: ট্রিপ টেস্টিক, ৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল";
+  const companyAddressBn = "কর্পোরেট অফিস: ট্রিপ টেস্টিক, ৪র্থ তলা, জেল রোড, মুন্সিপাড়া, দিনাজপুর সদর - ৫২০০";
 
   const search = async () => {
     if (!trackingId.trim()) return;
