@@ -7,14 +7,14 @@ const AdventureCTA = () => {
   const isBn = language === "bn";
 
   const destinations = [
-    { name: isBn ? "মক্কা" : "Makkah", emoji: "🕋", color: "from-amber-400 to-orange-500", delay: 0 },
-    { name: isBn ? "মদিনা" : "Madinah", emoji: "🌙", color: "from-emerald-400 to-teal-500", delay: 0.1 },
-    { name: isBn ? "দুবাই" : "Dubai", emoji: "🏙️", color: "from-sky-400 to-blue-500", delay: 0.2 },
-    { name: isBn ? "ইস্তাম্বুল" : "Istanbul", emoji: "🕌", color: "from-rose-400 to-pink-500", delay: 0.3 },
-    { name: isBn ? "মালয়েশিয়া" : "Malaysia", emoji: "🌴", color: "from-lime-400 to-green-500", delay: 0.4 },
-    { name: isBn ? "সিঙ্গাপুর" : "Singapore", emoji: "🦁", color: "from-fuchsia-400 to-purple-500", delay: 0.5 },
-    { name: isBn ? "তুরস্ক" : "Turkey", emoji: "🎈", color: "from-red-400 to-rose-500", delay: 0.6 },
-    { name: isBn ? "জাপান" : "Japan", emoji: "🗼", color: "from-pink-400 to-red-500", delay: 0.7 },
+    { name: isBn ? "মক্কা" : "Makkah", emoji: "🕋", color: "from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]", delay: 0 },
+    { name: isBn ? "মদিনা" : "Madinah", emoji: "🌙", color: "from-[hsl(var(--teal))] to-[hsl(var(--teal-dark))]", delay: 0.1 },
+    { name: isBn ? "দুবাই" : "Dubai", emoji: "🏙️", color: "from-[hsl(var(--teal))] to-[hsl(var(--gold))]", delay: 0.2 },
+    { name: isBn ? "ইস্তাম্বুল" : "Istanbul", emoji: "🕌", color: "from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]", delay: 0.3 },
+    { name: isBn ? "মালয়েশিয়া" : "Malaysia", emoji: "🌴", color: "from-[hsl(var(--teal))] to-[hsl(var(--teal-dark))]", delay: 0.4 },
+    { name: isBn ? "সিঙ্গাপুর" : "Singapore", emoji: "🦁", color: "from-[hsl(var(--teal))] to-[hsl(var(--gold))]", delay: 0.5 },
+    { name: isBn ? "তুরস্ক" : "Turkey", emoji: "🎈", color: "from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]", delay: 0.6 },
+    { name: isBn ? "জাপান" : "Japan", emoji: "🗼", color: "from-[hsl(var(--teal))] to-[hsl(var(--teal-dark))]", delay: 0.7 },
   ];
 
   const stats = [
