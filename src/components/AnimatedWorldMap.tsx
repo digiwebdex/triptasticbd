@@ -7,11 +7,11 @@ const DESTINATIONS = [
   { x: 555, y: 215, label: "Saudi Arabia", labelBn: "সৌদি আরব", flag: "🇸🇦" },
   { x: 605, y: 250, label: "UAE", labelBn: "দুবাই", flag: "🇦🇪" },
   { x: 525, y: 175, label: "Turkey", labelBn: "তুরস্ক", flag: "🇹🇷" },
-  { x: 825, y: 295, label: "Malaysia", labelBn: "মালয়েশিয়া", flag: "🇲🇾" },
-  { x: 870, y: 325, label: "Singapore", labelBn: "সিঙ্গাপুর", flag: "🇸🇬" },
+  { x: 855, y: 340, label: "Malaysia", labelBn: "মালয়েশিয়া", flag: "🇲🇾" },
+  { x: 905, y: 380, label: "Singapore", labelBn: "সিঙ্গাপুর", flag: "🇸🇬" },
   { x: 470, y: 145, label: "UK", labelBn: "যুক্তরাজ্য", flag: "🇬🇧" },
   { x: 270, y: 145, label: "Canada", labelBn: "কানাডা", flag: "🇨🇦" },
-  { x: 920, y: 200, label: "Japan", labelBn: "জাপান", flag: "🇯🇵" },
+  { x: 940, y: 200, label: "Japan", labelBn: "জাপান", flag: "🇯🇵" },
   { x: 410, y: 175, label: "Germany", labelBn: "জার্মানি", flag: "🇩🇪" },
 ];
 
