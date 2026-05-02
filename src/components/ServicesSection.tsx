@@ -1,111 +1,109 @@
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import {
+  ArrowUpRight,
+  Moon,
+  Compass,
+  Plane,
+  Globe2,
+  Briefcase,
+  Stethoscope,
+  HardHat,
+  Ambulance,
+  Sparkles,
+} from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
-import imgHajj from "@/assets/tt-hajj.jpg";
-import imgUmrah from "@/assets/tt-umrah.jpg";
-import imgTour from "@/assets/tt-tour.jpg";
-import imgAirTicket from "@/assets/tt-airticket.jpg";
-import imgTouristVisa from "@/assets/tt-tourist-visa.jpg";
-import imgBusinessVisa from "@/assets/tt-business-visa.jpg";
-import imgMedicalVisa from "@/assets/tt-medical-visa.jpg";
-import imgWorkVisa from "@/assets/tt-work-visa.jpg";
-import imgAirAmbulance from "@/assets/tt-air-ambulance.jpg";
 
 interface Service {
-  image: string;
+  Icon: React.ComponentType<{ className?: string }>;
   badge: string;
-  badgeColor: string;
+  gradient: string; // tailwind gradient classes
   titleEn: string;
   titleBn: string;
   descEn: string;
   descBn: string;
-  span?: string;
 }
 
 const services: Service[] = [
   {
-    image: imgHajj,
-    badge: "Spiritual",
-    badgeColor: "bg-emerald-500",
+    Icon: Sparkles,
+    badge: "Hajj",
+    gradient: "from-emerald-500 to-teal-600",
     titleEn: "Premium Hajj Package",
     titleBn: "প্রিমিয়াম হজ্জ প্যাকেজ",
-    descEn: "Complete Hajj packages with expert guidance, premium hotels near Haram and full pilgrimage support.",
-    descBn: "অভিজ্ঞ গাইড, হারামের নিকটবর্তী প্রিমিয়াম হোটেল ও সম্পূর্ণ সহায়তা সহ হজ্জ প্যাকেজ।",
-    span: "lg:col-span-2 lg:row-span-2",
+    descEn: "Expert guidance, premium hotels near Haram and full pilgrimage support.",
+    descBn: "অভিজ্ঞ গাইড, হারামের কাছাকাছি প্রিমিয়াম হোটেল ও পূর্ণ সহায়তা।",
   },
   {
-    image: imgUmrah,
-    badge: "Spiritual",
-    badgeColor: "bg-emerald-500",
+    Icon: Moon,
+    badge: "Umrah",
+    gradient: "from-teal-500 to-cyan-600",
     titleEn: "Premium Umrah Package",
     titleBn: "প্রিমিয়াম উমরাহ প্যাকেজ",
     descEn: "Year-round Umrah packages for individuals, families and groups.",
     descBn: "ব্যক্তি, পরিবার ও গ্রুপের জন্য সারাবছর উমরাহ প্যাকেজ।",
   },
   {
-    image: imgTour,
-    badge: "Adventure",
-    badgeColor: "bg-secondary",
+    Icon: Compass,
+    badge: "Tour",
+    gradient: "from-amber-500 to-orange-600",
     titleEn: "International Tour Package",
     titleBn: "ইন্টারন্যাশনাল ট্যুর প্যাকেজ",
     descEn: "Curated holidays to top destinations across Asia, Europe and beyond.",
     descBn: "এশিয়া, ইউরোপ ও বিশ্বের সেরা গন্তব্যে কিউরেটেড হলিডে।",
   },
   {
-    image: imgAirTicket,
+    Icon: Plane,
     badge: "Flights",
-    badgeColor: "bg-sky",
-    titleEn: "Domestic & International Air Tickets",
-    titleBn: "দেশি-বিদেশি এয়ার টিকিট",
-    descEn: "Best-fare tickets across all major airlines, with flexible booking and rescheduling.",
-    descBn: "সকল প্রধান এয়ারলাইন্সের সেরা মূল্যে টিকিট, সহজ বুকিং ও রিশিডিউল।",
-    span: "lg:col-span-2",
+    gradient: "from-sky-500 to-blue-600",
+    titleEn: "Air Tickets",
+    titleBn: "এয়ার টিকিট",
+    descEn: "Best fares on domestic & international flights with flexible booking.",
+    descBn: "ডোমেস্টিক ও ইন্টারন্যাশনাল ফ্লাইটে সেরা মূল্য, সহজ বুকিং।",
   },
   {
-    image: imgTouristVisa,
+    Icon: Globe2,
     badge: "Visa",
-    badgeColor: "bg-primary",
+    gradient: "from-indigo-500 to-violet-600",
     titleEn: "Tourist Visa",
     titleBn: "ট্যুরিস্ট ভিসা",
     descEn: "Smooth tourist visa processing for popular destinations worldwide.",
     descBn: "বিশ্বের জনপ্রিয় গন্তব্যের জন্য সহজ ট্যুরিস্ট ভিসা প্রসেসিং।",
   },
   {
-    image: imgBusinessVisa,
+    Icon: Briefcase,
     badge: "Visa",
-    badgeColor: "bg-primary",
+    gradient: "from-violet-500 to-purple-600",
     titleEn: "Business Visa",
     titleBn: "বিজনেস ভিসা",
-    descEn: "Professional business visa support with invitation letters and documentation.",
-    descBn: "ইনভিটেশন লেটার ও ডকুমেন্টেশনসহ পেশাদার বিজনেস ভিসা সাপোর্ট।",
+    descEn: "Professional business visa support with invitation letters & docs.",
+    descBn: "ইনভিটেশন লেটার ও ডকুমেন্টেশনসহ বিজনেস ভিসা সাপোর্ট।",
   },
   {
-    image: imgMedicalVisa,
+    Icon: Stethoscope,
     badge: "Visa",
-    badgeColor: "bg-primary",
+    gradient: "from-rose-500 to-pink-600",
     titleEn: "Medical Visa",
     titleBn: "মেডিকেল ভিসা",
-    descEn: "Medical travel arrangements with hospital appointments and care logistics.",
-    descBn: "হাসপাতাল অ্যাপয়েন্টমেন্ট ও সম্পূর্ণ যত্নসহ মেডিকেল ভিসা ব্যবস্থা।",
+    descEn: "Medical travel arrangements with hospital appointments & care.",
+    descBn: "হাসপাতাল অ্যাপয়েন্টমেন্ট ও যত্নসহ মেডিকেল ভিসা।",
   },
   {
-    image: imgWorkVisa,
+    Icon: HardHat,
     badge: "Visa",
-    badgeColor: "bg-primary",
+    gradient: "from-yellow-500 to-amber-600",
     titleEn: "Work Visa",
     titleBn: "ওয়ার্ক ভিসা",
     descEn: "End-to-end work visa processing for global job opportunities.",
     descBn: "বিদেশে কাজের সুযোগের জন্য সম্পূর্ণ ওয়ার্ক ভিসা প্রসেসিং।",
   },
   {
-    image: imgAirAmbulance,
+    Icon: Ambulance,
     badge: "Emergency",
-    badgeColor: "bg-destructive",
-    titleEn: "Air Ambulance Support",
-    titleBn: "এয়ার অ্যাম্বুলেন্স সাপোর্ট",
-    descEn: "Domestic and international medical evacuation with rapid response 24/7.",
-    descBn: "২৪/৭ দ্রুত সাড়া দিয়ে দেশি-বিদেশি মেডিকেল ইভাকুয়েশন।",
-    span: "lg:col-span-3",
+    gradient: "from-red-500 to-rose-600",
+    titleEn: "Air Ambulance",
+    titleBn: "এয়ার অ্যাম্বুলেন্স",
+    descEn: "Domestic & international medical evacuation, 24/7 rapid response.",
+    descBn: "২৪/৭ দ্রুত সাড়া, দেশি-বিদেশি মেডিকেল ইভাকুয়েশন।",
   },
 ];
 
@@ -114,7 +112,9 @@ const ServicesSection = () => {
 
   return (
     <section id="services" className="py-24 relative overflow-hidden bg-background">
-      <div className="absolute inset-0 travel-pattern opacity-60 pointer-events-none" />
+      {/* Subtle decorative blobs */}
+      <div className="absolute top-20 -left-32 w-80 h-80 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-20 -right-32 w-80 h-80 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -139,51 +139,53 @@ const ServicesSection = () => {
           </p>
         </motion.div>
 
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[260px] gap-5">
-          {services.map((s, i) => (
-            <motion.article
-              key={s.titleEn}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05, duration: 0.5 }}
-              className={`group relative overflow-hidden rounded-3xl shadow-luxury cursor-pointer ${s.span || ""}`}
-            >
-              <img
-                src={s.image}
-                alt={s.titleEn}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                loading="lazy"
-              />
-              {/* Always-visible bottom gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/40 to-transparent" />
-              {/* Hover sunset overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {/* Clean icon grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {services.map((s, i) => {
+            const Icon = s.Icon;
+            return (
+              <motion.article
+                key={s.titleEn}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05, duration: 0.45 }}
+                whileHover={{ y: -6 }}
+                className="group relative bg-card border border-border rounded-2xl p-6 md:p-7 transition-all hover:shadow-luxury hover:border-primary/30 cursor-pointer overflow-hidden"
+              >
+                {/* Soft gradient corner accent */}
+                <div className={`absolute -top-12 -right-12 w-32 h-32 rounded-full bg-gradient-to-br ${s.gradient} opacity-10 group-hover:opacity-25 blur-2xl transition-opacity`} />
 
-              {/* Badge */}
-              <div className="absolute top-4 left-4 z-10">
-                <span className={`${s.badgeColor} text-white text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full shadow-md`}>
+                {/* Top row: icon + arrow */}
+                <div className="flex items-start justify-between mb-5 relative">
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+                    <Icon className="h-7 w-7 text-white" />
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground group-hover:rotate-45 transition-all">
+                    <ArrowUpRight className="h-4 w-4" />
+                  </div>
+                </div>
+
+                {/* Badge */}
+                <span className={`inline-block bg-gradient-to-r ${s.gradient} bg-clip-text text-transparent text-[10px] font-bold tracking-[0.2em] uppercase mb-2`}>
                   {s.badge}
                 </span>
-              </div>
 
-              {/* Arrow */}
-              <div className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-transform group-hover:rotate-45 group-hover:bg-white">
-                <ArrowUpRight className="h-5 w-5 group-hover:text-primary" />
-              </div>
-
-              {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 z-10">
-                <h3 className="font-heading text-lg md:text-xl font-bold text-white leading-tight mb-2 drop-shadow-md">
+                {/* Title */}
+                <h3 className="font-heading text-lg md:text-xl font-bold text-foreground mb-2 leading-snug">
                   {language === "bn" ? s.titleBn : s.titleEn}
                 </h3>
-                <p className="text-sm text-white/85 leading-snug line-clamp-2 max-w-md">
+
+                {/* Description */}
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {language === "bn" ? s.descBn : s.descEn}
                 </p>
-              </div>
-            </motion.article>
-          ))}
+
+                {/* Bottom hover line */}
+                <div className={`absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r ${s.gradient} group-hover:w-full transition-all duration-500`} />
+              </motion.article>
+            );
+          })}
         </div>
       </div>
     </section>
