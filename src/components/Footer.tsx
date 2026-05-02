@@ -39,7 +39,7 @@ const Footer = () => {
 
   return (
     <>
-      {/* CTA Strip — bold gradient */}
+      {/* CTA Strip — bold gradient with animated world map */}
       <section className="relative overflow-hidden">
         <div className="bg-gradient-brand py-16 md:py-20 relative">
           <div className="absolute inset-0 travel-pattern opacity-20" />
@@ -56,9 +56,15 @@ const Footer = () => {
                 ? "আমাদের ট্রাভেল এক্সপার্টদের সাথে কথা বলুন — যেকোনো সার্ভিসের কাস্টমাইজড কোটেশন পান।"
                 : "Talk to our travel experts and get a personalised quote for any service."}
             </p>
+
+            {/* Animated world map showing global travel routes */}
+            <div className="mb-10">
+              <AnimatedWorldMap />
+            </div>
+
             <a
               href={`tel:${phone.replace(/[\s-]/g, "")}`}
-              className="inline-flex items-center gap-2 bg-white text-secondary font-bold px-8 py-4 rounded-full shadow-elevated hover:scale-105 transition-transform"
+              className="inline-flex items-center gap-2 bg-white text-accent font-bold px-8 py-4 rounded-full shadow-elevated hover:scale-105 transition-transform"
             >
               <Phone className="h-4 w-4" />
               {phone}
