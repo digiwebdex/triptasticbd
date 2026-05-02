@@ -149,7 +149,7 @@ export default function PdfSettingsManager() {
             className={inputClass}
             value={config.email}
             onChange={(e) => updateField("email", e.target.value)}
-            placeholder="manasiktravelhub.info@gmail.com"
+            placeholder="info@triptastic.com.bd"
           />
         </div>
         <div className="sm:col-span-2">

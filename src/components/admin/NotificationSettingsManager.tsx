@@ -313,7 +313,7 @@ export default function NotificationSettingsManager() {
               <label className="text-xs text-muted-foreground mb-1 block">Sender ID</label>
               <Input
                 type="text"
-                placeholder="e.g. ManasikHub"
+                placeholder="e.g. TripTastic"
                 value={apiConfig.bulksmsbd_sender_id}
                 onChange={(e) => setApiConfig({ ...apiConfig, bulksmsbd_sender_id: e.target.value })}
                 className="text-xs"

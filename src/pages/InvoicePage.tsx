@@ -24,7 +24,7 @@ export default function InvoicePage() {
   const company: CompanyInfo = {
     name: "TRIP TASTIC",
     phone: "+880 1711-999910",
-    email: "manasiktravelhub.info@gmail.com",
+    email: "info@triptastic.com.bd",
     address: "Corporate Office: TRIP TASTIC, 595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail",
   };
   const companyAddressBn = "কর্পোরেট অফিস: ট্রিপ টেস্টিক, ৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল";

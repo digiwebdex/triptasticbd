@@ -58,7 +58,7 @@ pm2 restart triptastic-api
 # Check all process status
 pm2 status
 
-# Restart manasik API
+# Restart triptastic API
 pm2 restart triptastic-api
 
 # Stop API
@@ -128,7 +128,7 @@ pg_dump -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 > /var/www/trip-tastic/
 psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 < /path/to/backup.sql
 
 # Check database size
-psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "SELECT pg_size_pretty(pg_database_size('manasik'));"
+psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "SELECT pg_size_pretty(pg_database_size('triptastic'));"
 
 # List all tables
 psql -U digiwebdex -d triptastic -p 5433 -h 127.0.0.1 -c "\dt"
@@ -164,7 +164,7 @@ tail -f /var/log/nginx/error.log
 # View access logs
 tail -f /var/log/nginx/access.log
 
-# View manasik-specific logs (if configured)
+# View triptastic-specific logs (if configured)
 tail -f /var/log/nginx/triptastic-error.log
 ```
 
@@ -222,7 +222,7 @@ PORT=3004
 FRONTEND_URL=https://triptastic.com.bd
 UPLOAD_DIR=./uploads
 BULKSMSBD_API_KEY=your_api_key
-BULKSMSBD_SENDER_ID=MANASIK
+BULKSMSBD_SENDER_ID=TRIPTASTIC
 RESEND_API_KEY=your_resend_key
 NOTIFICATION_FROM_EMAIL=noreply@triptastic.com.bd
 ```
@@ -254,7 +254,7 @@ openssl s_client -connect triptastic.com.bd:443 -servername triptastic.com.bd
 systemctl start docker
 
 # 2. Start PostgreSQL container
-docker start manasik-postgres
+docker start triptastic-postgres
 
 # 3. Start Nginx
 systemctl start nginx
@@ -285,7 +285,7 @@ docker stop <container-name>
 docker logs <container-name> --tail 50
 
 # Execute psql inside container
-docker exec -it <container-name> psql -U digiwebdex -d manasik
+docker exec -it <container-name> psql -U digiwebdex -d triptastic
 ```
 
 ---

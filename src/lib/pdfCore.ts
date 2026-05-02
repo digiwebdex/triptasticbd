@@ -271,7 +271,7 @@ export function addPdfFooter(doc: jsPDF, cfg: PdfCompanyConfig, options?: { show
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(255);
-    doc.text(cfg.email || "manasiktravelhub.info@gmail.com", centerX, barY + 10);
+    doc.text(cfg.email || "info@triptastic.com.bd", centerX, barY + 10);
     doc.text("triptastic.com.bd", centerX, barY + 16);
 
     // Thank You — right side (script/cursive style)
