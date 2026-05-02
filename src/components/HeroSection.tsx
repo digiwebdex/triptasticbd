@@ -4,6 +4,8 @@ import { ArrowRight, Plane, Sparkles, ChevronLeft, ChevronRight } from "lucide-r
 import heroHajj from "@/assets/hero-hajj.jpg";
 import heroTickets from "@/assets/hero-tickets.jpg";
 import heroTours from "@/assets/hero-tours.jpg";
+import heroVisa from "@/assets/hero-visa.jpg";
+import heroEmergency from "@/assets/hero-emergency.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useNavigate } from "react-router-dom";
 
@@ -48,6 +50,30 @@ const HeroSection = () => {
         : "Dubai, Turkey, Malaysia, Singapore, Maldives — customised tours with luxury stays and full itineraries.",
       ctaPrimary: language === "bn" ? "ট্যুর দেখুন" : "Explore Tours",
       ctaPrimaryAction: () => navigate("/packages?type=tour"),
+    },
+    {
+      img: heroVisa,
+      alt: "Passport, visa stamps and world map",
+      tag: language === "bn" ? "ভিসা প্রসেসিং" : "Visa Processing",
+      titleStart: language === "bn" ? "দ্রুত ও নির্ভরযোগ্য" : "Fast & reliable",
+      titleAccent: language === "bn" ? "ভিসা সাপোর্ট" : "visa support",
+      sub: language === "bn"
+        ? "ট্যুরিস্ট, বিজনেস, মেডিকেল ও ওয়ার্ক ভিসা — ডকুমেন্টেশন থেকে ইন্টারভিউ পর্যন্ত পূর্ণাঙ্গ সহায়তা।"
+        : "Tourist, business, medical & work visa — full assistance from documentation to interview.",
+      ctaPrimary: language === "bn" ? "ভিসা সাপোর্ট" : "Get Visa Support",
+      ctaPrimaryAction: () => navigate("/packages?type=visa"),
+    },
+    {
+      img: heroEmergency,
+      alt: "Air ambulance helicopter on hospital helipad",
+      tag: language === "bn" ? "এয়ার অ্যাম্বুলেন্স" : "Air Ambulance",
+      titleStart: language === "bn" ? "জরুরি মুহূর্তে" : "Critical care",
+      titleAccent: language === "bn" ? "সবসময় পাশে" : "anytime, anywhere",
+      sub: language === "bn"
+        ? "২৪/৭ দেশি-বিদেশি মেডিকেল ইভাকুয়েশন, ICU-সজ্জিত এয়ারক্রাফট ও ডাক্তার-নার্স এসকর্ট।"
+        : "24/7 domestic & international medical evacuation with ICU-equipped aircraft and doctor escort.",
+      ctaPrimary: language === "bn" ? "এখনই কল করুন" : "Call Emergency",
+      ctaPrimaryAction: () => navigate("/packages?type=emergency"),
     },
   ];
 
