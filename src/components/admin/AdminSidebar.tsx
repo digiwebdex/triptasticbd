@@ -98,7 +98,9 @@ export function AdminSidebar({ role }: { role: AppRole }) {
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="Logo" className="h-9 w-9 rounded-md object-cover" />
+          <div className="bg-white rounded-md p-1 shadow-sm border border-border">
+            <img src={logo} alt="Trip Tastic Logo" className="h-9 w-9 object-contain" />
+          </div>
           <span className="font-heading text-base font-bold text-primary">Admin</span>
         </div>
       </SidebarHeader>
