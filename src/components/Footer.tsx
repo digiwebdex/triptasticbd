@@ -1,5 +1,5 @@
 import { Phone, Mail, MapPin, Facebook, Youtube, Instagram, Plane } from "lucide-react";
-import AnimatedWorldMap from "@/components/AnimatedWorldMap";
+import AdventureCTA from "@/components/AdventureCTA";
 import sslcommerzPayWith from "@/assets/payment/sslcommerz-pay-with.png";
 import logo from "@/assets/triptastic-logo.png";
 import { useBulkSiteContent } from "@/hooks/useSiteContentProvider";
@@ -58,9 +58,9 @@ const Footer = () => {
                 : "Talk to our travel experts and get a personalised quote for any service."}
             </p>
 
-            {/* Animated world map showing global travel routes */}
+            {/* Vibrant destination cards + stats */}
             <div className="mb-10">
-              <AnimatedWorldMap />
+              <AdventureCTA />
             </div>
 
             <a
