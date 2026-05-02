@@ -23,12 +23,23 @@ const DESTINATIONS = [
   { code: "MAK", labelEn: "Makkah", labelBn: "মক্কা", emoji: "🕋", lon: 39.8, lat: 21.4 },
   { code: "MED", labelEn: "Madinah", labelBn: "মদিনা", emoji: "🌙", lon: 39.6, lat: 24.5 },
   { code: "DXB", labelEn: "Dubai", labelBn: "দুবাই", emoji: "🏙️", lon: 55.3, lat: 25.2 },
+  { code: "DOH", labelEn: "Doha", labelBn: "দোহা", emoji: "🌇", lon: 51.5, lat: 25.3 },
+  { code: "RUH", labelEn: "Riyadh", labelBn: "রিয়াদ", emoji: "🕍", lon: 46.7, lat: 24.7 },
   { code: "IST", labelEn: "Istanbul", labelBn: "ইস্তাম্বুল", emoji: "🕌", lon: 28.9, lat: 41.0 },
+  { code: "CAI", labelEn: "Cairo", labelBn: "কায়রো", emoji: "🐫", lon: 31.2, lat: 30.0 },
   { code: "KUL", labelEn: "Kuala Lumpur", labelBn: "কুয়ালালামপুর", emoji: "🌴", lon: 101.7, lat: 3.1 },
   { code: "SIN", labelEn: "Singapore", labelBn: "সিঙ্গাপুর", emoji: "🦁", lon: 103.8, lat: 1.35 },
+  { code: "BKK", labelEn: "Bangkok", labelBn: "ব্যাংকক", emoji: "🛕", lon: 100.5, lat: 13.75 },
+  { code: "DEL", labelEn: "Delhi", labelBn: "দিল্লি", emoji: "🛺", lon: 77.2, lat: 28.6 },
+  { code: "HKG", labelEn: "Hong Kong", labelBn: "হংকং", emoji: "🏯", lon: 114.2, lat: 22.3 },
+  { code: "ICN", labelEn: "Seoul", labelBn: "সিউল", emoji: "🏮", lon: 126.97, lat: 37.57 },
   { code: "NRT", labelEn: "Tokyo", labelBn: "টোকিও", emoji: "🗼", lon: 139.7, lat: 35.7 },
+  { code: "SYD", labelEn: "Sydney", labelBn: "সিডনি", emoji: "🦘", lon: 151.2, lat: -33.87 },
   { code: "LHR", labelEn: "London", labelBn: "লন্ডন", emoji: "🎡", lon: -0.1, lat: 51.5 },
+  { code: "CDG", labelEn: "Paris", labelBn: "প্যারিস", emoji: "🗼", lon: 2.35, lat: 48.85 },
+  { code: "FRA", labelEn: "Frankfurt", labelBn: "ফ্রাঙ্কফুর্ট", emoji: "🏰", lon: 8.68, lat: 50.11 },
   { code: "JFK", labelEn: "New York", labelBn: "নিউইয়র্ক", emoji: "🗽", lon: -74.0, lat: 40.7 },
+  { code: "YYZ", labelEn: "Toronto", labelBn: "টরন্টো", emoji: "🍁", lon: -79.4, lat: 43.65 },
 ];
 
 // Build a quadratic bezier arc between two projected points (curving "up" toward equator-side)
