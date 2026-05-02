@@ -162,7 +162,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <a href="/" className="inline-flex items-center gap-3 mb-4">
-            <img src={logo} alt="Logo" className="h-14 w-14 rounded-md object-cover" />
+            <img src={logo} alt="Trip Tastic Logo" className="h-14 w-14 rounded-md object-contain bg-white p-1 border border-border shadow-sm" />
             <div className="text-left">
               <span className="font-heading text-xl font-bold text-primary">TRIP TASTIC</span>
               <span className="block text-xs tracking-[0.25em] text-muted-foreground uppercase">Travel Hub</span>
