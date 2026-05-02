@@ -6,87 +6,87 @@
 
 @layer base {
   :root {
-    /* TRIP TASTIC — Brand palette: Logo Gold + Deep Teal mix */
-    --background: 180 25% 98%;
-    --foreground: 195 45% 10%;
+    /* TRIP TASTIC — Refined brand palette: muted Gold + Deep Teal */
+    --background: 200 20% 98%;
+    --foreground: 200 30% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 195 45% 10%;
+    --card-foreground: 200 30% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 195 45% 10%;
+    --popover-foreground: 200 30% 12%;
 
-    /* Primary = Logo Gold (warm, premium CTA) */
-    --primary: 38 90% 52%;
-    --primary-foreground: 195 60% 10%;
-    --primary-glow: 42 95% 60%;
+    /* Primary = Refined Gold (less saturated, more premium) */
+    --primary: 36 72% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 38 78% 58%;
 
-    /* Secondary = Soft teal-tinted neutral surface */
-    --secondary: 185 30% 95%;
-    --secondary-foreground: 195 45% 10%;
-    --secondary-glow: 188 75% 35%;
+    /* Secondary = Soft neutral surface */
+    --secondary: 200 18% 95%;
+    --secondary-foreground: 200 30% 12%;
+    --secondary-glow: 192 50% 32%;
 
-    --muted: 185 25% 94%;
-    --muted-foreground: 195 18% 38%;
+    --muted: 200 16% 94%;
+    --muted-foreground: 200 12% 42%;
 
-    /* Accent = Deep Teal (logo's dark color) */
-    --accent: 188 75% 28%;
+    /* Accent = Refined Deep Teal */
+    --accent: 192 58% 26%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 78% 55%;
+    --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 185 22% 88%;
-    --input: 185 22% 88%;
-    --ring: 38 90% 52%;
+    --border: 200 15% 88%;
+    --input: 200 15% 88%;
+    --ring: 36 72% 48%;
 
-    --radius: 1rem;
+    --radius: 0.875rem;
 
-    /* Brand-specific tokens (mapped to Gold + Teal) */
-    --gold: 38 90% 52%;
-    --gold-light: 42 95% 60%;
-    --gold-dark: 32 88% 44%;
-    --charcoal: 195 60% 8%;
-    --charcoal-light: 195 45% 16%;
-    --emerald: 175 75% 35%;
-    --teal: 188 75% 28%;
-    --teal-light: 188 65% 38%;
-    --teal-dark: 192 80% 18%;
-    --ocean: 188 75% 28%;
-    --ocean-light: 188 65% 38%;
-    --sky: 188 60% 50%;
+    /* Brand-specific tokens (refined) */
+    --gold: 36 72% 48%;
+    --gold-light: 38 78% 58%;
+    --gold-dark: 32 70% 40%;
+    --charcoal: 200 35% 10%;
+    --charcoal-light: 200 28% 18%;
+    --emerald: 175 50% 32%;
+    --teal: 192 58% 26%;
+    --teal-light: 192 48% 36%;
+    --teal-dark: 195 65% 16%;
+    --ocean: 192 58% 26%;
+    --ocean-light: 192 48% 36%;
+    --sky: 192 45% 46%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 195 45% 10%;
-    --sidebar-primary: 38 90% 52%;
-    --sidebar-primary-foreground: 195 60% 10%;
-    --sidebar-accent: 185 30% 95%;
-    --sidebar-accent-foreground: 195 45% 10%;
-    --sidebar-border: 185 22% 88%;
-    --sidebar-ring: 38 90% 52%;
+    --sidebar-foreground: 200 30% 12%;
+    --sidebar-primary: 36 72% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 18% 95%;
+    --sidebar-accent-foreground: 200 30% 12%;
+    --sidebar-border: 200 15% 88%;
+    --sidebar-ring: 36 72% 48%;
 
     --font-heading: 'Plus Jakarta Sans', 'Noto Sans Bengali', sans-serif;
     --font-body: 'Manrope', 'Noto Sans Bengali', sans-serif;
     --font-arabic: 'Noto Naskh Arabic', serif;
 
-    /* Signature gradients — Gold ↔ Teal mix */
-    --gradient-brand: linear-gradient(135deg, hsl(192 80% 18%) 0%, hsl(188 75% 28%) 50%, hsl(38 90% 52%) 100%);
-    --gradient-sunset: linear-gradient(135deg, hsl(42 95% 60%), hsl(38 90% 52%), hsl(32 88% 44%));
-    --gradient-ocean: linear-gradient(135deg, hsl(192 80% 18%), hsl(188 75% 28%), hsl(188 60% 50%));
-    --gradient-gold: linear-gradient(135deg, hsl(42 95% 60%), hsl(38 90% 52%), hsl(32 88% 44%));
-    --gradient-teal: linear-gradient(135deg, hsl(192 80% 18%), hsl(188 75% 28%), hsl(188 65% 38%));
-    --gradient-mix: linear-gradient(135deg, hsl(192 80% 18%) 0%, hsl(188 75% 28%) 40%, hsl(38 90% 52%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(180 25% 98%), hsl(185 30% 95%));
-    --gradient-dark: linear-gradient(135deg, hsl(195 60% 8%), hsl(192 50% 14%));
-    --gradient-hero-overlay: linear-gradient(180deg, hsl(195 60% 8% / 0.20) 0%, hsl(192 70% 12% / 0.60) 60%, hsl(192 80% 8% / 0.88) 100%);
+    /* Refined gradients — softer mix of Teal & Gold */
+    --gradient-brand: linear-gradient(135deg, hsl(195 65% 16%) 0%, hsl(192 58% 26%) 60%, hsl(36 72% 48%) 100%);
+    --gradient-sunset: linear-gradient(135deg, hsl(38 78% 58%), hsl(36 72% 48%), hsl(32 70% 40%));
+    --gradient-ocean: linear-gradient(135deg, hsl(195 65% 16%), hsl(192 58% 26%), hsl(192 45% 46%));
+    --gradient-gold: linear-gradient(135deg, hsl(38 78% 58%), hsl(36 72% 48%), hsl(32 70% 40%));
+    --gradient-teal: linear-gradient(135deg, hsl(195 65% 16%), hsl(192 58% 26%), hsl(192 48% 36%));
+    --gradient-mix: linear-gradient(135deg, hsl(195 65% 16%) 0%, hsl(192 58% 26%) 50%, hsl(36 72% 48%) 100%);
+    --gradient-warm: linear-gradient(180deg, hsl(200 20% 98%), hsl(200 18% 95%));
+    --gradient-dark: linear-gradient(135deg, hsl(200 35% 10%), hsl(195 30% 16%));
+    --gradient-hero-overlay: linear-gradient(180deg, hsl(200 35% 10% / 0.25) 0%, hsl(195 40% 12% / 0.55) 60%, hsl(195 50% 8% / 0.85) 100%);
 
-    --shadow-gold: 0 8px 28px hsl(38 90% 52% / 0.32);
-    --shadow-ocean: 0 8px 28px hsl(188 75% 28% / 0.28);
-    --shadow-teal: 0 8px 28px hsl(188 75% 28% / 0.30);
-    --shadow-soft: 0 2px 16px hsl(195 45% 10% / 0.06);
-    --shadow-luxury: 0 16px 50px hsl(195 45% 10% / 0.12);
-    --shadow-elevated: 0 24px 70px hsl(195 45% 10% / 0.18);
-    --shadow-glow: 0 0 60px hsl(38 90% 52% / 0.40);
+    --shadow-gold: 0 6px 22px hsl(36 72% 48% / 0.22);
+    --shadow-ocean: 0 6px 22px hsl(192 58% 26% / 0.20);
+    --shadow-teal: 0 6px 22px hsl(192 58% 26% / 0.20);
+    --shadow-soft: 0 2px 12px hsl(200 30% 12% / 0.05);
+    --shadow-luxury: 0 12px 40px hsl(200 30% 12% / 0.10);
+    --shadow-elevated: 0 20px 56px hsl(200 30% 12% / 0.14);
+    --shadow-glow: 0 0 48px hsl(36 72% 48% / 0.28);
   }
 
   .dark {
