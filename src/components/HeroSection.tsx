@@ -4,6 +4,8 @@ import { ArrowRight, Plane, Sparkles, ChevronLeft, ChevronRight } from "lucide-r
 import heroHajj from "@/assets/hero-hajj.jpg";
 import heroTickets from "@/assets/hero-tickets.jpg";
 import heroTours from "@/assets/hero-tours.jpg";
+import heroVisa from "@/assets/hero-visa.jpg";
+import heroEmergency from "@/assets/hero-emergency.jpg";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useNavigate } from "react-router-dom";
 
