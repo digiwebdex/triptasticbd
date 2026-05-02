@@ -15,14 +15,13 @@ const Contact = () => {
   const [form, setForm] = useState({ name: "", phone: "", email: "", service: "", message: "" });
   const [loading, setLoading] = useState(false);
 
-  const phone = content?.phone || "+880 1711-999910";
-  const phone2 = content?.phone2 || "+880 1711-999920";
+  const phone = content?.phone || "+880 1711-925400";
   const email = content?.email || "info@triptastic.com.bd";
-  const location = content?.location || (bn ? "৫৯৫/১, মিল্ক ভিটা রোড, তিন রাস্তার মোড়, দেওলা, টাঙ্গাইল সদর, টাঙ্গাইল" : "595/1, Milk Vita Road, Three-Way Intersection, Dewla, Tangail Sadar, Tangail");
+  const location = content?.location || (bn ? "৪র্থ তলা, জেল রোড, মুন্সিপাড়া, দিনাজপুর সদর - ৫২০০" : "4th Floor, Jail Road, Munshipara, Dinajpur Sadar - 5200");
   const hours = content?.hours || (bn ? "শনি - বৃহঃ: সকাল ৯টা - রাত ৯টা" : "Sat - Thu: 9AM - 9PM");
 
   const contactItems = [
-    { icon: Phone, label: t("contact.phone"), value: `${phone}, ${phone2}`, href: `tel:${phone.replace(/[\s-]/g, "")}` },
+    { icon: Phone, label: t("contact.phone"), value: phone, href: `tel:${phone.replace(/[\s-]/g, "")}` },
     { icon: Mail, label: t("contact.email"), value: email, href: `mailto:${email}` },
     { icon: MapPin, label: t("contact.location"), value: location, href: "#" },
     { icon: Clock, label: t("contact.hours"), value: hours, href: "#" },
@@ -104,7 +103,7 @@ const Contact = () => {
 
               {/* WhatsApp CTA */}
               <a
-                href="https://wa.me/8801601505050"
+                href="https://wa.me/8801711925400"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 bg-emerald-600 text-white font-semibold py-3.5 rounded-xl text-sm hover:bg-emerald-700 transition-colors w-full mt-4"
