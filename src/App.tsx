@@ -27,6 +27,7 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsConditions = lazy(() => import("./pages/TermsConditions"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const UmrahGuide = lazy(() => import("./pages/UmrahGuide"));
+const PaymentStatus = lazy(() => import("./pages/PaymentStatus"));
 
 // Lazy load admin pages (heavy: recharts, xlsx, jspdf)
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -108,6 +109,7 @@ const App = () => (
             <Route path="/terms-conditions" element={<TermsConditions />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/umrah-guide" element={<UmrahGuide />} />
+            <Route path="/payment/:status" element={<PaymentStatus />} />
 
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />
