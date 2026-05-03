@@ -7,6 +7,7 @@ const fsp = require('fs/promises');
 const multer = require('multer');
 const { query } = require('./config/database');
 const { authenticate, requireRole, optionalAuth } = require('./middleware/auth');
+const { auditMiddleware } = require('./middleware/audit');
 const authRoutes = require('./routes/auth');
 
 const app = express();
@@ -76,6 +77,9 @@ const isSmsAccepted = (responseText = '') => {
 // =============================================
 // AUTH ROUTES
 // =============================================
+// Audit logging middleware (logs all admin write operations)
+app.use('/api', auditMiddleware);
+
 app.use('/api/auth', authRoutes);
 
 // =============================================
@@ -588,6 +592,7 @@ app.use('/api/financial-summary', createCrudRoutes('financial_summary', { adminO
 app.use('/api/daily-cashbook', createCrudRoutes('daily_cashbook', { adminOnly: true }));
 app.use('/api/refunds', createCrudRoutes('refunds', { adminOnly: true }));
 app.use('/api/cancellation-policies', createCrudRoutes('cancellation_policies', { readAuth: false, writeAuth: true, adminOnly: true }));
+app.use('/api/audit-logs', createCrudRoutes('audit_logs', { adminOnly: true, orderBy: 'created_at DESC' }));
 
 // ==============================================
 // BACKUP / RESTORE ROUTES

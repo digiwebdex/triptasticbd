@@ -41,6 +41,60 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          actor_role: string | null
+          changes: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          method: string | null
+          path: string | null
+          status_code: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_role?: string | null
+          changes?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          method?: string | null
+          path?: string | null
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          actor_role?: string | null
+          changes?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          method?: string | null
+          path?: string | null
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_id: string | null

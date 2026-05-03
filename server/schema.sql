@@ -1308,3 +1308,26 @@ CREATE TABLE IF NOT EXISTS refunds (
 
 CREATE INDEX IF NOT EXISTS idx_refunds_booking_id ON refunds(booking_id);
 CREATE INDEX IF NOT EXISTS idx_refunds_status ON refunds(status);
+
+-- ===================== AUDIT LOGS =====================
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  actor_id UUID,
+  actor_email TEXT,
+  actor_role TEXT,
+  action TEXT NOT NULL,
+  entity_type TEXT,
+  entity_id TEXT,
+  method TEXT,
+  path TEXT,
+  status_code INTEGER,
+  ip_address TEXT,
+  user_agent TEXT,
+  changes JSONB DEFAULT '{}'::jsonb,
+  metadata JSONB DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_actor ON audit_logs(actor_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
