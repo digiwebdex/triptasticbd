@@ -1,8 +1,9 @@
 -- =====================================================================
 -- Migration:   20260503213847_ledger_phase1_up.sql
 -- Name:        Phase 1 — Double-Entry Ledger Foundation (parallel, additive)
--- Version:     v1.1 — added inactive/empty/negative guards in post_journal_entry();
---                     RPC now returns (entry_id uuid, entry_number text)
+-- Version:     v1.2 — added 9999 Suspense Account (33 accounts total);
+--                     added inactive/empty/negative guards in post_journal_entry();
+--                     RPC returns (entry_id uuid, entry_number text)
 -- Date:        2026-05-03
 -- Author:      TripTastic ERP
 -- Plan:        docs/LEDGER_MIGRATION_PLAN.md
@@ -73,7 +74,14 @@ INSERT INTO public.ledger_accounts (code, name, type, normal_balance) VALUES
   ('6400','Utilities','EXPENSE','DEBIT'),
   ('6500','SMS/Communication','EXPENSE','DEBIT'),
   ('6600','Bank/Gateway Fees','EXPENSE','DEBIT'),
-  ('6700','Refund Losses','EXPENSE','DEBIT')
+  ('6700','Refund Losses','EXPENSE','DEBIT'),
+  -- 9999 Suspense: Temporary holding account for unidentified or uncategorized
+  -- transactions. Must be cleared (zeroed out) before any monthly period close.
+  -- PHASE 4 TODO (period-close guard): IF suspense_balance != 0 THEN
+  --   RAISE WARNING / require explicit admin override before closing the period.
+  -- Health Check page should display Suspense balance with a yellow warning
+  -- when non-zero (most days it should be 0; non-zero = investigate).
+  ('9999','Suspense Account','ASSET','DEBIT')
 ON CONFLICT (code) DO NOTHING;
 
 -- =========================================================
