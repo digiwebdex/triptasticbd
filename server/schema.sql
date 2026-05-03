@@ -1353,3 +1353,22 @@ CREATE TABLE IF NOT EXISTS admin_2fa_codes (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_admin_2fa_codes_user ON admin_2fa_codes(user_id, created_at DESC);
+
+-- Online Payment Sessions (SSLCommerz)
+CREATE TABLE IF NOT EXISTS online_payment_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tran_id TEXT NOT NULL UNIQUE,
+  booking_id UUID REFERENCES bookings(id),
+  user_id UUID,
+  customer_phone TEXT,
+  amount NUMERIC NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'BDT',
+  status TEXT NOT NULL DEFAULT 'initiated',
+  gateway TEXT NOT NULL DEFAULT 'sslcommerz',
+  gateway_response JSONB,
+  payment_id UUID REFERENCES payments(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_ops_booking ON online_payment_sessions(booking_id);
+CREATE INDEX IF NOT EXISTS idx_ops_status ON online_payment_sessions(status);
