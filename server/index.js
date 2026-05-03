@@ -592,6 +592,7 @@ app.use('/api/financial-summary', createCrudRoutes('financial_summary', { adminO
 app.use('/api/daily-cashbook', createCrudRoutes('daily_cashbook', { adminOnly: true }));
 app.use('/api/refunds', createCrudRoutes('refunds', { adminOnly: true }));
 app.use('/api/cancellation-policies', createCrudRoutes('cancellation_policies', { readAuth: false, writeAuth: true, adminOnly: true }));
+app.use('/api/audit-logs', createCrudRoutes('audit_logs', { adminOnly: true, orderBy: 'created_at DESC' }));
 
 // ==============================================
 // BACKUP / RESTORE ROUTES
