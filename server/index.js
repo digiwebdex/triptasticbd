@@ -7,6 +7,7 @@ const fsp = require('fs/promises');
 const multer = require('multer');
 const { query } = require('./config/database');
 const { authenticate, requireRole, optionalAuth } = require('./middleware/auth');
+const { auditMiddleware } = require('./middleware/audit');
 const authRoutes = require('./routes/auth');
 
 const app = express();
