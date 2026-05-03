@@ -1221,6 +1221,76 @@ export type Database = {
         }
         Relationships: []
       }
+      online_payment_sessions: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string
+          currency: string
+          customer_phone: string | null
+          gateway: string
+          gateway_response: Json | null
+          id: string
+          payment_id: string | null
+          status: string
+          tran_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_phone?: string | null
+          gateway?: string
+          gateway_response?: Json | null
+          id?: string
+          payment_id?: string | null
+          status?: string
+          tran_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          customer_phone?: string | null
+          gateway?: string
+          gateway_response?: Json | null
+          id?: string
+          payment_id?: string | null
+          status?: string
+          tran_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "online_payment_sessions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "online_payment_sessions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "v_booking_profit"
+            referencedColumns: ["booking_id"]
+          },
+          {
+            foreignKeyName: "online_payment_sessions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       otp_codes: {
         Row: {
           code: string
