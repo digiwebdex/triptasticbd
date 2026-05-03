@@ -52,6 +52,7 @@ const toolsMenuItems = [
   { title: "Bulk Import",     url: "/admin/bulk-import",    icon: Upload,          roles: ["admin"] },
   { title: "Audit Logs",      url: "/admin/audit-logs",     icon: Shield,          roles: ["admin"] },
   { title: "Security & 2FA",  url: "/admin/security",       icon: ShieldCheck,     roles: ["admin"] },
+  { title: "User Guide",      url: "/admin/guide",          icon: BookOpen,        roles: ["admin", "accountant", "cms_manager", "support"] },
   { title: "Settings",        url: "/admin/settings",       icon: Settings,        roles: ["admin"] },
 ];
 
