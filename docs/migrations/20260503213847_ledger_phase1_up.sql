@@ -1,6 +1,8 @@
 -- =====================================================================
 -- Migration:   20260503213847_ledger_phase1_up.sql
 -- Name:        Phase 1 — Double-Entry Ledger Foundation (parallel, additive)
+-- Version:     v1.1 — added inactive/empty/negative guards in post_journal_entry();
+--                     RPC now returns (entry_id uuid, entry_number text)
 -- Date:        2026-05-03
 -- Author:      TripTastic ERP
 -- Plan:        docs/LEDGER_MIGRATION_PLAN.md
@@ -309,34 +311,66 @@ CREATE OR REPLACE FUNCTION public.post_journal_entry(
   p_reference_type VARCHAR,
   p_reference_id   UUID,
   p_lines          JSONB    -- [{account_code, debit, credit, description?}, ...]
-) RETURNS UUID
+) RETURNS TABLE (entry_id UUID, entry_number TEXT)
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 DECLARE
-  v_entry_id UUID;
-  v_line     JSONB;
-  v_acc_id   UUID;
+  v_entry_id     UUID;
+  v_entry_number TEXT;
+  v_line         JSONB;
+  v_acc_id       UUID;
+  v_debit        NUMERIC;
+  v_credit       NUMERIC;
+  i              INT;
+  v_len          INT;
 BEGIN
+  -- 1) RBAC
   IF NOT (public.has_role(auth.uid(), 'admin'::public.app_role)
        OR public.has_role(auth.uid(), 'accountant'::public.app_role)) THEN
     RAISE EXCEPTION 'Only admin or accountant can post journal entries.';
   END IF;
 
+  -- 2) Empty-lines guard (BEFORE any INSERT)
+  IF p_lines IS NULL OR jsonb_typeof(p_lines) <> 'array' OR jsonb_array_length(p_lines) = 0 THEN
+    RAISE EXCEPTION 'Journal entry must have at least one line.';
+  END IF;
+
+  -- 3) Pre-validate every line BEFORE any INSERT happens
+  --    (inactive account + negative amounts). This guarantees no partial entry.
+  v_len := jsonb_array_length(p_lines);
+  FOR i IN 0 .. v_len - 1 LOOP
+    v_line   := p_lines -> i;
+    v_debit  := COALESCE((v_line->>'debit')::numeric,  0);
+    v_credit := COALESCE((v_line->>'credit')::numeric, 0);
+
+    IF v_debit < 0 OR v_credit < 0 THEN
+      RAISE EXCEPTION 'Debit and credit amounts must be non-negative (line %): debit=%, credit=%',
+                      i + 1, v_debit, v_credit;
+    END IF;
+
+    PERFORM 1 FROM public.ledger_accounts
+      WHERE code = v_line->>'account_code' AND is_active = TRUE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Unknown or inactive account code: %', v_line->>'account_code';
+    END IF;
+  END LOOP;
+
+  -- 4) All guards passed — create header
   INSERT INTO public.journal_entries (entry_date, description, reference_type, reference_id, posted_by)
   VALUES (p_entry_date, p_description, p_reference_type, p_reference_id, auth.uid())
-  RETURNING id INTO v_entry_id;
+  RETURNING id, journal_entries.entry_number
+  INTO v_entry_id, v_entry_number;
 
   -- Row-level lock on the parent entry for concurrent-write safety
   PERFORM 1 FROM public.journal_entries WHERE id = v_entry_id FOR UPDATE;
 
+  -- 5) Insert lines (re-resolve account_id; validation already passed)
   FOR v_line IN SELECT * FROM jsonb_array_elements(p_lines)
   LOOP
-    SELECT id INTO v_acc_id FROM public.ledger_accounts WHERE code = v_line->>'account_code';
-    IF v_acc_id IS NULL THEN
-      RAISE EXCEPTION 'Unknown account code: %', v_line->>'account_code';
-    END IF;
+    SELECT id INTO v_acc_id FROM public.ledger_accounts
+      WHERE code = v_line->>'account_code' AND is_active = TRUE;
 
     INSERT INTO public.journal_lines
       (journal_entry_id, account_id, debit_amount, credit_amount, description)
@@ -348,8 +382,12 @@ BEGIN
     );
   END LOOP;
 
-  -- enforce_journal_balance fires per-row; final check happens on last line insert
-  RETURN v_entry_id;
+  -- enforce_journal_balance (CONSTRAINT TRIGGER) fires at COMMIT and
+  -- guarantees SUM(debit) = SUM(credit) across the whole entry.
+
+  entry_id     := v_entry_id;
+  entry_number := v_entry_number;
+  RETURN NEXT;
 END;
 $$;
 
