@@ -77,6 +77,9 @@ const isSmsAccepted = (responseText = '') => {
 // =============================================
 // AUTH ROUTES
 // =============================================
+// Audit logging middleware (logs all admin write operations)
+app.use('/api', auditMiddleware);
+
 app.use('/api/auth', authRoutes);
 
 // =============================================
