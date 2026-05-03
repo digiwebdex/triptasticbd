@@ -41,6 +41,66 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_2fa: {
+        Row: {
+          created_at: string
+          sms_enabled: boolean
+          sms_phone: string | null
+          totp_enabled: boolean
+          totp_secret: string | null
+          totp_secret_pending: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          sms_enabled?: boolean
+          sms_phone?: string | null
+          totp_enabled?: boolean
+          totp_secret?: string | null
+          totp_secret_pending?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          sms_enabled?: boolean
+          sms_phone?: string | null
+          totp_enabled?: boolean
+          totp_secret?: string | null
+          totp_secret_pending?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      admin_2fa_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string

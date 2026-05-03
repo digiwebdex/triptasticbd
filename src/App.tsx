@@ -60,6 +60,7 @@ const AdminTicketRefundsPage = lazy(() => import("./pages/admin/AdminTicketRefun
 const AdminSettlementsPage = lazy(() => import("./pages/admin/AdminSettlementsPage"));
 const AdminBulkImportPage = lazy(() => import("./pages/admin/AdminBulkImportPage"));
 const AdminAuditLogsPage = lazy(() => import("./pages/admin/AdminAuditLogsPage"));
+const AdminSecurityPage = lazy(() => import("./pages/admin/AdminSecurityPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,6 +139,7 @@ const App = () => (
               <Route path="settlements" element={<AdminSettlementsPage />} />
               <Route path="bulk-import" element={<AdminBulkImportPage />} />
               <Route path="audit-logs" element={<AdminAuditLogsPage />} />
+              <Route path="security" element={<AdminSecurityPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
             </Route>
 

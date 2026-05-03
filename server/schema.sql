@@ -1331,3 +1331,25 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at DE
 CREATE INDEX IF NOT EXISTS idx_audit_logs_actor ON audit_logs(actor_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+
+-- ===================== ADMIN 2FA =====================
+CREATE TABLE IF NOT EXISTS admin_2fa (
+  user_id UUID PRIMARY KEY,
+  sms_enabled BOOLEAN NOT NULL DEFAULT false,
+  sms_phone TEXT,
+  totp_enabled BOOLEAN NOT NULL DEFAULT false,
+  totp_secret TEXT,
+  totp_secret_pending TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS admin_2fa_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+  code TEXT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  verified BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_admin_2fa_codes_user ON admin_2fa_codes(user_id, created_at DESC);
