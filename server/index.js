@@ -1599,6 +1599,130 @@ app.post('/api/2fa/login/verify', async (req, res) => {
 });
 
 // =============================================
+// ONLINE PAYMENT (SSLCommerz)
+// =============================================
+const sslcz = require('./services/sslcommerz');
+
+const getBaseUrl = (req) => process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+
+// Initiate payment session — works for logged-in user OR guest with tracking_id
+app.post('/api/payments/online/initiate', optionalAuth, async (req, res) => {
+  try {
+    const { booking_id, tracking_id, amount, customer } = req.body || {};
+    if (!amount || Number(amount) <= 0) return res.status(400).json({ error: 'Invalid amount' });
+
+    let booking;
+    if (booking_id) {
+      const r = await query('SELECT id, user_id, tracking_id, due_amount FROM bookings WHERE id=$1', [booking_id]);
+      booking = r.rows[0];
+    } else if (tracking_id) {
+      const r = await query('SELECT id, user_id, tracking_id, due_amount FROM bookings WHERE tracking_id=$1', [tracking_id]);
+      booking = r.rows[0];
+    }
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    if (Number(amount) > Number(booking.due_amount || 0) + 0.01) {
+      return res.status(400).json({ error: `Amount exceeds due (৳${booking.due_amount})` });
+    }
+
+    const tran_id = `TT-${booking.tracking_id}-${Date.now()}`;
+    const sessionRes = await query(
+      `INSERT INTO online_payment_sessions (tran_id, booking_id, user_id, customer_phone, amount)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      [tran_id, booking.id, req.user?.id || booking.user_id, customer?.phone || null, amount]
+    );
+
+    const baseUrl = getBaseUrl(req);
+    const init = await sslcz.initSession({
+      tran_id,
+      amount,
+      customer: customer || {},
+      productName: `Trip Tastic Booking ${booking.tracking_id}`,
+      urls: {
+        success: `${baseUrl}/api/payments/online/callback/success`,
+        fail: `${baseUrl}/api/payments/online/callback/fail`,
+        cancel: `${baseUrl}/api/payments/online/callback/cancel`,
+        ipn: `${baseUrl}/api/payments/online/ipn`,
+      },
+    });
+
+    res.json({ success: true, gateway_url: init.GatewayPageURL, tran_id, session_id: sessionRes.rows[0].id });
+  } catch (e) {
+    console.error('initiate online payment error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// SSLCommerz callback handler — POST form data, then redirect user to SPA
+const handleCallback = (resultStatus) => async (req, res) => {
+  try {
+    const { tran_id, val_id, status } = req.body || {};
+    const sessionRes = await query('SELECT * FROM online_payment_sessions WHERE tran_id=$1', [tran_id]);
+    const session = sessionRes.rows[0];
+    if (!session) return res.redirect(`/payment/fail?reason=invalid_session`);
+
+    if (resultStatus === 'success' && val_id) {
+      const validation = await sslcz.validateTransaction(val_id);
+      if (validation.status === 'VALID' || validation.status === 'VALIDATED') {
+        await sslcz.markSessionPaid(session, { ...req.body, ...validation });
+        return res.redirect(`/payment/success?tran=${encodeURIComponent(tran_id)}`);
+      }
+      await query("UPDATE online_payment_sessions SET status='failed', gateway_response=$1, updated_at=now() WHERE id=$2",
+        [JSON.stringify({ ...req.body, validation }), session.id]);
+      return res.redirect(`/payment/fail?tran=${encodeURIComponent(tran_id)}&reason=invalid`);
+    }
+
+    await query("UPDATE online_payment_sessions SET status=$1, gateway_response=$2, updated_at=now() WHERE id=$3",
+      [resultStatus === 'cancel' ? 'cancelled' : 'failed', JSON.stringify(req.body), session.id]);
+    res.redirect(`/payment/${resultStatus}?tran=${encodeURIComponent(tran_id)}`);
+  } catch (e) {
+    console.error(`SSLCZ ${resultStatus} callback error:`, e.message);
+    res.redirect(`/payment/fail?reason=server_error`);
+  }
+};
+
+// SSLCommerz POSTs to these URLs (form-urlencoded)
+app.use('/api/payments/online/callback', express.urlencoded({ extended: true }));
+app.post('/api/payments/online/callback/success', handleCallback('success'));
+app.post('/api/payments/online/callback/fail', handleCallback('fail'));
+app.post('/api/payments/online/callback/cancel', handleCallback('cancel'));
+
+// IPN — server-to-server final confirmation
+app.post('/api/payments/online/ipn', express.urlencoded({ extended: true }), async (req, res) => {
+  try {
+    const { tran_id, val_id, status } = req.body || {};
+    const sessionRes = await query('SELECT * FROM online_payment_sessions WHERE tran_id=$1', [tran_id]);
+    const session = sessionRes.rows[0];
+    if (!session) return res.status(404).json({ error: 'session not found' });
+    if (session.status === 'success') return res.json({ ok: true, already: true });
+
+    if (status === 'VALID' && val_id) {
+      const validation = await sslcz.validateTransaction(val_id);
+      if (validation.status === 'VALID' || validation.status === 'VALIDATED') {
+        await sslcz.markSessionPaid(session, { ...req.body, ...validation });
+        return res.json({ ok: true });
+      }
+    }
+    res.json({ ok: false });
+  } catch (e) {
+    console.error('IPN error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Public lookup — used by /payment/success page
+app.get('/api/payments/online/session/:tran_id', async (req, res) => {
+  try {
+    const r = await query(
+      `SELECT ops.tran_id, ops.status, ops.amount, ops.created_at, b.tracking_id
+       FROM online_payment_sessions ops LEFT JOIN bookings b ON b.id=ops.booking_id
+       WHERE ops.tran_id=$1`, [req.params.tran_id]
+    );
+    if (!r.rows[0]) return res.status(404).json({ error: 'Not found' });
+    res.json(r.rows[0]);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// =============================================
 // SERVE FRONTEND (production)
 // =============================================
 const frontendPath = path.join(__dirname, '..', 'dist');
