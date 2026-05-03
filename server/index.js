@@ -1492,6 +1492,113 @@ app.post('/api/upload-booking-document', upload.single('file'), async (req, res)
 });
 
 // =============================================
+// =============================================
+// DUE REMINDER + 2FA
+// =============================================
+const cron = require('node-cron');
+const { runDueReminderJob } = require('./services/dueReminder');
+const twoFA = require('./services/twoFactor');
+
+// Manual trigger (admin only)
+app.post('/api/due-reminder/run', authenticate, requireRole('admin'), async (_req, res) => {
+  try {
+    const result = await runDueReminderJob();
+    res.json({ success: true, ...result });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Daily at 09:30 Asia/Dhaka
+if (process.env.DISABLE_CRON !== '1') {
+  cron.schedule('30 9 * * *', () => {
+    runDueReminderJob().catch((e) => console.error('[due-reminder] failed:', e.message));
+  }, { timezone: 'Asia/Dhaka' });
+  console.log('⏰ Due-reminder cron scheduled: daily 09:30 Asia/Dhaka');
+}
+
+// === 2FA ROUTES ===
+app.get('/api/2fa/status', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const s = await twoFA.getSettings(req.user.id);
+    res.json({
+      sms_enabled: s?.sms_enabled || false,
+      sms_phone: s?.sms_phone || null,
+      totp_enabled: s?.totp_enabled || false,
+      has_pending_totp: !!s?.totp_secret_pending,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/2fa/sms/enable', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { phone } = req.body || {};
+    if (!phone) return res.status(400).json({ error: 'phone required' });
+    await twoFA.setSmsEnabled(req.user.id, true, phone);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/2fa/sms/disable', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    await twoFA.setSmsEnabled(req.user.id, false, null);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/2fa/totp/setup', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const setup = await twoFA.generateTotpSetup(req.user.id, req.user.email);
+    res.json(setup);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/2fa/totp/confirm', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { token } = req.body || {};
+    if (!token) return res.status(400).json({ error: 'token required' });
+    const ok = await twoFA.confirmTotpEnable(req.user.id, token);
+    if (!ok) return res.status(401).json({ error: 'Invalid TOTP code' });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/2fa/totp/disable', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    await twoFA.disableTotp(req.user.id);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Step-2 login: send SMS OTP
+app.post('/api/2fa/login/send-sms', async (req, res) => {
+  try {
+    const { user_id } = req.body || {};
+    if (!user_id) return res.status(400).json({ error: 'user_id required' });
+    const s = await twoFA.getSettings(user_id);
+    if (!s?.sms_enabled || !s.sms_phone) return res.status(400).json({ error: 'SMS 2FA not enabled' });
+    await twoFA.sendSmsOtp(user_id, s.sms_phone);
+    res.json({ success: true, masked_phone: s.sms_phone.replace(/.(?=.{4})/g, '*') });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Step-2 login: verify (SMS or TOTP)
+app.post('/api/2fa/login/verify', async (req, res) => {
+  try {
+    const { user_id, method, code } = req.body || {};
+    if (!user_id || !method || !code) return res.status(400).json({ error: 'user_id, method, code required' });
+    const s = await twoFA.getSettings(user_id);
+    if (!s) return res.status(400).json({ error: '2FA not configured' });
+    let ok = false;
+    if (method === 'sms') ok = await twoFA.verifySmsOtp(user_id, code);
+    else if (method === 'totp' && s.totp_enabled && s.totp_secret) {
+      ok = twoFA.verifyTotpCode(s.totp_secret, code);
+    }
+    res.json({ success: ok });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// =============================================
 // SERVE FRONTEND (production)
 // =============================================
 const frontendPath = path.join(__dirname, '..', 'dist');
