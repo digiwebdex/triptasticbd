@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { formatBDT } from "@/lib/utils";
+import { PayOnlineButton } from "@/components/PayOnlineButton";
 
 const HISTORY_KEY = "rk_tracking_history";
 
@@ -374,6 +375,17 @@ const TrackBooking = () => {
                       <p className="font-medium text-destructive">{formatBDT(booking.due_amount || 0)}</p>
                     </div>
                   </div>
+                  {Number(booking.due_amount || 0) > 0 && (
+                    <div className="mt-4 flex justify-center">
+                      <PayOnlineButton
+                        trackingId={booking.tracking_id}
+                        dueAmount={Number(booking.due_amount)}
+                        customerName={booking.guest_name}
+                        customerPhone={booking.guest_phone}
+                        label={`Pay ৳${Number(booking.due_amount).toLocaleString("en-IN")} Online`}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 

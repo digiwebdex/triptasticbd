@@ -13,6 +13,7 @@ import DocumentUpload from "@/components/DocumentUpload";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { generateInvoice, generateReceipt, CompanyInfo, InvoicePayment } from "@/lib/invoiceGenerator";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { PayOnlineButton } from "@/components/PayOnlineButton";
 
 interface Booking {
   id: string;
@@ -412,7 +413,7 @@ const Dashboard = () => {
                     )}
 
                     {/* Actions */}
-                    <div className="px-5 py-3 border-t border-border flex items-center gap-4">
+                    <div className="px-5 py-3 border-t border-border flex items-center gap-4 flex-wrap">
                       <button
                         onClick={() => handleDownloadInvoice(b)}
                         disabled={generatingPdf === b.id}
@@ -421,6 +422,17 @@ const Dashboard = () => {
                         <Download className="h-4 w-4" />
                         {generatingPdf === b.id ? t("dashboard.generating") : t("dashboard.invoice")}
                       </button>
+                      {Number(b.due_amount || 0) > 0 && (
+                        <PayOnlineButton
+                          bookingId={b.id}
+                          dueAmount={Number(b.due_amount)}
+                          customerName={profile?.full_name}
+                          customerPhone={profile?.phone}
+                          customerEmail={user?.email}
+                          size="sm"
+                          label={`Pay ৳${Number(b.due_amount).toLocaleString("en-IN")}`}
+                        />
+                      )}
                       <button
                         onClick={() => setExpandedBooking(expandedBooking === b.id ? null : b.id)}
                         className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
