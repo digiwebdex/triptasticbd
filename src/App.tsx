@@ -137,6 +137,7 @@ const App = () => (
               <Route path="ticket-refunds" element={<AdminTicketRefundsPage />} />
               <Route path="settlements" element={<AdminSettlementsPage />} />
               <Route path="bulk-import" element={<AdminBulkImportPage />} />
+              <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
             </Route>
 
