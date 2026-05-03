@@ -367,6 +367,7 @@ const tableUrlMap: Record<string, string> = {
   supplier_agent_items: '/supplier-agent-items',
   refunds: '/refunds',
   cancellation_policies: '/cancellation-policies',
+  audit_logs: '/audit-logs',
 };
 
 // =============================================
