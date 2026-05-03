@@ -59,6 +59,7 @@ const AdminVisaPage = lazy(() => import("./pages/admin/AdminVisaPage"));
 const AdminTicketRefundsPage = lazy(() => import("./pages/admin/AdminTicketRefundsPage"));
 const AdminSettlementsPage = lazy(() => import("./pages/admin/AdminSettlementsPage"));
 const AdminBulkImportPage = lazy(() => import("./pages/admin/AdminBulkImportPage"));
+const AdminAuditLogsPage = lazy(() => import("./pages/admin/AdminAuditLogsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
