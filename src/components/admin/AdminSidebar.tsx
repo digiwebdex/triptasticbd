@@ -2,7 +2,7 @@ import {
   LayoutDashboard, FileText, Users, Package, CreditCard,
   Calculator, BarChart3, Pencil, Settings, LogOut, UserCheck, Truck,
   Hotel, Bell, AlertTriangle, BookOpen, DollarSign, RotateCcw, PieChart,
-  Plane, FileCheck, Map, Search, Upload, Shield,
+  Plane, FileCheck, Map, Search, Upload, Shield, ShieldCheck,
 } from "lucide-react";
 import logo from "@/assets/triptastic-logo.png";
 import { NavLink } from "@/components/NavLink";
@@ -51,6 +51,7 @@ const toolsMenuItems = [
   { title: "SEO",             url: "/admin/seo",            icon: Search,          roles: ["admin"] },
   { title: "Bulk Import",     url: "/admin/bulk-import",    icon: Upload,          roles: ["admin"] },
   { title: "Audit Logs",      url: "/admin/audit-logs",     icon: Shield,          roles: ["admin"] },
+  { title: "Security & 2FA",  url: "/admin/security",       icon: ShieldCheck,     roles: ["admin"] },
   { title: "Settings",        url: "/admin/settings",       icon: Settings,        roles: ["admin"] },
 ];
 
