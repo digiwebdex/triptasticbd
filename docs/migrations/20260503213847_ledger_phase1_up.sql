@@ -1,8 +1,19 @@
 -- =====================================================================
--- PHASE 1 — DOUBLE-ENTRY LEDGER (PARALLEL, ADDITIVE)
--- Reviewed plan: docs/LEDGER_MIGRATION_PLAN.md
--- Safe to apply: does NOT modify any existing table, trigger, or function.
--- Rollback: docs/ledger_phase1_down.sql
+-- Migration:   20260503213847_ledger_phase1_up.sql
+-- Name:        Phase 1 — Double-Entry Ledger Foundation (parallel, additive)
+-- Date:        2026-05-03
+-- Author:      TripTastic ERP
+-- Plan:        docs/LEDGER_MIGRATION_PLAN.md
+-- Rollback:    docs/migrations/ledger_phase1_down.sql
+-- Dependencies:
+--   - public.has_role(uuid, public.app_role)   (existing)
+--   - public.app_role enum with 'admin','accountant','viewer'
+--   - public.company_settings(setting_key text, setting_value jsonb)
+--   - auth.users
+-- Safety:
+--   - Wrapped in BEGIN/COMMIT — atomic. Partial failure rolls back fully.
+--   - Does NOT modify any existing table, trigger, function, or wallet.
+--   - All seed inserts are idempotent on UNIQUE(code).
 -- =====================================================================
 
 BEGIN;
@@ -60,7 +71,8 @@ INSERT INTO public.ledger_accounts (code, name, type, normal_balance) VALUES
   ('6400','Utilities','EXPENSE','DEBIT'),
   ('6500','SMS/Communication','EXPENSE','DEBIT'),
   ('6600','Bank/Gateway Fees','EXPENSE','DEBIT'),
-  ('6700','Refund Losses','EXPENSE','DEBIT');
+  ('6700','Refund Losses','EXPENSE','DEBIT')
+ON CONFLICT (code) DO NOTHING;
 
 -- =========================================================
 -- 2. ACCOUNTING PERIODS

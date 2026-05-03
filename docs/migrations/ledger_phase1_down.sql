@@ -1,7 +1,17 @@
 -- =====================================================================
--- PHASE 1 — DOUBLE-ENTRY LEDGER ROLLBACK
--- Restores the database to the state before ledger_phase1_up.sql.
--- Safe: only touches Phase 1 objects. Existing tables/triggers untouched.
+-- Rollback:    ledger_phase1_down.sql
+-- Pairs with:  20260503213847_ledger_phase1_up.sql
+-- Date:        2026-05-03
+--
+-- ⚠️  DESTRUCTIVE — THIS DROPS ALL LEDGER DATA.
+-- ⚠️  Take a full database backup BEFORE running this script.
+-- ⚠️  All journal entries, lines, periods, opening balances will be lost.
+--
+-- Safe boundary: only touches Phase 1 objects. Legacy tables, triggers,
+-- wallets, payments, bookings — all untouched.
+--
+-- NOT placed in supabase/migrations/ on purpose so the Supabase CLI
+-- will not auto-apply it. Run manually only.
 -- =====================================================================
 
 BEGIN;
