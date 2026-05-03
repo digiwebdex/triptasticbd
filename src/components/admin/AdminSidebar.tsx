@@ -2,7 +2,7 @@ import {
   LayoutDashboard, FileText, Users, Package, CreditCard,
   Calculator, BarChart3, Pencil, Settings, LogOut, UserCheck, Truck,
   Hotel, Bell, AlertTriangle, BookOpen, DollarSign, RotateCcw, PieChart,
-  Plane, FileCheck, Map, Search, Upload, Shield, ShieldCheck, BookOpen,
+  Plane, FileCheck, Map, Search, Upload, Shield, ShieldCheck,
 } from "lucide-react";
 import logo from "@/assets/triptastic-logo.png";
 import { NavLink } from "@/components/NavLink";
