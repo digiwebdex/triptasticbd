@@ -50,6 +50,7 @@ const toolsMenuItems = [
   { title: "CMS",             url: "/admin/cms",            icon: Pencil,          roles: ["admin", "cms"] },
   { title: "SEO",             url: "/admin/seo",            icon: Search,          roles: ["admin"] },
   { title: "Bulk Import",     url: "/admin/bulk-import",    icon: Upload,          roles: ["admin"] },
+  { title: "Audit Logs",      url: "/admin/audit-logs",     icon: Shield,          roles: ["admin"] },
   { title: "Settings",        url: "/admin/settings",       icon: Settings,        roles: ["admin"] },
 ];
 
