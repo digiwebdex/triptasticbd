@@ -147,3 +147,49 @@ The migration is complete only when **both commands return zero matches** in `sr
 - [ ] All 17 endpoints respond at `/api/<name>`
 - [ ] Row counts on VPS match the table in §2 (or current production)
 - [ ] Site loads and admin can log in via self-hosted JWT
+
+---
+
+## Migration Loop 1 — fb-conversions-api (completed)
+
+**Date:** 2026-05-08
+**Edge function migrated:** `fb-conversions-api`
+
+### Changes
+- **Backend (`server/index.js`):** Added `POST /api/fb-conversions-api` route. Uses Node `crypto.createHash('sha256')` instead of `crypto.subtle.digest` (Web Crypto). Same request/response shape as the original Deno function. Reads `FB_CONVERSIONS_API_TOKEN` and `FB_PIXEL_ID` from `process.env`.
+- **Frontend (`src/lib/api.ts`):** Added `'fb-conversions-api'` to `vpsRoutes`. Calls from `src/lib/fbPixel.ts` now hit the VPS endpoint first; Supabase fallback is disabled (since `allowEdgeFallback` is only true for `send-otp`).
+
+### Required on VPS
+Add to `/var/www/Triptastic/server/.env`:
+```
+FB_CONVERSIONS_API_TOKEN=<existing token from Supabase secrets>
+FB_PIXEL_ID=<existing pixel id from Supabase secrets>
+```
+Then: `pm2 restart triptastic-api`
+
+### Verification
+- Test: `curl -X POST https://triptastic.com.bd/api/fb-conversions-api -H 'Content-Type: application/json' -d '{"event_name":"PageView","test_event_code":"TEST123"}'`
+- Expected: `{"success":true,"events_received":1,...}` (or 500 if env vars not yet set on VPS).
+- Browser: trigger any pixel event, confirm POST to `/api/fb-conversions-api` returns 200.
+
+### Cleanup (do NOT do yet)
+- Keep `supabase/functions/fb-conversions-api/` deployed until VPS env vars are confirmed and Network tab shows successful VPS calls in production for ≥24h.
+- Then: delete `supabase/functions/fb-conversions-api/` + call `delete_edge_functions` tool.
+
+### Status
+- Code ✅
+- VPS env vars ⏳ (user must add)
+- Production verification ⏳
+
+---
+
+### Remaining edge functions still on Supabase
+| Function | Frontend caller | Migration priority |
+|---|---|---|
+| `admin-create-user` | `AdminUserManager.tsx` (via `auth/admin/create-user`) | Already routed to VPS via `/api/auth/admin/...` |
+| `admin-manage-user` | `AdminUserManager.tsx` (via `auth/admin/manage-user`) | Already routed to VPS via `/api/auth/admin/...` |
+| `check-due-alerts` | Cron only | Low — port to node-cron in a later loop |
+| `daily-backup` | Cron only | Low — replace with `server/backup-to-gdrive.sh` |
+| `daily-summary-sms` | Cron only | Low — port to node-cron |
+| `site-backup` | Admin UI (BackupRestoreManager) | Medium — next loop candidate |
+| `site-restore` | Admin UI (BackupRestoreManager) | Medium — next loop candidate |
