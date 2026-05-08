@@ -306,3 +306,58 @@ Keep `supabase/functions/track-booking/` and `supabase/functions/create-guest-bo
 | `admin-create-user`, `admin-manage-user` | Already on VPS via `/api/auth/admin/...` | Verify + remove fallback |
 | `fb-conversions-api`, `site-backup`, `site-restore`, `verify-invoice`, `track-booking`, `create-guest-booking` | All on VPS | Delete edge fn after 24h prod verify |
 
+
+---
+
+## Loop 4 — `send-notification` + `send-reminder` + `booking-notifications` ✅
+
+### Discovery
+- `send-notification` — already had VPS route at `POST /api/send-notification` (admin-only). No change needed.
+- `send-reminder` — VPS auto-mode existed via `runDueReminderJob` (server/services/dueReminder.js) but **no HTTP route**. Edge function was still being invoked for both manual single-reminders and cron auto-mode.
+- `booking-notifications` — invoked from a Postgres trigger (`notify_booking_completed`) hitting Supabase edge URL. Frontend never calls it directly, but client code does call it via `supabase.functions.invoke('booking-notifications')` in places where a booking is marked completed.
+
+### Changes (this loop)
+1. **server/index.js** — added two routes:
+   - `POST /api/send-reminder` — dual-mode:
+     - With `phone` in body → admin-authenticated single-customer SMS reminder (matches edge fn signature 1:1)
+     - No body / cron mode → calls `runDueReminderJob()` and returns `{ success, scanned, sent, skipped, failed }`
+   - `POST /api/booking-notifications` — accepts `{ booking_id }`, looks up booking + profile, sends Resend email + bulksmsbd SMS, logs to `notification_logs`. Same response shape as edge fn: `{ success, results: { email, sms } }`.
+2. Both routes already in `vpsRoutes` array in `src/lib/api.ts`, and `allowEdgeFallback` is `false` — so frontend `supabase.functions.invoke('send-reminder' | 'booking-notifications')` now routes to VPS only.
+
+### Verification (after deploy)
+```bash
+# Cron auto-mode (no body)
+curl -s -X POST https://triptastic.com.bd/api/send-reminder \
+  -H 'Content-Type: application/json' -d '{}'
+# → {"success":true,"processed":N,"sent":N,"skipped":N,"failed":N,"scanned":N}
+
+# Booking notification (replace with real booking UUID)
+curl -s -X POST https://triptastic.com.bd/api/booking-notifications \
+  -H 'Content-Type: application/json' \
+  -d '{"booking_id":"<uuid>"}'
+# → {"success":true,"results":{"email":"sent|skipped:...","sms":"sent|skipped:..."}}
+```
+
+### Postgres trigger note
+The DB trigger `notify_booking_completed` still POSTs to the **Supabase edge function URL** via `pg_net`. After verifying VPS endpoint works for ≥24h, update that trigger to POST to `https://triptastic.com.bd/api/booking-notifications` instead. SQL migration to do that will be Loop 5's first step.
+
+### Status
+- Backend ✅ (added)
+- Frontend ✅ (no change — already routed)
+- DB trigger redirect ⏳ (Loop 5)
+- Production verification ⏳ (after deploy)
+
+### Remaining
+| Function | Status | Next |
+|---|---|---|
+| `upload-booking-document` | VPS route exists `/api/upload-booking-document` (line ~1535). Verify + cleanup | Loop 5 |
+| `notify_booking_completed` trigger | Still hits Supabase URL | Loop 5 — redirect to VPS |
+| `check-due-alerts`, `daily-backup`, `daily-summary-sms` | Cron only | Final loop — node-cron |
+| All others | Migrated, awaiting 24h prod verify before edge fn deletion | Cleanup loop |
+
+### Deploy
+```bash
+cd /var/www/Triptastic
+git pull
+pm2 restart triptastic-api
+```
