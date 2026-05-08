@@ -1064,6 +1064,90 @@ app.post('/api/verify-invoice', async (req, res) => {
 });
 
 // =============================================
+// FACEBOOK CONVERSIONS API (server-side pixel)
+// =============================================
+const crypto = require('crypto');
+const sha256Hex = (value) =>
+  crypto.createHash('sha256').update(String(value).trim().toLowerCase()).digest('hex');
+
+app.post('/api/fb-conversions-api', async (req, res) => {
+  try {
+    const FB_ACCESS_TOKEN = process.env.FB_CONVERSIONS_API_TOKEN;
+    const FB_PIXEL_ID = process.env.FB_PIXEL_ID;
+    if (!FB_ACCESS_TOKEN || !FB_PIXEL_ID) {
+      return res.status(500).json({ error: 'Facebook Conversions API not configured' });
+    }
+
+    const {
+      event_name,
+      event_id,
+      event_time,
+      user_data = {},
+      custom_data = {},
+      event_source_url,
+      action_source = 'website',
+      test_event_code,
+    } = req.body || {};
+
+    if (!event_name) return res.status(400).json({ error: 'event_name is required' });
+
+    const hashedUserData = {};
+    if (user_data.em) hashedUserData.em = [sha256Hex(user_data.em)];
+    if (user_data.ph) hashedUserData.ph = [sha256Hex(String(user_data.ph).replace(/[^0-9]/g, ''))];
+    if (user_data.fn) hashedUserData.fn = [sha256Hex(user_data.fn)];
+    if (user_data.ln) hashedUserData.ln = [sha256Hex(user_data.ln)];
+    if (user_data.fbp) hashedUserData.fbp = user_data.fbp;
+    if (user_data.fbc) hashedUserData.fbc = user_data.fbc;
+    if (user_data.client_user_agent) hashedUserData.client_user_agent = user_data.client_user_agent;
+
+    const clientIp =
+      (req.headers['x-forwarded-for'] || '').toString().split(',')[0]?.trim() ||
+      req.headers['x-real-ip'] ||
+      req.ip ||
+      '';
+    if (clientIp) hashedUserData.client_ip_address = clientIp;
+
+    const eventData = {
+      event_name,
+      event_time: event_time || Math.floor(Date.now() / 1000),
+      action_source,
+      user_data: hashedUserData,
+    };
+    if (event_id) eventData.event_id = event_id;
+    if (event_source_url) eventData.event_source_url = event_source_url;
+    if (Object.keys(custom_data).length > 0) eventData.custom_data = custom_data;
+
+    const payload = { data: [eventData] };
+    if (test_event_code) payload.test_event_code = test_event_code;
+
+    const fbResponse = await fetch(
+      `https://graph.facebook.com/v21.0/${FB_PIXEL_ID}/events?access_token=${FB_ACCESS_TOKEN}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }
+    );
+    const fbResult = await fbResponse.json();
+
+    if (!fbResponse.ok) {
+      console.error('Facebook CAPI error:', JSON.stringify(fbResult));
+      return res.status(fbResponse.status).json({ error: 'Facebook API error', details: fbResult });
+    }
+
+    res.json({
+      success: true,
+      events_received: fbResult.events_received,
+      messages: fbResult.messages,
+      fbtrace_id: fbResult.fbtrace_id,
+    });
+  } catch (err) {
+    console.error('POST /api/fb-conversions-api error:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// =============================================
 // SEND NOTIFICATION (admin only)
 // =============================================
 app.post('/api/send-notification', authenticate, requireRole('admin'), async (req, res) => {
