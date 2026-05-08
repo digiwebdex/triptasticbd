@@ -1,6 +1,19 @@
 // Cron job implementations — ported from Supabase Edge Functions to node-cron
 const { query } = require('../config/database');
 
+// Safe query: returns { rows: [] } if table is missing (undefined_table = 42P01)
+async function safeQuery(sql, params = []) {
+  try {
+    return await query(sql, params);
+  } catch (err) {
+    if (err && err.code === '42P01') {
+      console.warn('[cron] skipping missing table:', err.message);
+      return { rows: [] };
+    }
+    throw err;
+  }
+}
+
 // ── helpers ──────────────────────────────────────────────────────────
 
 const toSmsPhone = (value = '') => {
@@ -74,7 +87,7 @@ async function runCheckDueAlerts() {
   const results = { tickets: 0, visa: 0, refunds: 0, notified: 0 };
 
   // Overdue ticket bookings
-  const ticketsRes = await query(
+  const ticketsRes = await safeQuery(
     `SELECT id, invoice_no, passenger_name, billing_name, customer_due, expected_collection_date
      FROM ticket_bookings
      WHERE customer_due > 0 AND status = 'active'
@@ -85,7 +98,7 @@ async function runCheckDueAlerts() {
   results.tickets = ticketsRes.rows.length;
 
   // Overdue visa applications
-  const visaRes = await query(
+  const visaRes = await safeQuery(
     `SELECT id, invoice_no, applicant_name, billing_name, customer_due, expected_collection_date
      FROM visa_applications
      WHERE customer_due > 0 AND status = 'active'
@@ -96,7 +109,7 @@ async function runCheckDueAlerts() {
   results.visa = visaRes.rows.length;
 
   // Overdue ticket refunds
-  const refundRes = await query(
+  const refundRes = await safeQuery(
     `SELECT id, invoice_no, passenger_name, billing_name, due, refund_date
      FROM ticket_refunds
      WHERE due > 0 AND status = 'active'`,
