@@ -1204,7 +1204,7 @@ app.post('/api/fb-conversions-api', async (req, res) => {
 });
 
 // =============================================
-// NOTIFICATION DISPATCH (shared by /api/send-notification + /api/internal/send-notification)
+// NOTIFICATION DISPATCH (shared by /api/send-notification + in-process hooks)
 // =============================================
 async function dispatchNotification({ type, channels, user_id, booking_id, payment_id, custom_subject, custom_message, sms_message, extra }) {
   if (!type || !Array.isArray(channels) || !user_id) {
