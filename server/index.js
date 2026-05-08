@@ -1288,26 +1288,10 @@ app.post('/api/send-notification', authenticate, requireRole('admin'), async (re
   }
 });
 
-// =============================================
-// INTERNAL SEND NOTIFICATION — called by Postgres triggers via pg_net.
-// Authenticated by shared secret in X-Internal-Secret header (compared to
-// process.env.INTERNAL_TRIGGER_SECRET). Never expose this externally.
-// =============================================
-app.post('/api/internal/send-notification', async (req, res) => {
-  try {
-    const expected = process.env.INTERNAL_TRIGGER_SECRET;
-    const provided = req.headers['x-internal-secret'];
-    if (!expected) return res.status(503).json({ error: 'Internal secret not configured' });
-    if (!provided || provided !== expected) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-    const result = await dispatchNotification(req.body || {});
-    res.json(result);
-  } catch (err) {
-    console.error('POST /api/internal/send-notification error:', err.message);
-    res.status(err.status || 500).json({ error: err.message });
-  }
-});
+// Note: the former /api/internal/send-notification endpoint (Loop 6) has been removed.
+// pg_net is unavailable on the local PostgreSQL build, so notifications are dispatched
+// in-process via createCrudRoutes hooks instead of from DB triggers.
+
 
 // =============================================
 // SEND REMINDER (manual single-reminder OR cron auto-mode)
