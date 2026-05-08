@@ -361,3 +361,46 @@ cd /var/www/Triptastic
 git pull
 pm2 restart triptastic-api
 ```
+
+---
+
+## Loop 5 — `upload-booking-document` verify + DB trigger redirect ✅
+
+### upload-booking-document
+- VPS route already exists: `POST /api/upload-booking-document` (server/index.js line ~1679).
+- In `vpsRoutes` array; `allowEdgeFallback = false`.
+- Frontend callers (`BookingDialog.tsx`) use `supabase.functions.invoke('upload-booking-document', { body: formData })` — intercepted by `src/lib/api.ts` and routed to VPS. **No change needed.**
+
+### Postgres triggers — root cause discovered
+All 6 `notify_*` trigger functions on VPS Postgres reference `vault.decrypted_secrets` (a Supabase-only feature). Verified with:
+```sql
+SELECT EXISTS(SELECT 1 FROM information_schema.schemata WHERE schema_name='vault'); -- f
+```
+→ **These triggers have been silently failing in production** since the VPS migration (caught by `EXCEPTION WHEN OTHERS`). No notifications have been dispatched via DB triggers post-migration.
+
+### Migration script — `migration/redirect_notification_triggers.sql`
+- **`notify_booking_completed`** → repointed at `https://triptastic.com.bd/api/booking-notifications` (unauthenticated public route added in Loop 4). Booking-completion notifications will start firing again after this runs.
+- **`notify_booking_created`, `notify_booking_status_updated`, `notify_payment_completed`, `notify_commission_payment`, `notify_supplier_payment`** → replaced with no-op bodies (they previously called `/functions/v1/send-notification`, which is admin-authenticated; trigger context can't authenticate). Restoration pending an internal HMAC-secured endpoint.
+
+### Apply on VPS
+```bash
+cd /var/www/Triptastic
+psql "$DATABASE_URL" -f migration/redirect_notification_triggers.sql
+
+# verify
+psql "$DATABASE_URL" -c "SELECT prosrc FROM pg_proc WHERE proname='notify_booking_completed';" \
+  | grep -c triptastic.com.bd
+# → 1
+```
+
+### Status
+- Backend route ✅
+- Frontend ✅
+- DB trigger redirect — script ready, **awaiting VPS apply** ⏳
+
+### Remaining
+| Function | Status | Next |
+|---|---|---|
+| Internal `/api/internal/send-notification` (HMAC) | not yet built | restore the 5 neutralized triggers |
+| `check-due-alerts`, `daily-backup`, `daily-summary-sms` | cron only — currently invoked from Supabase scheduler | replace with `node-cron` in `server/index.js` |
+| Edge function deletion | hold | after ≥24h prod stability of all VPS routes |
