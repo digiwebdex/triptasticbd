@@ -1148,86 +1148,108 @@ app.post('/api/fb-conversions-api', async (req, res) => {
 });
 
 // =============================================
-// SEND NOTIFICATION (admin only)
+// NOTIFICATION DISPATCH (shared by /api/send-notification + /api/internal/send-notification)
+// =============================================
+async function dispatchNotification({ type, channels, user_id, booking_id, payment_id, custom_subject, custom_message, sms_message, extra }) {
+  if (!type || !Array.isArray(channels) || !user_id) {
+    const err = new Error('type, channels, and user_id are required');
+    err.status = 400;
+    throw err;
+  }
+
+  const profileResult = await query('SELECT * FROM profiles WHERE user_id = $1', [user_id]);
+  const profile = profileResult.rows[0] || {};
+
+  let booking = null;
+  if (booking_id) {
+    const bResult = await query(
+      `SELECT b.*, p.name AS package_name, p.type AS package_type
+         FROM bookings b LEFT JOIN packages p ON b.package_id = p.id
+        WHERE b.id = $1`,
+      [booking_id]
+    );
+    booking = bResult.rows[0] || null;
+  }
+
+  const results = [];
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.NOTIFICATION_FROM_EMAIL || 'TRIP TASTIC <noreply@triptastic.com.bd>';
+
+  if (channels.includes('email') && profile.email && RESEND_API_KEY) {
+    try {
+      const subject = custom_subject || `Notification: ${type}`;
+      const html = custom_message || `<p>Booking ${booking?.tracking_id || ''} - Status: ${booking?.status || 'N/A'}</p>`;
+      const emailRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: fromEmail, to: [profile.email], subject, html }),
+      });
+      const status = emailRes.ok ? 'sent' : 'failed';
+      results.push({ channel: 'email', status });
+      await query(
+        `INSERT INTO notification_logs (user_id, booking_id, payment_id, event_type, channel, recipient, subject, message, status)
+         VALUES ($1, $2, $3, $4, 'email', $5, $6, $7, $8)`,
+        [user_id, booking_id || null, payment_id || null, type, profile.email, subject, html, status]
+      );
+    } catch (e) {
+      results.push({ channel: 'email', status: 'failed', error: e.message });
+    }
+  }
+
+  if (channels.includes('sms') && profile.phone) {
+    const SMS_KEY = process.env.BULKSMSBD_API_KEY || process.env.BULKSMS_API_KEY;
+    const SMS_SENDER = process.env.BULKSMSBD_SENDER_ID || process.env.BULKSMS_SENDER_ID || 'TRIPTASTIC';
+    if (SMS_KEY) {
+      try {
+        const smsMessage = sms_message || custom_message || `TRIP TASTIC: Booking ${booking?.tracking_id || ''} - ${type}`;
+        const smsRes = await fetch(`https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(SMS_KEY)}&type=text&number=${encodeURIComponent(profile.phone)}&senderid=${encodeURIComponent(SMS_SENDER)}&message=${encodeURIComponent(smsMessage)}`);
+        const status = smsRes.ok ? 'sent' : 'failed';
+        results.push({ channel: 'sms', status });
+        await query(
+          `INSERT INTO notification_logs (user_id, booking_id, payment_id, event_type, channel, recipient, message, status)
+           VALUES ($1, $2, $3, $4, 'sms', $5, $6, $7)`,
+          [user_id, booking_id || null, payment_id || null, type, profile.phone, smsMessage, status]
+        );
+      } catch (e) {
+        results.push({ channel: 'sms', status: 'failed', error: e.message });
+      }
+    }
+  }
+
+  return { success: true, results, type, ...(extra || {}) };
+}
+
+// =============================================
+// SEND NOTIFICATION (admin only — manual dispatch from admin UI)
 // =============================================
 app.post('/api/send-notification', authenticate, requireRole('admin'), async (req, res) => {
   try {
-    const { type, channels, user_id, booking_id, custom_subject, custom_message, sms_message } = req.body;
-    if (!type || !channels || !user_id) {
-      return res.status(400).json({ error: 'type, channels, and user_id are required' });
-    }
-
-    // Fetch user profile
-    const profileResult = await query('SELECT * FROM profiles WHERE user_id = $1', [user_id]);
-    const profile = profileResult.rows[0];
-    if (!profile) return res.status(404).json({ error: 'User profile not found' });
-
-    // Fetch booking if provided
-    let booking = null;
-    if (booking_id) {
-      const bResult = await query(
-        `SELECT b.*, p.name as package_name, p.type as package_type FROM bookings b LEFT JOIN packages p ON b.package_id = p.id WHERE b.id = $1`,
-        [booking_id]
-      );
-      booking = bResult.rows[0];
-    }
-
-    const results = [];
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-
-    // Send email
-    if (channels.includes('email') && profile.email && RESEND_API_KEY) {
-      try {
-        const subject = custom_subject || `Notification: ${type}`;
-        const html = custom_message || `<p>Booking ${booking?.tracking_id || ''} - Status: ${booking?.status || 'N/A'}</p>`;
-        const emailRes = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: process.env.NOTIFICATION_FROM_EMAIL || 'TRIP TASTIC <noreply@triptastic.com.bd>',
-            to: [profile.email],
-            subject,
-            html,
-          }),
-        });
-        const status = emailRes.ok ? 'sent' : 'failed';
-        results.push({ channel: 'email', status });
-
-        await query(
-          `INSERT INTO notification_logs (user_id, booking_id, event_type, channel, recipient, subject, message, status)
-           VALUES ($1, $2, $3, 'email', $4, $5, $6, $7)`,
-          [user_id, booking_id || null, type, profile.email, subject, html, status]
-        );
-      } catch (e) {
-        results.push({ channel: 'email', status: 'failed', error: e.message });
-      }
-    }
-
-    // Send SMS
-    if (channels.includes('sms') && profile.phone) {
-      const BULKSMS_API_KEY = process.env.BULKSMS_API_KEY;
-      if (BULKSMS_API_KEY) {
-        try {
-          const smsMessage = sms_message || custom_message || `TRIP TASTIC: Booking ${booking?.tracking_id || ''} - ${type}`;
-          const smsRes = await fetch(`https://bulksmsbd.net/api/smsapi?api_key=${BULKSMS_API_KEY}&type=text&number=${profile.phone}&senderid=${process.env.BULKSMS_SENDER_ID || 'TRIPTASTIC'}&message=${encodeURIComponent(smsMessage)}`);
-          const status = smsRes.ok ? 'sent' : 'failed';
-          results.push({ channel: 'sms', status });
-
-          await query(
-            `INSERT INTO notification_logs (user_id, booking_id, event_type, channel, recipient, message, status)
-             VALUES ($1, $2, $3, 'sms', $4, $5, $6)`,
-            [user_id, booking_id || null, type, profile.phone, smsMessage, status]
-          );
-        } catch (e) {
-          results.push({ channel: 'sms', status: 'failed', error: e.message });
-        }
-      }
-    }
-
-    res.json({ success: true, results });
+    const result = await dispatchNotification(req.body || {});
+    res.json(result);
   } catch (err) {
     console.error('POST /api/send-notification error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// INTERNAL SEND NOTIFICATION — called by Postgres triggers via pg_net.
+// Authenticated by shared secret in X-Internal-Secret header (compared to
+// process.env.INTERNAL_TRIGGER_SECRET). Never expose this externally.
+// =============================================
+app.post('/api/internal/send-notification', async (req, res) => {
+  try {
+    const expected = process.env.INTERNAL_TRIGGER_SECRET;
+    const provided = req.headers['x-internal-secret'];
+    if (!expected) return res.status(503).json({ error: 'Internal secret not configured' });
+    if (!provided || provided !== expected) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const result = await dispatchNotification(req.body || {});
+    res.json(result);
+  } catch (err) {
+    console.error('POST /api/internal/send-notification error:', err.message);
+    res.status(err.status || 500).json({ error: err.message });
   }
 });
 
