@@ -221,6 +221,7 @@ const createCrudRoutes = (tableName, options = {}) => {
         console.log(`INSERT into ${tableName}:`, { sql, values, keys });
         const result = await query(sql, values);
         results.push(result.rows[0]);
+        fireHook('afterCreate', result.rows[0], req);
       }
 
       res.status(201).json(Array.isArray(req.body) ? results : results[0]);
