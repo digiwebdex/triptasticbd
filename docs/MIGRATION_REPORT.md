@@ -462,3 +462,33 @@ psql "$DATABASE_URL" -c "SELECT current_setting('app.internal_trigger_secret', t
 |---|---|
 | `check-due-alerts`, `daily-backup`, `daily-summary-sms` | Loop 7 — replace Supabase cron with `node-cron` |
 | Edge function deletion | Final — after ≥24h prod stability |
+
+---
+
+## Loop 6b — Pivot to app-level hooks ✅
+
+Loop 6's plan (DB triggers → `/api/internal/send-notification` via `pg_net`) was abandoned because:
+
+1. **`pg_net` not available** on the local PostgreSQL 16 build (`Could not open extension control file ".../pg_net.control"`). It's a Supabase-only extension.
+2. **`triptastic_user` is not superuser**, so `ALTER DATABASE ... SET app.internal_trigger_secret` fails with `permission denied to set parameter`.
+
+### Replacement architecture
+Notifications are now dispatched **in-process** by the Node.js API via hooks on `createCrudRoutes`:
+
+- New `hooks: { afterCreate, afterUpdate }` option, fire-and-forget after the response is sent.
+- `/api/bookings` afterCreate → `booking_created`; afterUpdate (when `status` in body) → `booking_status_updated`.
+- `/api/payments` afterCreate/afterUpdate (when `status === 'completed'`) → `payment_completed`.
+- Guest UUID `00000000-0000-0000-0000-000000000000` used when `user_id` is null.
+
+### Cleanup
+- Dropped trigger functions: `notify_booking_created`, `notify_booking_status_updated`, `notify_payment_completed`, `notify_commission_payment`, `notify_supplier_payment`.
+- Removed `POST /api/internal/send-notification` endpoint and `INTERNAL_TRIGGER_SECRET` requirement.
+- Deleted `migration/redirect_notification_triggers.sql`.
+- `INTERNAL_TRIGGER_SECRET` line in `server/.env` is now harmless (unused) — can be removed manually.
+
+### Deployment
+```bash
+cd /var/www/Triptastic && git pull
+pm2 restart triptastic-api --update-env
+```
+No DB migration required.
