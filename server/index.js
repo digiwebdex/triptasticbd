@@ -1232,6 +1232,150 @@ app.post('/api/send-notification', authenticate, requireRole('admin'), async (re
 });
 
 // =============================================
+// SEND REMINDER (manual single-reminder OR cron auto-mode)
+// =============================================
+app.post('/api/send-reminder', async (req, res) => {
+  try {
+    const body = req.body || {};
+
+    // Manual single reminder mode (admin auth required)
+    if (body && body.phone) {
+      // Verify admin via Bearer token
+      const authHeader = req.headers.authorization || '';
+      const token = authHeader.replace(/^Bearer\s+/i, '');
+      if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+      let userId;
+      try {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userId = decoded.userId || decoded.sub;
+      } catch (e) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+      const roleRes = await query(
+        `SELECT 1 FROM user_roles WHERE user_id = $1 AND role = 'admin' LIMIT 1`,
+        [userId]
+      );
+      if (!roleRes.rows[0]) return res.status(403).json({ error: 'Admin access required' });
+
+      const { phone, customer_name, tracking_id, amount, due_date, installment_number } = body;
+      const apiKey = process.env.BULKSMSBD_API_KEY || process.env.BULKSMS_API_KEY;
+      const senderId = process.env.BULKSMSBD_SENDER_ID || process.env.BULKSMS_SENDER_ID;
+      if (!apiKey || !senderId) {
+        return res.status(500).json({ error: 'SMS credentials not configured' });
+      }
+
+      const message = `Dear ${customer_name}, installment #${installment_number} of ৳${Number(amount).toLocaleString()} for booking ${tracking_id} is due on ${due_date}. Please pay at the earliest. TRIP TASTIC: 01711-999910`;
+      const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(apiKey)}&type=text&number=${encodeURIComponent(phone)}&senderid=${encodeURIComponent(senderId)}&message=${encodeURIComponent(message)}`;
+      const smsRes = await fetch(smsUrl);
+      const smsText = await smsRes.text();
+      return res.json({ success: true, sms_response: smsText });
+    }
+
+    // Auto/cron mode — runs the due-reminder job
+    const result = await runDueReminderJob();
+    return res.json({ success: true, processed: result.scanned, ...result });
+  } catch (err) {
+    console.error('POST /api/send-reminder error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
+// BOOKING NOTIFICATIONS (sent when booking marked completed)
+// =============================================
+app.post('/api/booking-notifications', async (req, res) => {
+  try {
+    const { booking_id } = req.body || {};
+    if (!booking_id) return res.status(400).json({ error: 'booking_id required' });
+
+    const bRes = await query(
+      `SELECT b.*, p.name AS package_name FROM bookings b LEFT JOIN packages p ON b.package_id = p.id WHERE b.id = $1 LIMIT 1`,
+      [booking_id]
+    );
+    const booking = bRes.rows[0];
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+    let fullName = booking.guest_name || 'Valued Customer';
+    let phone = booking.guest_phone;
+    let email = booking.guest_email;
+
+    if (booking.user_id && booking.user_id !== '00000000-0000-0000-0000-000000000000') {
+      const profRes = await query(
+        `SELECT full_name, phone, email FROM profiles WHERE user_id = $1 LIMIT 1`,
+        [booking.user_id]
+      );
+      const prof = profRes.rows[0];
+      if (prof) {
+        fullName = prof.full_name || fullName;
+        phone = prof.phone || phone;
+        email = prof.email || email;
+      }
+    }
+
+    const trackingId = booking.tracking_id;
+    const packageName = booking.package_name || 'Umrah Package';
+    const results = { email: null, sms: null };
+
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.NOTIFICATION_FROM_EMAIL || 'TRIP TASTIC <noreply@triptastic.com.bd>';
+    if (RESEND_API_KEY && email) {
+      try {
+        const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#1a7f37">Payment Confirmed ✅</h2>
+          <p>Dear <strong>${fullName}</strong>,</p>
+          <p>Your booking <strong>${trackingId}</strong> for <strong>${packageName}</strong> has been fully paid.</p>
+          <p>Total Paid: ৳${Number(booking.total_amount).toLocaleString()}</p>
+          <p>Thank you for choosing TRIP TASTIC.</p>
+        </div>`;
+        const emailRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ from: fromEmail, to: [email], subject: `✅ Booking ${trackingId} - Payment Complete!`, html }),
+        });
+        results.email = emailRes.ok ? 'sent' : 'failed';
+        await query(
+          `INSERT INTO notification_logs (user_id, booking_id, event_type, channel, recipient, subject, message, status)
+           VALUES ($1, $2, 'booking_completed', 'email', $3, $4, $5, $6)`,
+          [booking.user_id || '00000000-0000-0000-0000-000000000000', booking_id, email, `Booking ${trackingId} - Payment Complete`, html, results.email]
+        );
+      } catch (e) {
+        results.email = `error: ${e.message}`;
+      }
+    } else {
+      results.email = !RESEND_API_KEY ? 'skipped: no API key' : 'skipped: no email';
+    }
+
+    const smsApiKey = process.env.BULKSMSBD_API_KEY || process.env.BULKSMS_API_KEY;
+    const smsSenderId = process.env.BULKSMSBD_SENDER_ID || process.env.BULKSMS_SENDER_ID || '8809617618686';
+    if (smsApiKey && phone) {
+      try {
+        const message = `Dear ${fullName}, your booking ${trackingId} for ${packageName} is fully paid (৳${Number(booking.total_amount).toLocaleString()}). Status: Completed. Thank you! TRIP TASTIC`;
+        const smsUrl = `https://bulksmsbd.net/api/smsapi?api_key=${encodeURIComponent(smsApiKey)}&type=text&number=${encodeURIComponent(phone)}&senderid=${encodeURIComponent(smsSenderId)}&message=${encodeURIComponent(message)}`;
+        const smsRes = await fetch(smsUrl);
+        const smsText = await smsRes.text();
+        results.sms = smsRes.ok ? 'sent' : 'failed';
+        await query(
+          `INSERT INTO notification_logs (user_id, booking_id, event_type, channel, recipient, message, status)
+           VALUES ($1, $2, 'booking_completed', 'sms', $3, $4, $5)`,
+          [booking.user_id || '00000000-0000-0000-0000-000000000000', booking_id, phone, message, results.sms]
+        );
+      } catch (e) {
+        results.sms = `error: ${e.message}`;
+      }
+    } else {
+      results.sms = !smsApiKey ? 'skipped: no API key' : 'skipped: no phone';
+    }
+
+    res.json({ success: true, results });
+  } catch (err) {
+    console.error('POST /api/booking-notifications error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================
 // CONTACT FORM EMAIL
 // =============================================
 const escapeHtml = (str) => {
