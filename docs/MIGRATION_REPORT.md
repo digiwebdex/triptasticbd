@@ -191,5 +191,61 @@ Then: `pm2 restart triptastic-api`
 | `check-due-alerts` | Cron only | Low — port to node-cron in a later loop |
 | `daily-backup` | Cron only | Low — replace with `server/backup-to-gdrive.sh` |
 | `daily-summary-sms` | Cron only | Low — port to node-cron |
-| `site-backup` | Admin UI (BackupRestoreManager) | Medium — next loop candidate |
-| `site-restore` | Admin UI (BackupRestoreManager) | Medium — next loop candidate |
+| `site-backup` | Admin UI (BackupRestoreManager) | Already on VPS — see Loop 2 |
+| `site-restore` | Admin UI (BackupRestoreManager) | Already on VPS — see Loop 2 |
+
+---
+
+## Migration Loop 2 — site-backup + site-restore (completed)
+
+**Date:** 2026-05-08
+**Edge functions migrated:** `site-backup`, `site-restore`
+
+### Discovery
+These edge functions were **already fully migrated** in the original VPS setup. No code changes were required in this loop.
+
+### Current state
+- **Backend (`server/index.js`):** `POST /api/backup/create`, `POST /api/backup/restore`, `GET /api/backup/list`, `GET /api/backup/download`, `POST /api/backup/delete` — all implemented using local filesystem (`server/backups/`) and direct PostgreSQL queries.
+- **Frontend (`src/components/admin/BackupRestoreManager.tsx`):** Uses direct `fetch()` to `/api/backup/*` endpoints. Does **not** call `supabase.functions.invoke()`.
+- **`src/lib/api.ts`:** No backup-related entries in `vpsRoutes` or `functions.invoke()` — no changes needed.
+
+### Differences from original Supabase edge functions
+| Aspect | Supabase edge function | VPS endpoint |
+|---|---|---|
+| Storage location | Supabase Storage bucket `site-backups` | Local filesystem `server/backups/` |
+| Backup format | `{ created_at, tables, stats }` JSON | Same format, compatible |
+| Restore mode `full` | Delete via `.delete().gte("id", ...)` then `upsert` | `DELETE FROM table` then `INSERT ... ON CONFLICT (id) DO UPDATE` |
+| Restore mode `merge` | `upsert(batch, { onConflict: "id" })` | `INSERT ... ON CONFLICT (id) DO UPDATE` |
+| Response shape | `{ success, fileName, stats, size }` / `{ success, mode, results }` | `{ success, fileName, tables, size }` / `{ success, restored, mode, results }` — **compatible** with frontend |
+
+### Verification
+- Open Admin → Settings → Backup & Restore.
+- Click **New Backup** — should create `.json` file in `server/backups/`.
+- Click **Download** — file should download with valid JSON content.
+- Click **Merge Restore** or **Full Restore** — should restore data without errors.
+
+### Cleanup (do NOT do yet)
+- Keep `supabase/functions/site-backup/` and `supabase/functions/site-restore/` deployed until backup/restore is tested in production.
+- Then delete both folders and call `delete_edge_functions` tool.
+
+### Status
+- Code (frontend) ✅ (already using VPS)
+- Code (backend) ✅ (already implemented)
+- Production verification ⏳ (test after next deploy)
+
+---
+
+### Remaining edge functions still on Supabase
+| Function | Frontend caller | Migration priority |
+|---|---|---|
+| `admin-create-user` | `AdminUserManager.tsx` (via `auth/admin/create-user`) | Already routed to VPS via `/api/auth/admin/...` |
+| `admin-manage-user` | `AdminUserManager.tsx` (via `auth/admin/manage-user`) | Already routed to VPS via `/api/auth/admin/...` |
+| `check-due-alerts` | Cron only | Low — port to node-cron in a later loop |
+| `daily-backup` | Cron only | Low — replace with `server/backup-to-gdrive.sh` |
+| `daily-summary-sms` | Cron only | Low — port to node-cron |
+| `send-notification` | AdminNotificationsPage | Medium |
+| `send-reminder` | AdminDueAlertsPage | Medium |
+| `booking-notifications` | Booking flow | Medium |
+| `upload-booking-document` | BookingDialog, DocumentUploadStep | Medium |
+| `track-booking` | TrackBooking page | Medium — already has `/api/track-booking` route |
+| `create-guest-booking` | Booking flow | Medium — already has `/api/create-guest-booking` route |
