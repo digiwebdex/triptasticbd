@@ -466,8 +466,46 @@ app.get('/api/bookings', authenticate, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-app.use('/api/bookings', createCrudRoutes('bookings', { adminOnly: true }));
-app.use('/api/payments', createCrudRoutes('payments', { adminOnly: true }));
+// Notification hooks (replaces former Postgres triggers — pg_net is unavailable on the VPS).
+const GUEST_UUID = '00000000-0000-0000-0000-000000000000';
+const safeDispatch = (payload) => {
+  Promise.resolve()
+    .then(() => dispatchNotification(payload))
+    .catch((e) => console.error('[notify]', payload?.type, e?.message || e));
+};
+app.use('/api/bookings', createCrudRoutes('bookings', {
+  adminOnly: true,
+  hooks: {
+    afterCreate: (row) => {
+      const uid = row.user_id || GUEST_UUID;
+      safeDispatch({ type: 'booking_created', channels: ['email', 'sms'], user_id: uid, booking_id: row.id });
+    },
+    afterUpdate: (row, req) => {
+      // Only fire when status was part of the patch payload
+      if (req?.body && Object.prototype.hasOwnProperty.call(req.body, 'status')) {
+        const uid = row.user_id || GUEST_UUID;
+        safeDispatch({ type: 'booking_status_updated', channels: ['email', 'sms'], user_id: uid, booking_id: row.id });
+      }
+    },
+  },
+}));
+app.use('/api/payments', createCrudRoutes('payments', {
+  adminOnly: true,
+  hooks: {
+    afterCreate: (row) => {
+      if (row?.status === 'completed') {
+        const uid = row.user_id || GUEST_UUID;
+        safeDispatch({ type: 'payment_completed', channels: ['email', 'sms'], user_id: uid, booking_id: row.booking_id, payment_id: row.id });
+      }
+    },
+    afterUpdate: (row, req) => {
+      if (row?.status === 'completed' && req?.body && Object.prototype.hasOwnProperty.call(req.body, 'status')) {
+        const uid = row.user_id || GUEST_UUID;
+        safeDispatch({ type: 'payment_completed', channels: ['email', 'sms'], user_id: uid, booking_id: row.booking_id, payment_id: row.id });
+      }
+    },
+  },
+}));
 app.use('/api/expenses', createCrudRoutes('expenses', { adminOnly: true }));
 app.use('/api/transactions', createCrudRoutes('transactions', { adminOnly: true }));
 app.use('/api/profiles', createCrudRoutes('profiles', { adminOnly: true }));
