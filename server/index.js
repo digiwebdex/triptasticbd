@@ -89,7 +89,23 @@ const createCrudRoutes = (tableName, options = {}) => {
   const router = express.Router();
   // Use id DESC as safe default because some tables (site_content/company_settings/financial_summary/user_roles)
   // do not have created_at.
-  const { readAuth = true, writeAuth = true, adminOnly = false, selectFields = '*', orderBy = 'id DESC' } = options;
+  const {
+    readAuth = true,
+    writeAuth = true,
+    adminOnly = false,
+    selectFields = '*',
+    orderBy = 'id DESC',
+    hooks = {}, // { afterCreate?: (row, req) => void, afterUpdate?: (row, req) => void }
+  } = options;
+
+  const fireHook = (name, row, req) => {
+    const fn = hooks[name];
+    if (!fn || !row) return;
+    // Fire-and-forget; never block the response or surface errors to the client.
+    Promise.resolve()
+      .then(() => fn(row, req))
+      .catch((e) => console.error(`[hook ${name} ${tableName}] error:`, e?.message || e));
+  };
 
   // List
   router.get('/', readAuth ? authenticate : optionalAuth, async (req, res) => {
