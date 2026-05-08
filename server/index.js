@@ -253,6 +253,7 @@ const createCrudRoutes = (tableName, options = {}) => {
       );
       if (!result.rows[0]) return res.status(404).json({ error: 'Not found' });
       res.json(result.rows[0]);
+      fireHook('afterUpdate', result.rows[0], req);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
