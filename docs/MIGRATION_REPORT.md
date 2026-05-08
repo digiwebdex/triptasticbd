@@ -404,3 +404,61 @@ psql "$DATABASE_URL" -c "SELECT prosrc FROM pg_proc WHERE proname='notify_bookin
 | Internal `/api/internal/send-notification` (HMAC) | not yet built | restore the 5 neutralized triggers |
 | `check-due-alerts`, `daily-backup`, `daily-summary-sms` | cron only — currently invoked from Supabase scheduler | replace with `node-cron` in `server/index.js` |
 | Edge function deletion | hold | after ≥24h prod stability of all VPS routes |
+
+---
+
+## Loop 6 — Internal `/api/internal/send-notification` + restored 5 triggers ✅
+
+### server/index.js
+- Extracted dispatch logic into shared `dispatchNotification()` helper used by both:
+  - `POST /api/send-notification` (admin-authenticated, manual UI)
+  - `POST /api/internal/send-notification` (NEW — shared-secret, called by Postgres triggers)
+- Internal route requires `X-Internal-Secret: <process.env.INTERNAL_TRIGGER_SECRET>`. Returns 401 on mismatch, 503 if env var not set.
+
+### migration/redirect_notification_triggers.sql (updated)
+All 6 trigger functions restored with real bodies:
+- `notify_booking_completed` → `/api/booking-notifications` (public)
+- `notify_booking_created`, `notify_booking_status_updated`, `notify_payment_completed`, `notify_commission_payment`, `notify_supplier_payment` → `/api/internal/send-notification` with `X-Internal-Secret` header read from DB GUC `app.internal_trigger_secret`.
+
+### VPS deploy steps
+```bash
+# 1. Generate a strong secret
+SECRET=$(openssl rand -hex 32)
+
+# 2. Add to server/.env
+echo "INTERNAL_TRIGGER_SECRET=$SECRET" >> /var/www/Triptastic/server/.env
+
+# 3. Set the same value as a DB GUC
+psql "$DATABASE_URL" -c "ALTER DATABASE triptastic SET app.internal_trigger_secret = '$SECRET';"
+
+# 4. Apply trigger SQL (loads new function bodies)
+cd /var/www/Triptastic && git pull
+psql "$DATABASE_URL" -f migration/redirect_notification_triggers.sql
+
+# 5. Restart API to pick up new env + new routes
+pm2 restart triptastic-api --update-env
+
+# 6. Smoke-test internal endpoint (should 401 without header, 200 with)
+curl -s -o /dev/null -w "%{http_code}\n" -X POST https://triptastic.com.bd/api/internal/send-notification \
+  -H 'Content-Type: application/json' -d '{}'
+# → 401
+
+curl -s -X POST https://triptastic.com.bd/api/internal/send-notification \
+  -H "X-Internal-Secret: $SECRET" -H 'Content-Type: application/json' \
+  -d '{"type":"test","channels":[],"user_id":"00000000-0000-0000-0000-000000000000"}'
+# → {"success":true,"results":[],"type":"test"}
+
+# 7. Verify GUC reaches trigger context
+psql "$DATABASE_URL" -c "SELECT current_setting('app.internal_trigger_secret', true);"
+```
+
+### Status
+- Backend ✅
+- Migration SQL ✅
+- VPS rollout ⏳ (env + GUC + apply)
+
+### Remaining
+| Function | Status |
+|---|---|
+| `check-due-alerts`, `daily-backup`, `daily-summary-sms` | Loop 7 — replace Supabase cron with `node-cron` |
+| Edge function deletion | Final — after ≥24h prod stability |
