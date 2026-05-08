@@ -1,0 +1,1 @@
+CREATE POLICY "Admins can manage backups" ON storage.objects FOR ALL TO authenticated USING (bucket_id = 'site-backups' AND public.has_role(auth.uid(), 'admin'::public.app_role)) WITH CHECK (bucket_id = 'site-backups' AND public.has_role(auth.uid(), 'admin'::public.app_role));
