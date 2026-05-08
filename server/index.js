@@ -89,7 +89,23 @@ const createCrudRoutes = (tableName, options = {}) => {
   const router = express.Router();
   // Use id DESC as safe default because some tables (site_content/company_settings/financial_summary/user_roles)
   // do not have created_at.
-  const { readAuth = true, writeAuth = true, adminOnly = false, selectFields = '*', orderBy = 'id DESC' } = options;
+  const {
+    readAuth = true,
+    writeAuth = true,
+    adminOnly = false,
+    selectFields = '*',
+    orderBy = 'id DESC',
+    hooks = {}, // { afterCreate?: (row, req) => void, afterUpdate?: (row, req) => void }
+  } = options;
+
+  const fireHook = (name, row, req) => {
+    const fn = hooks[name];
+    if (!fn || !row) return;
+    // Fire-and-forget; never block the response or surface errors to the client.
+    Promise.resolve()
+      .then(() => fn(row, req))
+      .catch((e) => console.error(`[hook ${name} ${tableName}] error:`, e?.message || e));
+  };
 
   // List
   router.get('/', readAuth ? authenticate : optionalAuth, async (req, res) => {
@@ -205,6 +221,7 @@ const createCrudRoutes = (tableName, options = {}) => {
         console.log(`INSERT into ${tableName}:`, { sql, values, keys });
         const result = await query(sql, values);
         results.push(result.rows[0]);
+        fireHook('afterCreate', result.rows[0], req);
       }
 
       res.status(201).json(Array.isArray(req.body) ? results : results[0]);
@@ -236,6 +253,7 @@ const createCrudRoutes = (tableName, options = {}) => {
       );
       if (!result.rows[0]) return res.status(404).json({ error: 'Not found' });
       res.json(result.rows[0]);
+      fireHook('afterUpdate', result.rows[0], req);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -448,8 +466,46 @@ app.get('/api/bookings', authenticate, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-app.use('/api/bookings', createCrudRoutes('bookings', { adminOnly: true }));
-app.use('/api/payments', createCrudRoutes('payments', { adminOnly: true }));
+// Notification hooks (replaces former Postgres triggers — pg_net is unavailable on the VPS).
+const GUEST_UUID = '00000000-0000-0000-0000-000000000000';
+const safeDispatch = (payload) => {
+  Promise.resolve()
+    .then(() => dispatchNotification(payload))
+    .catch((e) => console.error('[notify]', payload?.type, e?.message || e));
+};
+app.use('/api/bookings', createCrudRoutes('bookings', {
+  adminOnly: true,
+  hooks: {
+    afterCreate: (row) => {
+      const uid = row.user_id || GUEST_UUID;
+      safeDispatch({ type: 'booking_created', channels: ['email', 'sms'], user_id: uid, booking_id: row.id });
+    },
+    afterUpdate: (row, req) => {
+      // Only fire when status was part of the patch payload
+      if (req?.body && Object.prototype.hasOwnProperty.call(req.body, 'status')) {
+        const uid = row.user_id || GUEST_UUID;
+        safeDispatch({ type: 'booking_status_updated', channels: ['email', 'sms'], user_id: uid, booking_id: row.id });
+      }
+    },
+  },
+}));
+app.use('/api/payments', createCrudRoutes('payments', {
+  adminOnly: true,
+  hooks: {
+    afterCreate: (row) => {
+      if (row?.status === 'completed') {
+        const uid = row.user_id || GUEST_UUID;
+        safeDispatch({ type: 'payment_completed', channels: ['email', 'sms'], user_id: uid, booking_id: row.booking_id, payment_id: row.id });
+      }
+    },
+    afterUpdate: (row, req) => {
+      if (row?.status === 'completed' && req?.body && Object.prototype.hasOwnProperty.call(req.body, 'status')) {
+        const uid = row.user_id || GUEST_UUID;
+        safeDispatch({ type: 'payment_completed', channels: ['email', 'sms'], user_id: uid, booking_id: row.booking_id, payment_id: row.id });
+      }
+    },
+  },
+}));
 app.use('/api/expenses', createCrudRoutes('expenses', { adminOnly: true }));
 app.use('/api/transactions', createCrudRoutes('transactions', { adminOnly: true }));
 app.use('/api/profiles', createCrudRoutes('profiles', { adminOnly: true }));
@@ -1148,7 +1204,7 @@ app.post('/api/fb-conversions-api', async (req, res) => {
 });
 
 // =============================================
-// NOTIFICATION DISPATCH (shared by /api/send-notification + /api/internal/send-notification)
+// NOTIFICATION DISPATCH (shared by /api/send-notification + in-process hooks)
 // =============================================
 async function dispatchNotification({ type, channels, user_id, booking_id, payment_id, custom_subject, custom_message, sms_message, extra }) {
   if (!type || !Array.isArray(channels) || !user_id) {
@@ -1232,26 +1288,10 @@ app.post('/api/send-notification', authenticate, requireRole('admin'), async (re
   }
 });
 
-// =============================================
-// INTERNAL SEND NOTIFICATION — called by Postgres triggers via pg_net.
-// Authenticated by shared secret in X-Internal-Secret header (compared to
-// process.env.INTERNAL_TRIGGER_SECRET). Never expose this externally.
-// =============================================
-app.post('/api/internal/send-notification', async (req, res) => {
-  try {
-    const expected = process.env.INTERNAL_TRIGGER_SECRET;
-    const provided = req.headers['x-internal-secret'];
-    if (!expected) return res.status(503).json({ error: 'Internal secret not configured' });
-    if (!provided || provided !== expected) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-    const result = await dispatchNotification(req.body || {});
-    res.json(result);
-  } catch (err) {
-    console.error('POST /api/internal/send-notification error:', err.message);
-    res.status(err.status || 500).json({ error: err.message });
-  }
-});
+// Note: the former /api/internal/send-notification endpoint (Loop 6) has been removed.
+// pg_net is unavailable on the local PostgreSQL build, so notifications are dispatched
+// in-process via createCrudRoutes hooks instead of from DB triggers.
+
 
 // =============================================
 // SEND REMINDER (manual single-reminder OR cron auto-mode)
