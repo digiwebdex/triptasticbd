@@ -238,14 +238,71 @@ These edge functions were **already fully migrated** in the original VPS setup. 
 ### Remaining edge functions still on Supabase
 | Function | Frontend caller | Migration priority |
 |---|---|---|
-| `admin-create-user` | `AdminUserManager.tsx` (via `auth/admin/create-user`) | Already routed to VPS via `/api/auth/admin/...` |
-| `admin-manage-user` | `AdminUserManager.tsx` (via `auth/admin/manage-user`) | Already routed to VPS via `/api/auth/admin/...` |
-| `check-due-alerts` | Cron only | Low — port to node-cron in a later loop |
+| `admin-create-user` | `AdminUserManager.tsx` | Already on VPS via `/api/auth/admin/...` |
+| `admin-manage-user` | `AdminUserManager.tsx` | Already on VPS via `/api/auth/admin/...` |
+| `track-booking` | TrackBooking page | Already on VPS — see Loop 3 |
+| `create-guest-booking` | Booking flow | Already on VPS — see Loop 3 |
+| `check-due-alerts` | Cron only | Low — port to node-cron later |
 | `daily-backup` | Cron only | Low — replace with `server/backup-to-gdrive.sh` |
 | `daily-summary-sms` | Cron only | Low — port to node-cron |
-| `send-notification` | AdminNotificationsPage | Medium |
-| `send-reminder` | AdminDueAlertsPage | Medium |
+| `send-notification` | AdminNotificationsPage | Medium — Loop 4 candidate |
+| `send-reminder` | AdminDueAlertsPage | Medium — Loop 4 candidate |
 | `booking-notifications` | Booking flow | Medium |
 | `upload-booking-document` | BookingDialog, DocumentUploadStep | Medium |
-| `track-booking` | TrackBooking page | Medium — already has `/api/track-booking` route |
-| `create-guest-booking` | Booking flow | Medium — already has `/api/create-guest-booking` route |
+
+---
+
+## Migration Loop 3 — track-booking + create-guest-booking (completed)
+
+**Date:** 2026-05-08
+**Edge functions migrated:** `track-booking`, `create-guest-booking`
+
+### Discovery
+Both endpoints were **already fully migrated** in the original VPS setup. Frontend routes through `src/lib/api.ts` `functions.invoke()` which sends requests VPS-first; Supabase fallback is **disabled** for these (since `allowEdgeFallback` is only true for `send-otp`).
+
+### Current state
+| Layer | track-booking | create-guest-booking |
+|---|---|---|
+| Backend route | `POST /api/track-booking` (server/index.js line ~338) | `POST /api/create-guest-booking` (server/index.js line ~945) |
+| In `vpsRoutes` array (api.ts) | ✅ | ✅ |
+| Supabase fallback | ❌ disabled | ❌ disabled |
+| Frontend caller | `TrackBooking.tsx` via `supabase.functions.invoke('track-booking')` | `Booking.tsx` via `supabase.functions.invoke('create-guest-booking')` |
+
+The `supabase.functions.invoke(...)` call inside the frontend is intercepted by `src/lib/api.ts` and routed to `${API_URL}/track-booking` / `${API_URL}/create-guest-booking` — the underlying Supabase Edge Function is **never** called for these two.
+
+### Verification (production)
+```bash
+# Public track by tracking_id
+curl -s -X POST https://triptastic.com.bd/api/track-booking \
+  -H 'Content-Type: application/json' \
+  -d '{"tracking_id":"TT-XXXXX"}'
+# → {"booking": {...}} or {"booking": null}
+
+# Public create-guest-booking (smoke test, expect 404 for fake package)
+curl -s -X POST https://triptastic.com.bd/api/create-guest-booking \
+  -H 'Content-Type: application/json' \
+  -d '{"guest_name":"Test","guest_phone":"01700000000","package_id":"00000000-0000-0000-0000-000000000000"}'
+# → {"error":"Package not found or inactive"}
+```
+
+### Cleanup (do NOT do yet)
+Keep `supabase/functions/track-booking/` and `supabase/functions/create-guest-booking/` deployed until production traffic is confirmed hitting VPS for ≥24h. Then delete both folders + call `delete_edge_functions` tool.
+
+### Status
+- Code (frontend) ✅
+- Code (backend) ✅
+- Production verification ⏳ (test after Loop 1 deploy)
+
+---
+
+### Remaining after Loop 3
+| Function | Caller | Next Loop |
+|---|---|---|
+| `send-notification` | AdminNotificationsPage | Loop 4 |
+| `send-reminder` | AdminDueAlertsPage | Loop 4 |
+| `booking-notifications` | Booking flow | Loop 5 |
+| `upload-booking-document` | BookingDialog, DocumentUploadStep | Loop 6 |
+| `check-due-alerts`, `daily-backup`, `daily-summary-sms` | Cron only | Final loop (node-cron) |
+| `admin-create-user`, `admin-manage-user` | Already on VPS via `/api/auth/admin/...` | Verify + remove fallback |
+| `fb-conversions-api`, `site-backup`, `site-restore`, `verify-invoice`, `track-booking`, `create-guest-booking` | All on VPS | Delete edge fn after 24h prod verify |
+
