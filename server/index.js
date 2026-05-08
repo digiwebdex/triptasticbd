@@ -1787,9 +1787,11 @@ app.post('/api/upload-booking-document', upload.single('file'), async (req, res)
 // =============================================
 const cron = require('node-cron');
 const { runDueReminderJob } = require('./services/dueReminder');
+const { runCheckDueAlerts, runDailyBackup, runDailySummarySms } = require('./services/cronJobs');
 const twoFA = require('./services/twoFactor');
 
-// Manual trigger (admin only)
+// ── Manual trigger routes (admin only) ───────────────────────────────
+
 app.post('/api/due-reminder/run', authenticate, requireRole('admin'), async (_req, res) => {
   try {
     const result = await runDueReminderJob();
@@ -1799,12 +1801,59 @@ app.post('/api/due-reminder/run', authenticate, requireRole('admin'), async (_re
   }
 });
 
-// Daily at 09:30 Asia/Dhaka
+app.post('/api/check-due-alerts/run', authenticate, requireRole('admin'), async (_req, res) => {
+  try {
+    const result = await runCheckDueAlerts();
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/daily-backup/run', authenticate, requireRole('admin'), async (_req, res) => {
+  try {
+    const result = await runDailyBackup();
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/daily-summary-sms/run', authenticate, requireRole('admin'), async (_req, res) => {
+  try {
+    const result = await runDailySummarySms();
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Cron schedules ─────────────────────────────────────────────────
+
 if (process.env.DISABLE_CRON !== '1') {
+  // Daily at 09:30 Asia/Dhaka — payment due reminders
   cron.schedule('30 9 * * *', () => {
     runDueReminderJob().catch((e) => console.error('[due-reminder] failed:', e.message));
   }, { timezone: 'Asia/Dhaka' });
   console.log('⏰ Due-reminder cron scheduled: daily 09:30 Asia/Dhaka');
+
+  // Daily at 08:00 Asia/Dhaka — check overdue invoices
+  cron.schedule('0 8 * * *', () => {
+    runCheckDueAlerts().catch((e) => console.error('[check-due-alerts] failed:', e.message));
+  }, { timezone: 'Asia/Dhaka' });
+  console.log('⏰ Check-due-alerts cron scheduled: daily 08:00 Asia/Dhaka');
+
+  // Daily at 07:00 Asia/Dhaka — email CSV backups
+  cron.schedule('0 7 * * *', () => {
+    runDailyBackup().catch((e) => console.error('[daily-backup] failed:', e.message));
+  }, { timezone: 'Asia/Dhaka' });
+  console.log('⏰ Daily-backup cron scheduled: daily 07:00 Asia/Dhaka');
+
+  // Daily at 10:00 Asia/Dhaka — SMS summary to owner
+  cron.schedule('0 10 * * *', () => {
+    runDailySummarySms().catch((e) => console.error('[daily-summary-sms] failed:', e.message));
+  }, { timezone: 'Asia/Dhaka' });
+  console.log('⏰ Daily-summary-sms cron scheduled: daily 10:00 Asia/Dhaka');
 }
 
 // === 2FA ROUTES ===

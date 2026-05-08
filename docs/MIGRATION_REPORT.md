@@ -492,3 +492,65 @@ cd /var/www/Triptastic && git pull
 pm2 restart triptastic-api --update-env
 ```
 No DB migration required.
+
+---
+
+## Loop 7 — Cron functions (`check-due-alerts`, `daily-backup`, `daily-summary-sms`) ✅
+
+**Date:** 2026-05-08
+**Edge functions migrated:** `check-due-alerts`, `daily-backup`, `daily-summary-sms`
+**Already on VPS:** `send-reminder` auto-mode (via `runDueReminderJob` at 09:30 daily)
+
+### Changes
+1. **New service:** `server/services/cronJobs.js` — three standalone job functions:
+   - `runCheckDueAlerts()` — finds overdue `ticket_bookings`, `visa_applications`, and `ticket_refunds`; logs each to `notification_logs` as `due_alert`.
+   - `runDailyBackup()` — exports all 25 core tables to CSV, emails them as attachments via Resend.
+   - `runDailySummarySms()` — calculates today's income, supplier payments, and total dues; sends SMS summary to owner phone via bulksmsbd.
+2. **Wiring in `server/index.js`:**
+   - Import all three from `cronJobs.js`.
+   - Admin manual-trigger routes: `POST /api/check-due-alerts/run`, `/api/daily-backup/run`, `/api/daily-summary-sms/run`.
+   - Cron schedules (all `Asia/Dhaka`):
+     - `check-due-alerts` — daily 08:00
+     - `daily-backup` — daily 07:00
+     - `daily-summary-sms` — daily 10:00
+     - `due-reminder` — daily 09:30 (already existed)
+   - All wrapped in `if (process.env.DISABLE_CRON !== '1')`.
+
+### Required env vars
+Ensure these are in `/var/www/Triptastic/server/.env`:
+```
+RESEND_API_KEY=<key>
+NOTIFICATION_FROM_EMAIL=<sender>
+BULKSMSBD_API_KEY=<key>
+BULKSMSBD_SENDER_ID=<senderid>
+BACKUP_EMAIL=digiwebdex@gmail.com
+OWNER_PHONE=01601505050
+```
+
+### Verification
+```bash
+# Manual triggers (admin auth required)
+curl -X POST http://127.0.0.1:3045/api/check-due-alerts/run \
+  -H "Authorization: Bearer <admin_token>"
+# → {"success":true,"tickets":N,"visa":N,"refunds":N,"notified":N,"date":"YYYY-MM-DD"}
+
+curl -X POST http://127.0.0.1:3045/api/daily-backup/run \
+  -H "Authorization: Bearer <admin_token>"
+# → {"success":true,"tables":25,"attachments":N}
+
+curl -X POST http://127.0.0.1:3045/api/daily-summary-sms/run \
+  -H "Authorization: Bearer <admin_token>"
+# → {"success":true,"status":"sent","message":"..."}
+```
+
+### Status
+- Code ✅
+- Production verification ⏳ (after deploy)
+
+### Remaining
+All 17 edge functions are now either **migrated to VPS** or **already implemented on VPS**. The remaining work is:
+1. Production verification of Loop 6b + Loop 7 endpoints.
+2. After 24h of confirmed VPS traffic, delete all `supabase/functions/*` folders and call `delete_edge_functions` tool.
+3. Strip Supabase fallback logic from `src/lib/api.ts`.
+4. Remove `VITE_SUPABASE_*` from `.env`.
+5. Final no-Supabase checklist (see §8).
