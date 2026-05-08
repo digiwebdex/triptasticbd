@@ -1,6 +1,19 @@
 // Cron job implementations — ported from Supabase Edge Functions to node-cron
 const { query } = require('../config/database');
 
+// Safe query: returns { rows: [] } if table is missing (undefined_table = 42P01)
+async function safeQuery(sql, params = []) {
+  try {
+    return await query(sql, params);
+  } catch (err) {
+    if (err && err.code === '42P01') {
+      console.warn('[cron] skipping missing table:', err.message);
+      return { rows: [] };
+    }
+    throw err;
+  }
+}
+
 // ── helpers ──────────────────────────────────────────────────────────
 
 const toSmsPhone = (value = '') => {
