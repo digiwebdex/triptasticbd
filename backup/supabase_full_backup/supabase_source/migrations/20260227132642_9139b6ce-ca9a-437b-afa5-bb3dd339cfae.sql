@@ -1,0 +1,1 @@
+UPDATE site_content SET content = jsonb_set(content, '{email}', '"raheka@gmail.com"') WHERE content->>'email' IS NOT NULL;

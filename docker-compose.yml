@@ -1,0 +1,43 @@
+# Triptastic — self-hosted stack
+# Container/db names are unique to avoid collision with other VPS services.
+services:
+  triptastic-db:
+    image: postgres:16-alpine
+    container_name: triptastic-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-triptastic}
+      POSTGRES_USER: ${DB_USER:-triptastic_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_me}
+    ports:
+      # Bind only to localhost; pick an unused port (5440 used by current deployment)
+      - "127.0.0.1:${DB_PORT_HOST:-5440}:5432"
+    volumes:
+      - triptastic_pgdata:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-triptastic_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  triptastic-app:
+    build: .
+    container_name: triptastic-app
+    restart: unless-stopped
+    depends_on:
+      triptastic-db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DB_HOST: triptastic-db
+      DB_PORT: 5432
+    ports:
+      # Pick an unused host port; Nginx proxies the public domain to it.
+      - "127.0.0.1:${PORT:-3045}:3045"
+    volumes:
+      - triptastic_uploads:/app/uploads
+
+volumes:
+  triptastic_pgdata:
+  triptastic_uploads:
